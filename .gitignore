@@ -1,0 +1,7 @@
+node_modules/
+dist/
+tools/preview-*.png
+.zcode/
+.DS_Store
+*.log
+.zcodeignore

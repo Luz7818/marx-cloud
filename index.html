@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#07080f" />
+    <meta name="description" content="一张可漫游的思想星图:万点星辰随视角流转,汇聚成马克思、恩格斯、列宁、卢森堡的肖像,每颗星都是一句马克思主义经典。" />
+    <title>思想云 · Marx Cloud —— 马克思主义经典星图</title>
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+    <div id="vignette"></div>
+
+    <header id="brand">
+      <h1>思想云</h1>
+      <p>Marx Cloud · 马克思主义经典星图</p>
+    </header>
+
+    <nav id="toolbar">
+      <button id="btn-panel" type="button" title="思想家列表">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 5h18v2H3zm0 6h12v2H3zm0 6h16v2H3z"/></svg>
+      </button>
+      <button id="btn-about" type="button" title="关于">关于</button>
+    </nav>
+
+    <aside id="panel"></aside>
+
+    <div id="tooltip"></div>
+    <div id="quote-card"></div>
+
+    <div id="figure-caption">
+      <span class="cap-dot"></span>
+      <span class="cap-main">
+        <b class="cap-name"></b>
+        <span class="cap-sub"></span>
+      </span>
+    </div>
+
+    <footer id="hint">拖拽旋转 · 每 90° 换一位思想家 · 点击星尘看语录 · 点击虚空捞起一句</footer>
+
+    <div id="intro"></div>
+
+    <div id="loading">
+      <div class="load-ring"></div>
+      <div class="load-text">正在汇聚思想星尘……</div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

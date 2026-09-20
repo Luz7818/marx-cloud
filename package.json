@@ -1,0 +1,25 @@
+{
+  "name": "marx-cloud",
+  "version": "1.0.0",
+  "description": "思想云 · Marx Cloud —— 一张可漫游的马克思主义经典星图,万点星辰汇成思想的肖像",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Luz7818/marx-cloud.git"
+  },
+  "homepage": "https://luz7818.github.io/marx-cloud/",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0",
+    "vite": "^5.4.0"
+  }
+}
