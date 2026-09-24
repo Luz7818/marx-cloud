@@ -114,7 +114,98 @@ export const figures = [
     id: 'castro', name: '菲德尔·卡斯特罗', en: 'Fidel Castro', years: '1926–2016',
     region: '古巴', role: '古巴革命领袖', group: 'inheritors', color: '#7bdff2',
     blurb: '古巴革命的领袖。'
+  },
+  {
+    id: 'muntzer', name: '托马斯·闵采尔', en: 'Thomas Müntzer', years: '1489–1525',
+    region: '德国', role: '农民战争领袖', group: 'pioneer', color: '#c9a227',
+    blurb: '把天国搬到地上来的激进改革者,德国农民战争的旗手。'
+  },
+  {
+    id: 'weitling', name: '威廉·魏特林', en: 'Wilhelm Weitling', years: '1808–1871',
+    region: '德国', role: '空想共产主义者', group: 'pioneer', color: '#9ad1a0',
+    blurb: '正义者同盟的理论家,德国工人运动的空想共产主义代表。'
+  },
+  {
+    id: 'chernyshevsky', name: '车尔尼雪夫斯基', en: 'N. G. Chernyshevsky', years: '1828–1889',
+    region: '俄国', role: '革命民主主义者', group: 'pioneer', color: '#e0aaff',
+    blurb: '写在狱中的《怎么办?》,影响了整整几代俄国革命者。'
+  },
+  {
+    id: 'bebel', name: '奥古斯特·倍倍尔', en: 'August Bebel', years: '1840–1913',
+    region: '德国', role: '社会民主党领袖', group: 'inheritors', color: '#89c2d9',
+    blurb: '德国社会民主党的创建者与长期领袖,《妇女与社会主义》的作者。'
+  },
+  {
+    id: 'lafargue', name: '保尔·拉法格', en: 'Paul Lafargue', years: '1842–1911',
+    region: '法国', role: '马克思主义宣传家', group: 'inheritors', color: '#f2ca3a',
+    blurb: '马克思的女婿,《懒惰的权利》的作者,把马克思介绍给法国工人。'
+  },
+  {
+    id: 'morris', name: '威廉·莫里斯', en: 'William Morris', years: '1834–1896',
+    region: '英国', role: '设计师与社会主义者', group: 'inheritors', color: '#7fd1ae',
+    blurb: '工艺美术运动的领袖,也是英国社会主义最早的宣传家之一。'
+  },
+  {
+    id: 'guevara', name: '切·格瓦拉', en: 'Che Guevara', years: '1928–1967',
+    region: '阿根廷 · 古巴', role: '革命家', group: 'inheritors', color: '#e07a5f',
+    blurb: '骑着摩托车读遍南美,然后把一生交给了这片大陆的革命。'
+  },
+  {
+    id: 'mariategui', name: '马里亚特吉', en: 'José C. Mariátegui', years: '1894–1930',
+    region: '秘鲁', role: '马克思主义思想家', group: 'inheritors', color: '#d4a373',
+    blurb: '拉丁美洲马克思主义的奠基人,《关于秘鲁国情的七篇论文》的作者。'
+  },
+  {
+    id: 'quqiubai', name: '瞿秋白', en: 'Qu Qiubai', years: '1899–1935',
+    region: '中国', role: '早期领袖 · 文学家', group: 'china', color: '#f28db2',
+    blurb: '翻译《国际歌》的人,也是写下《多余的话》的人。'
+  },
+  {
+    id: 'caihesen', name: '蔡和森', en: 'Cai Hesen', years: '1895–1931',
+    region: '中国', role: '早期理论家', group: 'china', color: '#6ec6ca',
+    blurb: '最早提出“中国共产党”这一名称的人。'
+  },
+  {
+    id: 'dengzhongxia', name: '邓中夏', en: 'Deng Zhongxia', years: '1894–1933',
+    region: '中国', role: '工人运动领袖', group: 'china', color: '#f4d35e',
+    blurb: '长辛店工人的教员,中国早期职工运动的领导者。'
+  },
+  {
+    id: 'zhaoyiman', name: '赵一曼', en: 'Zhao Yiman', years: '1905–1936',
+    region: '中国', role: '抗日民族英雄', group: 'china', color: '#ff6b81',
+    blurb: '在狱中受尽酷刑而不屈,临刑前给儿子写下遗书。'
+  },
+  {
+    id: 'yundaiying', name: '恽代英', en: 'Yun Daiying', years: '1895–1931',
+    region: '中国', role: '青年运动领袖', group: 'china', color: '#bde0fe',
+    blurb: '青年的楷模,在狱中写下“留得豪情作楚囚”。'
+  },
+  {
+    id: 'asiqi', name: '艾思奇', en: 'Ai Siqi', years: '1910–1966',
+    region: '中国', role: '马克思主义哲学家', group: 'china', color: '#cdb4db',
+    blurb: '用一本《大众哲学》,把哲学交到了普通人手里。'
   }
 ];
 
 export const figureMap = Object.fromEntries(figures.map(f => [f.id, f]));
+
+/** 搜索别名:字、原名、另一通译 */
+const ALIAS = {
+  lenin: ['乌里扬诺夫', '伊里奇', '弗拉基米尔·伊里奇'],
+  stalin: ['朱加什维利', '科巴'],
+  mao: ['润之', '润之先生'],
+  lidazhao: ['守常'],
+  dengxiaoping: ['希贤'],
+  hochiminh: ['阮必成', '阮爱国'],
+  zetkin: ['蔡特金', '克拉拉'],
+  luxemburg: ['罗莎', '卢森堡'],
+  fourier: ['傅里叶', '沙尔·傅立叶'],
+  owen: ['欧文', '罗伯特·欧文'],
+  saintsimon: ['昂利·圣西门', '克劳德'],
+  plekhanov: ['沃尔基奇', '格奥尔基'],
+  castro: ['菲德尔', '卡斯特罗'],
+  dimitrov: ['格奥尔基·季米特洛夫', '季米托夫'],
+  campanella: ['康帕内拉'],
+  moore: ['托马斯·莫尔']
+};
+for (const f of figures) f.aka = ALIAS[f.id] || [];

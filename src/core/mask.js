@@ -3,7 +3,7 @@
  * 返回归一化坐标(x∈[-w/2,w/2], y∈[-h/2,h/2])与亮度权重,单位与肖像高度无关,
  * 由调用方统一缩放到世界坐标。
  */
-export function loadImage(url) {
+function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);

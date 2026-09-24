@@ -1,17 +1,19 @@
 /**
  * 把人物照片加工成运行时采样的亮度掩膜(每人一张,存到 public/<id>-mask.png)。
- * 照片灰度与"应画密度"不一致(暗色西装、阴影胡须与背景亮度互相重叠),
- * 无法用单一亮度阈值分割,因此采用手工描摹的剪影多边形:
- *   - 外轮廓多边形 = 头部剪影(衣领舍弃,画面更干净);
- *   - 眉眼/鼻影/胡髭用旋转椭圆挖成稀疏负形;
- *   - 剪影内密度 = BASE 底 + 亮度平滑映射(高光发须更密);
- *   - 剪影外的野生亮度(乱发辉光)按 outsideGain 保留,衣领区用斜线压暗。
- * 坐标系:输出掩膜宽 500,高 = 裁剪框纵横比 × 500,各参数按输出坐标目视标定。
+ *
+ * 管线(照片明暗还原):
+ *   1. 裁剪 → 下采样到宽 500(区域平均);
+ *   2. 背景分割:从图像边界做泛洪,只穿过「梯度平滑 且 亮度接近边界中位数」的像素,
+ *      其余即主体 —— 不手工描摹剪影多边形;
+ *   3. 密度 = 主体内亮度的自动曝光(主体亮度 p4..p96 映射到 0..1)+ 高通细节增强,
+ *      再按 ped 托底(剪影整体保持密度,明暗只做细节调制),
+ *      五官、发须、明暗全部来自照片本身;
+ *   4. 主体边缘羽化 + 轻模糊,避免硬切边。
  *
  * 用法:
  *   node tools/prepare-mask.mjs                # 生成全部掩膜
  *   node tools/prepare-mask.mjs --only=engels  # 只生成一位
- *   node tools/prepare-mask.mjs --preview      # 生成标定预览 tools/preview-<id>.png
+ *   node tools/prepare-mask.mjs --preview      # 生成掩膜 + 主体边界(红)核对图
  */
 import { decode as decodeJpeg } from 'jpeg-js';
 import { PNG } from 'pngjs';
@@ -22,109 +24,170 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_WIDTH = 500;
 
-// ---- 各人物参数(坐标均在输出坐标系中目视标定) ----
+// ---- 各人物参数:裁剪框 + 少量标定旋钮 ----
 const CONFIGS = {
   marx: {
     photo: 'marx-photo.jpg',
-    crop: { x0: 0.05, x1: 0.995, y0: 0.0, y1: 0.80 },
-    baseDensity: 0.16, holeDensity: 0.05, hiLo: 105, hiHi: 215,
-    outLo: 100, outHi: 200, outsideGain: 1.0, blur: 1,
-    outsideHoles: [],
-    // 衣领分界线:经过 P(x,y) 与 P+(dx,dy) 的斜线,线下方压暗亮度核心
-    line: { x: 152, y: 388, dx: 83, dy: 77 },
-    sil: [
-      [148, 92], [168, 48], [222, 28], [288, 24], [352, 42], [408, 80],
-      [445, 135], [462, 200], [455, 262], [422, 308], [402, 358], [376, 412],
-      [338, 458], [292, 482], [244, 486], [214, 462], [180, 428], [152, 388],
-      [130, 342], [130, 286], [118, 228], [126, 168]
-    ],
-    holes: [
-      [233, 192, 38, 15, -8],   // 左眉眼
-      [336, 184, 40, 15, 6],    // 右眉眼
-      [285, 263, 24, 12, 0]     // 鼻下阴影/人中
-    ]
+    crop: { x0: 0.05, x1: 0.995, y0: 0.0, y1: 0.70 },
+    face: [0.53, 0.42], faceR: [0.30, 0.34],
+    bgTol: 0.16, gradTol: 0.09, cutY: 1.0, detailGain: 1.7, gamma: 1.15, ped: 0.20
   },
   engels: {
     photo: 'engels-photo.jpg',
     crop: { x0: 0.10, x1: 0.80, y0: 0.0, y1: 0.66 },
-    baseDensity: 0.16, holeDensity: 0.05, hiLo: 120, hiHi: 225,
-    outLo: 150, outHi: 240, outsideGain: 0.8, blur: 1,
-    line: { x: 160, y: 560, dx: 260, dy: 70 },
-    outsideHoles: [],
-    sil: [
-      [95, 105], [225, 30], [330, 68], [393, 149], [425, 245], [448, 350],
-      [438, 490], [420, 565], [350, 620], [290, 622], [238, 568], [195, 470], [180, 375],
-      [148, 305], [118, 285], [72, 238], [58, 190]
-    ],
-    holes: [
-      [252, 252, 46, 16, -6],   // 左眉眼(3/4 侧脸)
-      [356, 256, 48, 16, 6],    // 右眉眼
-      [338, 322, 22, 11, 0]     // 鼻下阴影
-    ]
+    face: [0.54, 0.42], faceR: [0.30, 0.34],
+    bgTol: 0.10, gradTol: 0.05, cutY: 0.9, detailGain: 1.8, gamma: 1.3, ped: 0.22
   },
   lenin: {
     photo: 'lenin-photo.jpg',
-    crop: { x0: 0.24, x1: 0.82, y0: 0.0, y1: 0.46 },
-    baseDensity: 0.30, holeDensity: 0.05, hiLo: 90, hiHi: 230,
-    outLo: 140, outHi: 250, outsideGain: 1.0, blur: 1,
-    line: { x: 210, y: 470, dx: 190, dy: 45 },
-    outsideHoles: [[300, 555, 95, 70, 0]],   // 白衬衫领口/领带
-    sil: [
-      [255, 38], [310, 55], [360, 88], [395, 150], [415, 250], [408, 330],
-      [385, 395], [360, 458], [295, 520], [245, 465], [228, 400], [208, 330],
-      [206, 282], [190, 250], [160, 205], [170, 140], [205, 85]
-    ],
-    holes: [
-      [225, 248, 44, 16, -4],   // 左眉眼
-      [318, 244, 46, 16, 4],    // 右眉眼
-      [268, 322, 22, 11, 0],    // 鼻下阴影
-      [268, 375, 44, 14, 0]     // 唇上胡髭
-    ]
+    crop: { x0: 0.26, x1: 0.78, y0: 0.01, y1: 0.43 },
+    face: [0.46, 0.50], faceR: [0.30, 0.36],
+    bgTol: 0.10, gradTol: 0.055, cutY: 0.97, detailGain: 1.6, gamma: 1.2, ped: 0.24
   },
   luxemburg: {
     photo: 'luxemburg-photo.jpg',
-    crop: { x0: 0.24, x1: 0.86, y0: 0.08, y1: 0.56 },
-    baseDensity: 0.26, holeDensity: 0.05, hiLo: 110, hiHi: 230,
-    outLo: 170, outHi: 250, outsideGain: 0.12, blur: 1,
-    line: { x: 90, y: 500, dx: 260, dy: 60 },
-    outsideHoles: [[420, 545, 120, 60, 0]],  // 白衬衫肩部
-    sil: [
-      [240, 42], [330, 70], [395, 115], [440, 175], [452, 250], [440, 325],
-      [415, 395], [388, 445], [330, 478], [262, 508], [195, 505],
-      [155, 492], [127, 468], [100, 400], [86, 335], [82, 315], [90, 278],
-      [72, 255], [78, 225], [75, 190], [60, 150], [85, 110], [130, 75]
-    ],
-    holes: [
-      [133, 310, 40, 16, -8],   // 左眉眼
-      [208, 304, 42, 16, 6],    // 右眉眼
-      [100, 356, 18, 10, 0],    // 鼻下阴影
-      [112, 422, 24, 10, 0]     // 唇部阴影
-    ]
+    crop: { x0: 0.24, x1: 0.86, y0: 0.08, y1: 0.57 },
+    face: [0.38, 0.46], faceR: [0.26, 0.32],
+    bgTol: 0.10, gradTol: 0.055, cutY: 0.97, detailGain: 1.9, gamma: 0.95, ped: 0.26
   }
 };
 
 const args = process.argv.slice(2);
 const PREVIEW = args.includes('--preview');
-const OVERLAY = args.includes('--overlay');
 const onlyArg = args.find(a => a.startsWith('--only='));
 const ONLY = onlyArg ? onlyArg.split('=')[1] : null;
 
-const smooth = (t) => { t = t < 0 ? 0 : t > 1 ? 1 : t; return t * t * (3 - 2 * t); };
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const smooth = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 
-function pointInPoly(px, py, poly) {
-  let inside = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const [xi, yi] = poly[i], [xj, yj] = poly[j];
-    if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
+/** 区域平均下采样到 OUT_WIDTH 宽 */
+function downsample(lum, W, H, crop) {
+  const cx0 = Math.floor(W * crop.x0), cx1 = Math.ceil(W * crop.x1);
+  const cy0 = Math.floor(H * crop.y0), cy1 = Math.ceil(H * crop.y1);
+  const cw = cx1 - cx0, ch = cy1 - cy0;
+  const outH = Math.round((ch / cw) * OUT_WIDTH);
+  const out = new Float32Array(OUT_WIDTH * outH);
+  for (let y = 0; y < outH; y++) {
+    const sy0 = cy0 + Math.floor((y * ch) / outH);
+    const sy1 = Math.min(cy1, Math.max(sy0 + 1, cy0 + Math.floor(((y + 1) * ch) / outH)));
+    for (let x = 0; x < OUT_WIDTH; x++) {
+      const sx0 = cx0 + Math.floor((x * cw) / OUT_WIDTH);
+      const sx1 = Math.min(cx1, Math.max(sx0 + 1, cx0 + Math.floor(((x + 1) * cw) / OUT_WIDTH)));
+      let s = 0, n = 0;
+      for (let sy = sy0; sy < sy1; sy++)
+        for (let sx = sx0; sx < sx1; sx++) { s += lum[sy * W + sx]; n++; }
+      out[y * OUT_WIDTH + x] = s / n / 255;
+    }
   }
-  return inside;
+  return { lum: out, w: OUT_WIDTH, h: outH };
 }
-function inEllipse(px, py, [cx, cy, rx, ry, deg]) {
-  const a = (deg * Math.PI) / 180;
-  const dx = px - cx, dy = py - cy;
-  const u = (dx * Math.cos(a) + dy * Math.sin(a)) / rx;
-  const v = (-dx * Math.sin(a) + dy * Math.cos(a)) / ry;
-  return u * u + v * v <= 1;
+
+function boxBlur(src, w, h, r) {
+  const tmp = new Float32Array(w * h), out = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) {
+    const row = y * w;
+    let acc = 0;
+    for (let x = -r; x <= r; x++) acc += src[row + clamp(x, 0, w - 1)];
+    for (let x = 0; x < w; x++) {
+      tmp[row + x] = acc / (2 * r + 1);
+      acc += src[row + clamp(x + r + 1, 0, w - 1)] - src[row + clamp(x - r, 0, w - 1)];
+    }
+  }
+  for (let x = 0; x < w; x++) {
+    let acc = 0;
+    for (let y = -r; y <= r; y++) acc += tmp[clamp(y, 0, h - 1) * w + x];
+    for (let y = 0; y < h; y++) {
+      out[y * w + x] = acc / (2 * r + 1);
+      acc += tmp[clamp(y + r + 1, 0, h - 1) * w + x] - tmp[clamp(y - r, 0, h - 1) * w + x];
+    }
+  }
+  return out;
+}
+
+function gradient(lum, w, h) {
+  const g = new Float32Array(w * h);
+  for (let y = 1; y < h - 1; y++)
+    for (let x = 1; x < w - 1; x++) {
+      const i = y * w + x;
+      const gx = (lum[i + 1] - lum[i - 1]) + (lum[i + w + 1] - lum[i + w - 1]) + (lum[i - w + 1] - lum[i - w - 1]);
+      const gy = (lum[i + w] - lum[i - w]) + (lum[i + w + 1] - lum[i + w - 1]) + (lum[i + w - 1] - lum[i - w + 1]);
+      g[i] = Math.hypot(gx, gy) / 4;
+    }
+  return g;
+}
+
+/** 边界泛洪:穿过「低梯度 且 亮度落在背景带内」的像素;背景带由上边界估计(避开衣领)。
+ *  面部椭圆内永不为背景 —— 保护与背景同亮度的阴影面颊。 */
+function segmentBackground(lum, w, h, { bgTol, gradTol, face, faceR }) {
+  const grad = boxBlur(gradient(lum, w, h), w, h, 3);
+  const ring = [];
+  for (let x = 0; x < w; x++) ring.push(lum[x]);
+  for (let y = 0; y < Math.floor(h * 0.35); y++) ring.push(lum[y * w], lum[y * w + w - 1]);
+  ring.sort((a, b) => a - b);
+  const bgMed = ring[ring.length >> 1];
+  const fx = face[0] * w, fy = face[1] * h, rx = faceR[0] * w, ry = faceR[1] * h;
+
+  const isBg = new Uint8Array(w * h);
+  const queue = new Int32Array(w * h);
+  let qh = 0, qt = 0;
+  const accept = (i) => {
+    if (isBg[i] || grad[i] >= gradTol || Math.abs(lum[i] - bgMed) >= bgTol) return false;
+    const x = i % w, y = (i / w) | 0;
+    const u = (x - fx) / rx, v = (y - fy) / ry;
+    return u * u + v * v > 1;
+  };
+  const seed = (i) => { if (accept(i)) { isBg[i] = 1; queue[qt++] = i; } };
+  for (let x = 0; x < w; x++) { seed(x); seed((h - 1) * w + x); }
+  for (let y = 0; y < h; y++) { seed(y * w); seed(y * w + w - 1); }
+  while (qh < qt) {
+    const i = queue[qh++];
+    const x = i % w, y = (i / w) | 0;
+    if (x > 0 && accept(i - 1)) { isBg[i - 1] = 1; queue[qt++] = i - 1; }
+    if (x < w - 1 && accept(i + 1)) { isBg[i + 1] = 1; queue[qt++] = i + 1; }
+    if (y > 0 && accept(i - w)) { isBg[i - w] = 1; queue[qt++] = i - w; }
+    if (y < h - 1 && accept(i + w)) { isBg[i + w] = 1; queue[qt++] = i + w; }
+  }
+  return { isBg, bgMed };
+}
+
+/** 主体 = 含面部种子的非背景连通块;再闭运算接回被漏分割切断的须发 */
+function faceComponent(isBg, w, h, face) {
+  let sx = clamp(Math.round(face[0] * w), 0, w - 1);
+  let sy = clamp(Math.round(face[1] * h), 0, h - 1);
+  let seed = -1;
+  for (let r = 0; r < 20 && seed < 0; r++) {
+    for (let dy = -r; dy <= r && seed < 0; dy++)
+      for (let dx = -r; dx <= r && seed < 0; dx++) {
+        const x = sx + dx, y = sy + dy;
+        if (x < 0 || y < 0 || x >= w || y >= h) continue;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+        if (!isBg[y * w + x]) seed = y * w + x;
+      }
+  }
+  const main = new Uint8Array(w * h);
+  if (seed < 0) return main;
+  const queue = new Int32Array(w * h);
+  let qh = 0, qt = 0;
+  main[seed] = 1; queue[qt++] = seed;
+  while (qh < qt) {
+    const i = queue[qh++];
+    const x = i % w, y = (i / w) | 0;
+    if (x > 0 && !isBg[i - 1] && !main[i - 1]) { main[i - 1] = 1; queue[qt++] = i - 1; }
+    if (x < w - 1 && !isBg[i + 1] && !main[i + 1]) { main[i + 1] = 1; queue[qt++] = i + 1; }
+    if (y > 0 && !isBg[i - w] && !main[i - w]) { main[i - w] = 1; queue[qt++] = i - w; }
+    if (y < h - 1 && !isBg[i + w] && !main[i + w]) { main[i + w] = 1; queue[qt++] = i + w; }
+  }
+  for (let pass = 0; pass < 3; pass++) {
+    const add = [];
+    for (let y = 1; y < h - 1; y++)
+      for (let x = 1; x < w - 1; x++) {
+        const i = y * w + x;
+        if (main[i] || isBg[i]) continue;
+        if (main[i - 1] || main[i + 1] || main[i - w] || main[i + w]) add.push(i);
+      }
+    for (const i of add) main[i] = 1;
+  }
+  return main;
 }
 
 function buildMask(cfg) {
@@ -132,182 +195,83 @@ function buildMask(cfg) {
     useTArray: true, maxMemoryUsageInMB: 2048
   });
   const { width: W, height: H } = jpeg;
-  const lum = new Float32Array(W * H);
+  const lum0 = new Float32Array(W * H);
   for (let i = 0; i < W * H; i++) {
-    lum[i] = 0.299 * jpeg.data[i * 4] + 0.587 * jpeg.data[i * 4 + 1] + 0.114 * jpeg.data[i * 4 + 2];
+    lum0[i] = 0.299 * jpeg.data[i * 4] + 0.587 * jpeg.data[i * 4 + 1] + 0.114 * jpeg.data[i * 4 + 2];
   }
-  const { crop } = cfg;
-  const cx0 = Math.floor(W * crop.x0), cx1 = Math.ceil(W * crop.x1);
-  const cy0 = Math.floor(H * crop.y0), cy1 = Math.ceil(H * crop.y1);
-  const cw = cx1 - cx0, ch = cy1 - cy0;
-  const outH = Math.round((ch / cw) * OUT_WIDTH);
-  const sx = cw / OUT_WIDTH, sy = ch / outH;
+  const { lum, w, h } = downsample(lum0, W, H, cfg.crop);
+  const { isBg, bgMed } = segmentBackground(lum, w, h, cfg);
+  const subj0 = faceComponent(isBg, w, h, cfg.face);
+  if (args.includes('--debug')) {
+    let nb = 0, ns = 0;
+    for (let i = 0; i < w * h; i++) { nb += isBg[i]; ns += subj0[i]; }
+    console.log(`  [debug] ${cfg.photo} bgMed=${bgMed.toFixed(3)} bg=${(100 * nb / (w * h)).toFixed(1)}% subj=${(100 * ns / (w * h)).toFixed(1)}%`);
+  }
 
-  const mask = new Float32Array(OUT_WIDTH * outH);
-  for (let y = 0; y < outH; y++) {
-    for (let x = 0; x < OUT_WIDTH; x++) {
-      const i = y * OUT_WIDTH + x;
-      const ox = Math.min(cw - 1, Math.max(0, Math.round((x + 0.5) * sx)));
-      const oy = Math.min(ch - 1, Math.max(0, Math.round((y + 0.5) * sy)));
-      const v = lum[(oy + cy0) * W + (ox + cx0)];
+  // 主体亮度百分位 → 自动曝光区间(区间收窄,面部明暗反差更大)
+  const vals = [];
+  for (let i = 0; i < w * h; i++) if (subj0[i]) vals.push(lum[i]);
+  vals.sort((a, b) => a - b);
+  const pLo = vals[Math.floor(vals.length * 0.10)];
+  const pHi = vals[Math.floor(vals.length * 0.90)];
 
-      // 亮度核心:照片中发须高光的野生轮廓;衣领区域(斜线以下)渐变压暗
-      const L = cfg.line;
-      const s = (x - L.x) / L.dx - (y - L.y) / L.dy;
-      const lineFactor = Math.max(0, Math.min(1, (s + 1.5) / 4));
-      const outT = smooth((v - cfg.outLo) / (cfg.outHi - cfg.outLo));
-      const suppressed = cfg.outsideHoles.some(h => inEllipse(x + 0.5, y + 0.5, h));
-      let d = outT * cfg.outsideGain * lineFactor * (suppressed ? 0.1 : 1);
+  const low = boxBlur(lum, w, h, 9);   // 局部参考:眼窝/眉/须这类小暗结构靠它显形
+  const lumS = boxBlur(lum, w, h, 1);   // 抑胶片颗粒后再取明暗与高通
+  const feather = boxBlur(boxBlur(subj0, w, h, 2), w, h, 2);
 
-      // 多边形底座:保证面部与暗部胡须的体积;负形优先级最高
-      if (pointInPoly(x + 0.5, y + 0.5, cfg.sil)) {
-        let hole = false;
-        for (const h of cfg.holes) if (inEllipse(x + 0.5, y + 0.5, h)) { hole = true; break; }
-        if (hole) {
-          d = cfg.holeDensity;
-        } else {
-          const floor = cfg.baseDensity + (1 - cfg.baseDensity) * smooth((v - cfg.hiLo) / (cfg.hiHi - cfg.hiLo));
-          d = Math.max(d, floor);
-        }
-      }
-      mask[i] = d;
+  const mask = new Float32Array(w * h);
+  const cutPix = (cfg.cutY ?? 1) * h;
+  for (let i = 0; i < w * h; i++) {
+    const edge = smooth(feather[i] * 2.2) * smooth((cutPix - (i / w | 0)) / (0.06 * h));
+    if (edge <= 0.002) continue;
+    const base = smooth((lumS[i] - pLo) / Math.max(1e-4, pHi - pLo));
+    const hp = (lumS[i] - low[i]) * cfg.detailGain;
+    const t = clamp(base + hp, 0, 1);
+    // 主体内托底:剪影整体保持密度,明暗只做细节调制(否则暗部发须空成一片,认不出人)
+    const ped = cfg.ped ?? 0.34;
+    mask[i] = (ped + (1 - ped) * Math.pow(t, cfg.gamma)) * edge;
+  }
+
+  const copy = mask.slice();
+  for (let y = 1; y < h - 1; y++)
+    for (let x = 1; x < w - 1; x++) {
+      const i = y * w + x;
+      mask[i] = (copy[i] * 4 + copy[i - 1] + copy[i + 1] + copy[i - w] + copy[i + w] +
+        (copy[i - w - 1] + copy[i - w + 1] + copy[i + w - 1] + copy[i + w + 1]) * 0.5) / 8;
     }
-  }
-
-  // 轻模糊(柔化多边形边,保留五官锐度)
-  for (let pass = 0; pass < cfg.blur; pass++) {
-    const copy = mask.slice();
-    for (let y = 1; y < outH - 1; y++)
-      for (let x = 1; x < OUT_WIDTH - 1; x++) {
-        const i = y * OUT_WIDTH + x;
-        mask[i] = (copy[i] * 4 + copy[i - 1] + copy[i + 1] + copy[i - OUT_WIDTH] + copy[i + OUT_WIDTH] +
-          (copy[i - OUT_WIDTH - 1] + copy[i - OUT_WIDTH + 1] + copy[i + OUT_WIDTH - 1] + copy[i + OUT_WIDTH + 1]) * 0.5) / 8;
-      }
-  }
-  return { mask, outW: OUT_WIDTH, outH };
+  return { mask, outW: w, outH: h, subj: subj0 };
 }
 
 function maskToPng(mask, outW, outH) {
   const png = new PNG({ width: outW, height: outH });
   for (let i = 0; i < outW * outH; i++) {
-    const b = Math.round(Math.min(1, Math.max(0, mask[i])) * 255);
+    const b = Math.round(clamp(mask[i], 0, 1) * 255);
     png.data[i * 4] = png.data[i * 4 + 1] = png.data[i * 4 + 2] = b;
     png.data[i * 4 + 3] = 255;
   }
   return png;
 }
 
+/** 核对图:掩膜 + 主体边界描红 */
+function buildPreview(id, cfg) {
+  const { mask, outW, outH, subj } = buildMask(cfg);
+  const png = maskToPng(mask, outW, outH);
+  for (let y = 1; y < outH - 1; y++)
+    for (let x = 1; x < outW - 1; x++) {
+      const i = y * outW + x;
+      if (subj[i] !== subj[i + 1] || subj[i] !== subj[i + outW]) {
+        png.data[i * 4] = 255; png.data[i * 4 + 1] = 60; png.data[i * 4 + 2] = 60;
+      }
+    }
+  writeFileSync(join(root, `tools/preview-${id}.png`), PNG.sync.write(png));
+  console.log(`  预览 tools/preview-${id}.png (${outW}x${outH})`);
+}
+
 function stats(name, png) {
   const { width: w, height: h, data } = png;
-  const avg = (x0, y0, x1, y1) => {
-    x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
-    let s = 0, n = 0;
-    for (let y = y0; y < y1; y += 2) for (let x = x0; x < x1; x += 2) { s += data[(y * w + x) * 4]; n++; }
-    return (s / n).toFixed(1);
-  };
-  console.log(`  ${name} ${w}x${h} | 左上 ${avg(10, 10, 90, 90)} 右上 ${avg(w - 90, 10, w - 10, 90)} 中部 ${avg(w / 2 - 60, h / 2 - 30, w / 2 + 60, h / 2 + 30)} 底部 ${avg(w / 2 - 60, h - 70, w / 2 + 60, h - 10)}`);
-}
-
-// ---- 标定预览:裁剪照片 + 网格 + 多边形/负形叠加 ----
-function buildPreview(id, cfg) {
-  const jpeg = decodeJpeg(readFileSync(join(root, 'tools', cfg.photo)), { useTArray: true, maxMemoryUsageInMB: 2048 });
-  const { width: W, height: H } = jpeg;
-  const { crop } = cfg;
-  const cx0 = Math.floor(W * crop.x0), cx1 = Math.ceil(W * crop.x1);
-  const cy0 = Math.floor(H * crop.y0), cy1 = Math.ceil(H * crop.y1);
-  const cw = cx1 - cx0, ch = cy1 - cy0;
-  const outH = Math.round((ch / cw) * OUT_WIDTH);
-  const png = new PNG({ width: OUT_WIDTH, height: outH });
-  for (let y = 0; y < outH; y++) {
-    for (let x = 0; x < OUT_WIDTH; x++) {
-      const i = y * OUT_WIDTH + x;
-      const ox = Math.min(cw - 1, Math.round((x + 0.5) * cw / OUT_WIDTH));
-      const oy = Math.min(ch - 1, Math.round((y + 0.5) * ch / outH));
-      const src = (oy + cy0) * W + (ox + cx0);
-      const g = Math.round(0.299 * jpeg.data[src * 4] + 0.587 * jpeg.data[src * 4 + 1] + 0.114 * jpeg.data[src * 4 + 2]);
-      png.data[i * 4] = png.data[i * 4 + 1] = png.data[i * 4 + 2] = g;
-      png.data[i * 4 + 3] = 255;
-    }
-  }
-  const put = (x, y, r, g, b) => {
-    x = Math.round(x); y = Math.round(y);
-    if (x < 0 || y < 0 || x >= OUT_WIDTH || y >= outH) return;
-    const i = (y * OUT_WIDTH + x) * 4;
-    png.data[i] = r; png.data[i + 1] = g; png.data[i + 2] = b;
-  };
-  const line = (x0, y0, x1, y1, r, g, b) => {
-    const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) | 0;
-    for (let k = 0; k <= n; k++) put(x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n, r, g, b);
-  };
-  // 网格:50px 细线,100px 粗线
-  for (let x = 0; x < OUT_WIDTH; x += 50) {
-    const strong = x % 100 === 0;
-    for (let y = 0; y < outH; y++) put(x, y, strong ? 90 : 50, strong ? 90 : 50, strong ? 110 : 60);
-  }
-  for (let y = 0; y < outH; y += 50) {
-    const strong = y % 100 === 0;
-    for (let x = 0; x < OUT_WIDTH; x++) put(x, y, strong ? 90 : 50, strong ? 90 : 50, strong ? 110 : 60);
-  }
-  // 多边形:淡红填充 + 红边
-  for (let y = 0; y < outH; y++) for (let x = 0; x < OUT_WIDTH; x++) {
-    if (pointInPoly(x, y, cfg.sil)) {
-      const i = (y * OUT_WIDTH + x) * 4;
-      png.data[i] = Math.min(255, png.data[i] * 0.75 + 40);
-    }
-  }
-  const poly = cfg.sil;
-  for (let i = 0; i < poly.length; i++) {
-    const [x0, y0] = poly[i], [x1, y1] = poly[(i + 1) % poly.length];
-    line(x0, y0, x1, y1, 255, 60, 60);
-  }
-  // 负形椭圆:蓝边
-  for (const [cx, cy, rx, ry, deg] of cfg.holes) {
-    const a = deg * Math.PI / 180;
-    let px = cx + rx * Math.cos(a), py = cy + rx * Math.sin(a);
-    for (let t = 0; t <= 360; t += 2) {
-      const rad = t * Math.PI / 180;
-      const nx = cx + rx * Math.cos(rad) * Math.cos(a) - ry * Math.sin(rad) * Math.sin(a);
-      const ny = cy + rx * Math.cos(rad) * Math.sin(a) + ry * Math.sin(rad) * Math.cos(a);
-      line(px, py, nx, ny, 90, 140, 255);
-      px = nx; py = ny;
-    }
-  }
-  // 衣领线:绿
-  const L = cfg.line;
-  line(L.x - L.dx * 0.4, L.y - L.dy * 0.4, L.x + L.dx * 1.4, L.y + L.dy * 1.4, 90, 220, 120);
-  writeFileSync(join(root, `tools/preview-${id}.png`), PNG.sync.write(png));
-  console.log(`  预览 tools/preview-${id}.png (${OUT_WIDTH}x${outH})`);
-}
-
-function overlay(png, cfg) {
-  const { width: w, height: h, data } = png;
-  const put = (x, y, r, g, b) => {
-    x = Math.round(x); y = Math.round(y);
-    if (x < 0 || y < 0 || x >= w || y >= h) return;
-    const i = (y * w + x) * 4;
-    data[i] = r; data[i + 1] = g; data[i + 2] = b;
-  };
-  const line = (x0, y0, x1, y1, r, g, b) => {
-    const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) | 0;
-    for (let k = 0; k <= n; k++) put(x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n, r, g, b);
-  };
-  const poly = cfg.sil;
-  for (let i = 0; i < poly.length; i++) {
-    const [x0, y0] = poly[i], [x1, y1] = poly[(i + 1) % poly.length];
-    line(x0, y0, x1, y1, 255, 80, 80);
-  }
-  for (const [cx, cy, rx, ry, deg] of cfg.holes) {
-    const a = deg * Math.PI / 180;
-    let px = cx, py = cy;
-    for (let t = 0; t <= 360; t += 2) {
-      const rad = t * Math.PI / 180;
-      const nx = cx + rx * Math.cos(rad) * Math.cos(a) - ry * Math.sin(rad) * Math.sin(a);
-      const ny = cy + rx * Math.cos(rad) * Math.sin(a) + ry * Math.sin(rad) * Math.cos(a);
-      line(px, py, nx, ny, 90, 140, 255);
-      px = nx; py = ny;
-    }
-  }
-  return png;
+  let sum = 0, nz = 0;
+  for (let i = 0; i < w * h; i++) { const v = data[i * 4]; sum += v; if (v > 8) nz++; }
+  console.log(`  ${name} ${w}x${h} | 平均亮度 ${(sum / (w * h)).toFixed(1)} | 有效覆盖 ${(100 * nz / (w * h)).toFixed(1)}%`);
 }
 
 for (const [id, cfg] of Object.entries(CONFIGS)) {
@@ -315,7 +279,6 @@ for (const [id, cfg] of Object.entries(CONFIGS)) {
   if (PREVIEW) { buildPreview(id, cfg); continue; }
   const { mask, outW, outH } = buildMask(cfg);
   const png = maskToPng(mask, outW, outH);
-  if (OVERLAY) overlay(png, cfg);
   writeFileSync(join(root, `public/${id}-mask.png`), PNG.sync.write(png));
   stats(id, png);
 }

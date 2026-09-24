@@ -20,6 +20,13 @@
       <button id="btn-panel" type="button" title="思想家列表">
         <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 5h18v2H3zm0 6h12v2H3zm0 6h16v2H3z"/></svg>
       </button>
+      <button id="btn-view" type="button" title="切换视图:四向肖像 / 镰刀锤头徽章">视图·肖像</button>
+      <button id="btn-quality" type="button" title="画质:自动=按帧率自适应;高=满粒子;低=弱显卡">画质·自动</button>
+      <label id="speed-wrap" title="自动巡游速度">
+        <span>速度</span>
+        <input id="speed" type="range" min="0.4" max="2.4" step="0.2" value="1" />
+      </label>
+      <button id="btn-void" type="button" title="点击虚空时是否随机拾起一句">拾句·开</button>
       <button id="btn-about" type="button" title="关于">关于</button>
     </nav>
 
@@ -36,7 +43,7 @@
       </span>
     </div>
 
-    <footer id="hint">拖拽旋转 · 每 90° 换一位思想家 · 点击星尘看语录 · 点击虚空捞起一句</footer>
+    <footer id="hint">拖拽 / WASD 飞行 · 每 90° 换一位思想家 · 点星尘看语录 · 点虚空捞一句 · H 隐藏界面 · F 全屏 · P 暂停巡游</footer>
 
     <div id="intro"></div>
 

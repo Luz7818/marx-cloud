@@ -1,7 +1,7 @@
 /**
  * 开场引导(1/3 三页,致敬《诗云》)。
  */
-export function initIntro(container, { onEnter }) {
+export function initIntro(container, { onEnter, immediate = false }) {
   const slides = [
     {
       cls: 's1',
@@ -25,7 +25,8 @@ export function initIntro(container, { onEnter }) {
         <p class="intro-line">万点星辰,随视角流转:</p>
         <p class="intro-line">每转过 <em>90°</em>,便汇聚成一位思想家的肖像。</p>
         <p class="intro-line">点击星尘,读到一句经典;点击虚空,<em>捞起一句</em>。</p>
-        <p class="intro-line small">拖拽旋转 · 滚轮缩放 · 左侧点亮一位思想家</p>
+        <p class="intro-line small">拖拽 / WASD 飞行 · 滚轮缩放 · 左侧点亮或搜索一位思想家 · H 隐藏界面 · F 全屏 · P 暂停巡游</p>
+        <p class="intro-line small">卡片上可 <em>收进拾遗</em>、<em>留影</em>、复制与分享这一句</p>
         <button class="intro-enter" type="button">进入星图</button>
       `
     }
@@ -33,7 +34,6 @@ export function initIntro(container, { onEnter }) {
 
   let i = 0;
   let done = false;
-  let pageEl = null;
 
   container.innerHTML = `
     <div class="intro-stage">
@@ -85,5 +85,6 @@ export function initIntro(container, { onEnter }) {
   });
 
   open();
+  if (immediate) finish();
   return { reopen: open };
 }
