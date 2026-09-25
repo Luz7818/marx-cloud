@@ -107,7 +107,6 @@ const boot = async () => {
     figIndex: figIndexByParticle,
     groupIdx: groupIdxByParticle,
     emblem: emblemPoints,
-    quoteIdx: quoteIdxByParticle,
     colors,
     height: PORTRAIT_H
   });

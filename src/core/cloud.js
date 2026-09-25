@@ -123,7 +123,6 @@ const GROUP_HALO_R = 9.2;
  * @param {Array}        o.planes     [{pts, bright, aspect}] ×4,归一化肖像点位
  * @param {number[]}     o.figIndex   每粒子人物索引
  * @param {number[]}     o.groupIdx   每粒子分组索引(徽章视图)
- * @param {number[]}     o.quoteIdx   每粒子语录索引
  * @param {string[]}     o.colors     每粒子人物色 '#rrggbb'(静止/点亮两态由此派生)
  * @param {number}       o.height     肖像世界高度(各平面统一)
  */

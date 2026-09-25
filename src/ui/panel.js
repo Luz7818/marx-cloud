@@ -1,6 +1,4 @@
-import { figures, groups } from '../data/figures.js';
-
-const figureById = Object.fromEntries(figures.map(f => [f.id, f]));
+import { figures, figureMap, groups } from '../data/figures.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const cut = (s, n = 26) => (s.length > n ? s.slice(0, n) + '……' : s);
@@ -43,7 +41,7 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
         <button class="fav-clear" type="button">清空</button>
       </div>
       ${ids.map(i => {
-        const q = quotes[i]; const f = figureById[q.f];
+        const q = quotes[i]; const f = figureMap[q.f];
         return `<button class="fav-row" type="button" data-q="${i}">
           <span class="dot" style="--c:${f.color}"></span>
           <span class="fav-text">${esc(cut(q.t, 22))}</span>
@@ -148,7 +146,7 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
   search.addEventListener('input', () => {
     const q = search.value.trim().toLowerCase();
     container.querySelectorAll('.panel-row-wrap').forEach(w => {
-      const f = figureById[w.dataset.fig];
+      const f = figureMap[w.dataset.fig];
       const hay = [f.name, f.en, f.region, f.role, ...(f.aka || [])].join(' ').toLowerCase();
       w.style.display = !q || hay.includes(q) ? '' : 'none';
     });
