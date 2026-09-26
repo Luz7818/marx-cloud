@@ -1,0 +1,10 @@
+# 免说明目录:这里列的一级目录不再要求各自的 README.md
+# 一行一个相对路径。检查器内置已跳过 node_modules/ dist/ build/ .venv/ docs/ 与点号目录,
+# 本文件只声明本仓库特有的那部分。
+
+node_modules/
+dist/
+
+# 本仓库的一级目录一共 6 个:src/ tools/ public/ 各自有 README.md;
+# docs/ 是文档目录、.github/ 是隐藏目录,两者由检查器内置跳过,不用在此重复。
+# 没有其它"跑一次就变"的产物目录:tools/ 生成的核对图 tools/preview-*.png 已被 .gitignore 拦住。
