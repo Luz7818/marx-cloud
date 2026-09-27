@@ -26,7 +26,7 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染
 | 代码规模 | `src/` 下 12 个 `.js` 共 2917 行,另有 `style.css` | `git ls-files 'src/*.js' \| wc -l`;`cat $(git ls-files 'src/*.js') \| wc -l` |
 | 粒子数分档 | 桌面 28000 / 触屏或窄屏 20000 / 软件渲染 14000 / 带 `?lite` 9000 | `grep -n "const COUNT" src/main.js` |
 | 自动巡游节拍 | 停留 9 秒 + 转场 8 秒,空闲 4 秒后恢复 | `grep -n "DWELL = 9" src/core/scene.js` |
-| CI | 工作流只在 push `main` 或手动触发时跑。最近一次 `Deploy to GitHub Pages` = `completed success`(提交 `f808cc6`,复核于 2026-09-27)。不装 `gh` 也能读:GitHub 的 Actions 接口对**公开仓免认证**,但 URL 里要用**仓库名 `marx-cloud`**,不是目录名 `Marx_Cloud`(用后者返回 404) | `python -c "import json,urllib.request as u;r=json.load(u.urlopen('https://api.github.com/repos/Luz7818/marx-cloud/actions/runs?per_page=1'))['workflow_runs'][0];print(r['head_commit']['id'][:7],r['status'],r['conclusion'])"` |
+| CI | 工作流只在 push `main` 或手动触发时跑。**这里不写"最近一次是哪个提交"**——分支每推一次它就变,写进文档同一次提交里就作废了。当前分支 HEAD 的徽章为 `passing`(复核见右)。不装 `gh` 也能读:徽章与 Actions 接口对**公开仓都免认证**,但 URL 里要用**仓库名 `marx-cloud`**,不是目录名 `Marx_Cloud`(用后者返回 404)。要提交号与耗时再用 `/actions/runs`(匿名限 60 次/小时/IP,别拿它轮询) | `python -c "import urllib.request as u;b=u.urlopen(u.Request('https://github.com/Luz7818/marx-cloud/workflows/Deploy%20to%20GitHub%20Pages/badge.svg',headers={'User-Agent':'Mozilla/5.0'}),timeout=30).read().decode();print('passing' in b)"` 应为 `True` |
 | 线上版本 | HTTP 200,资源 hash 与本机 `npm run build` 一致 | `curl -s https://luz7818.github.io/marx-cloud/ \| grep -o 'assets/[a-zA-Z0-9._-]*' \| sort -u` |
 | 本机环境 | node v24.19.0 / npm 11.17.0;CI 用 node 20 | `node --version && npm --version` |
 | `dist/` | gitignore 的本地产物,不是交付物,不要提交 | `git check-ignore -v dist/index.html` |
@@ -136,7 +136,7 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染
 
 | 动了什么 | 必须跑 | 通过判据 |
 |---|---|---|
-| 任意 `.js` | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" || echo "FAIL $f"; done` | 无输出 |
+| 任意 `.js` | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` | 无输出 |
 | 任意代码 | `npm run build` | 退出码 0,`16 modules transformed`,无 `chunk size` 警告 |
 | `src/data/quotes.js`、`src/data/figures.js` | 「数据规模」行的 node 命令 + 「关键约定 1」的 id 核对命令 | 句数与预期一致,且 id 核对输出 `0` |
 | `public/*-mask.png` | 同时改 `src/main.js` 的 `v` → `npm run build` → `npm run preview` | 肖像轮廓对得上照片,转 90° 换人 |
