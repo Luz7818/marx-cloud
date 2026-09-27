@@ -33,6 +33,8 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染
 
 ## 仓库地图
 
+目录树本身与"每个目录的入口在哪"见仓根 [目录说明.md](目录说明.md),本节只留职责与隐藏约束,两边不重复列目录。
+
 | 路径 | 职责 | 关键点 |
 |---|---|---|
 | `index.html` | 唯一页面骨架与 DOM 契约 | 18 个 `id`,其中 14 个被 `src/main.js` 用 `getElementById` 取走,改名片刻就 `null` 报错。计数:`grep -o 'id="[a-z-]*"' index.html \| wc -l` |
