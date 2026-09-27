@@ -3,7 +3,7 @@
 # 本文件只声明本仓库特有的那部分。
 
 node_modules/
-dist/
+dist/                     # Vite 构建产物,npm run build 重生成;交付走 Pages,不入库
 
 # 本仓库的一级目录一共 6 个:src/ tools/ public/ 各自有 README.md;
 # docs/ 是文档目录、.github/ 是隐藏目录,两者由检查器内置跳过,不用在此重复。
