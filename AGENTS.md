@@ -119,6 +119,10 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染
 10. **本页会被 luzzz.me 当子页面收录**:`#brand` 里的「返回主页」是相对路径 `../`,在 `luzzz.me/marx-cloud/` 下解析成主站、在 Pages 的 `/marx-cloud/` 下解析成用户主页;全站资源同样走相对路径(`base: "./"`、掩膜 `./<id>-mask.png`),所以换托管位置不用改代码,改成绝对路径则会让其中一种部署断掉。子页面副本由 `luzzz.me/tools/sync-showcases.mjs` 生成,本仓库的改动不会被它反向覆盖。
     回链只在「确实有上一级」时保留:`src/main.js` 比较 `../` 解析出的路径与当前路径,相等(把 `dist/`
     或开发服务器起在站点根)时把它从 DOM 里摘掉,否则点了等于刷新本页。
+    **相对路径还要求访问 URL 以 `/` 结尾**:落到 `/marx-cloud`(少斜杠)时基准变成站点根,
+    `./assets/…` 全部 404,表现是文字在、星图不动。GitHub Pages 与 `python -m http.server`
+    都会自动补这个斜杠;Vercel 的 Next 预设默认相反,会把带斜杠的路径 308 成不带斜杠的,
+    所以收录方 luzzz.me 用 `trailingSlash: true` 把方向反过来才跑得通。
     复核: `mkdir -p /tmp/s && cp -r dist /tmp/s/marx-cloud && python -m http.server 8099 -d /tmp/s`,
     访问 `http://127.0.0.1:8099/marx-cloud/` 看得到回链;把服务改起在 `dist/` 上、访问根路径则看不到。
     注意双击 `dist/index.html` 打不开:产物是 `type="module"` 脚本,`file://` 下被 CORS 拦掉
