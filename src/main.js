@@ -26,6 +26,15 @@ const favs = initFavorites();
 document.getElementById('btn-panel').addEventListener('click', () => body.classList.toggle('panel-open'));
 document.getElementById('btn-about').addEventListener('click', () => intro && intro.reopen());
 
+// 回链只在作为子页面挂到别处时有意义:开发服务器或静态托管跑在站点根时, ../ 就是本页自己
+{
+  const back = document.querySelector('#brand .back');
+  if (back) {
+    const strip = (p) => p.replace(/index\.html$/, '');
+    if (strip(new URL('../', location.href).pathname) === strip(location.pathname)) back.remove();
+  }
+}
+
 // ---------- 语录索引 ----------
 const figureIndex = Object.fromEntries(figures.map((f, i) => [f.id, i]));
 const quotesByFigure = {};

@@ -9,6 +9,7 @@
 万点星辰,随视角流转,汇成思想的肖像 —— 每颗星,都是一句经典。
 
 [![在线演示](https://img.shields.io/badge/%F0%9F%8C%90%20%E5%9C%A8%E7%BA%BF%E6%BC%94%E7%A4%BA-GitHub%20Pages-8a2be2?style=flat-square)](https://luz7818.github.io/marx-cloud/)
+
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 </div>
@@ -19,9 +20,12 @@
 这些星就聚拢成一位思想家的肖像 —— 马克思、恩格斯、列宁、卢森堡,轮廓与明暗直接从
 本人照片还原,不是描出来的剪影。再转 90° 又散作星雾,肖像只在你的视角正对时存在。
 
+同一份构建产物也被收录进个人站 `luzzz.me` 的 `/marx-cloud/` 子页面
+（那边只是拷贝本仓库的 `dist/`, 改动仍在本仓库提交, 见 `AGENTS.md` 关键约定 10）。
+
 **规模**:1041 句语录 · 35 位思想家 · 4 组徽章 · 桌面端 28000 颗粒子
 （复核:`AGENTS.md` 的「当前真实状态」表,里面有可直接粘贴的统计命令）
-**体积**:`npm run build` 产出一个 628.35 kB / gzip 211.50 kB 的 JS;`dist/` 全量约 1.65 MB
+**体积**:`npm run build` 产出一个 628.56 kB / gzip 211.60 kB 的 JS;`dist/` 全量约 1.65 MB
 (复核:`npm run build` 末三行,以及 `du -sb dist | cut -f1`)。
 
 ## 30 秒跑通

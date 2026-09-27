@@ -86,16 +86,18 @@ transforming...
 ✓ 16 modules transformed.
 rendering chunks...
 computing gzip size...
-dist/index.html                   1.98 kB │ gzip:   1.26 kB
-dist/assets/index-BzJ6BFtw.css   12.40 kB │ gzip:   3.20 kB
-dist/assets/index-DcHb7l6O.js   628.35 kB │ gzip: 211.50 kB
+dist/index.html                   2.03 kB │ gzip:   1.30 kB
+dist/assets/index-Cj5y267Y.css   12.65 kB │ gzip:   3.25 kB
+dist/assets/index-BC7DdfnK.js   628.56 kB │ gzip: 211.60 kB
 ✓ built in 1.04s
 ```
 
 通过标准:退出码 0、`✓ built in`,没有 `chunk size` 警告。
 产物在 `dist/`(已 gitignore,不要提交):一个 HTML、一个 CSS、一个 JS,外加 Vite 从
-`public/` 原样拷过去的 4 张掩膜 PNG 与那份 `README.md`,合计 1,646,445 字节
-(复核:`du -sb dist | cut -f1`)。JS/CSS 文件名里的 hash 由内容决定,内容不变则 hash 不变。
+`public/` 原样拷过去的 4 张掩膜 PNG 与那份 `README.md`。掩膜合计 909,306 字节
+(复核:`node -e "const fs=require('fs');let t=0;for(const f of fs.readdirSync('public'))if(f.endsWith('.png'))t+=fs.statSync('public/'+f).size;console.log(t)"`),
+`du -sb dist | cut -f1` 的总数还包含那份 `README.md`,它随文档改动而变,所以这里不写死总数。
+JS/CSS 文件名里的 hash 由内容决定,内容不变则 hash 不变。
 
 `dist/` 是 gitignore 的本地产物,提交前不需要清理它。构建本身不跑类型检查,
 所以还要挨个过一遍语法(在仓库根执行,无输出即全部通过):

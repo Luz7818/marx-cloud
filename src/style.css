@@ -51,10 +51,24 @@ html, body {
   pointer-events: none;
   user-select: none;
 }
+/* #brand 整体不吃指针事件, 返回链接要单独开回来 */
+#brand .back {
+  pointer-events: auto;
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 12px;
+  letter-spacing: .4px;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--glass-brd);
+}
+#brand .back:hover {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
 #brand h1 {
   font-family: var(--serif);
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 26px;  font-weight: 700;
   letter-spacing: 0.35em;
   text-indent: 0.1em;
 }

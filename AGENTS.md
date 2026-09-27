@@ -13,10 +13,10 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染
 | 项 | 值 | 复核命令 |
 |---|---|---|
 | 构建 | 通过,`16 modules transformed`(这个数字跟源码模块数绑定,加一个 `.js` 就会变),约 1 秒 | `npm run build` |
-| 产物 JS | 628.35 kB / gzip 211.50 kB | `npm run build` 末三行 |
-| 产物 CSS | 12.40 kB / gzip 3.20 kB | `npm run build` 末三行 |
-| 产物 HTML | 1.98 kB / gzip 1.26 kB | `npm run build` 末三行 |
-| dist 全量 | 约 1.65 MB = hash 产物 730,996(JS 718,595 + CSS 12,401)+ `index.html` 2,388 + 4 张掩膜 909,306 + `README.md`(即 `public/README.md` 的体积,随文档改动而变,所以不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
+| 产物 JS | 628.56 kB / gzip 211.60 kB | `npm run build` 末三行 |
+| 产物 CSS | 12.65 kB / gzip 3.25 kB | `npm run build` 末三行 |
+| 产物 HTML | 2.03 kB / gzip 1.30 kB | `npm run build` 末三行 |
+| dist 全量 | 约 1.65 MB = hash 产物 731,462(JS 718,806 + CSS 12,656)+ `index.html` 2,442 + 4 张掩膜 909,306 + `README.md`(即 `public/README.md` 的体积,随文档改动而变,所以不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
 | 语法检查 | 16 个源码文件(`src` 12 + `tools` 3 + `vite.config.js`)全部通过 | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` |
 | 自动化测试 | 无。scripts 只有 dev/build/preview | `node -e "console.log(Object.keys(require('./package.json').scripts))"` |
 | lint / 类型检查 / 格式化 | 无配置也无依赖 | `git ls-files` 里没有 `eslint*`、`tsconfig*`、`prettier*` |
@@ -116,7 +116,15 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染
    它暴露 `scene / cloud / camera / quoteIdxByParticle / planeFigures`,是手工验证与截图复现
    的唯一入口,不要因为"生产环境不该挂全局变量"而删掉。
 
-10. **中文正文用半角逗号**。全仓库(源码、`index.html`、文档)不出现全角逗号 U+FF0C,新增
+10. **本页会被 luzzz.me 当子页面收录**:`#brand` 里的「返回主页」是相对路径 `../`,在 `luzzz.me/marx-cloud/` 下解析成主站、在 Pages 的 `/marx-cloud/` 下解析成用户主页;全站资源同样走相对路径(`base: "./"`、掩膜 `./<id>-mask.png`),所以换托管位置不用改代码,改成绝对路径则会让其中一种部署断掉。子页面副本由 `luzzz.me/tools/sync-showcases.mjs` 生成,本仓库的改动不会被它反向覆盖。
+    回链只在「确实有上一级」时保留:`src/main.js` 比较 `../` 解析出的路径与当前路径,相等(把 `dist/`
+    或开发服务器起在站点根)时把它从 DOM 里摘掉,否则点了等于刷新本页。
+    复核: `mkdir -p /tmp/s && cp -r dist /tmp/s/marx-cloud && python -m http.server 8099 -d /tmp/s`,
+    访问 `http://127.0.0.1:8099/marx-cloud/` 看得到回链;把服务改起在 `dist/` 上、访问根路径则看不到。
+    注意双击 `dist/index.html` 打不开:产物是 `type="module"` 脚本,`file://` 下被 CORS 拦掉
+    (控制台首条即 `Access to script at 'file:///...index-*.js' from origin 'null' has been blocked by CORS policy`),
+    这一页只能用 HTTP 起服务看。
+11. **中文正文用半角逗号**。全仓库(源码、`index.html`、文档)不出现全角逗号 U+FF0C,新增
      语录、注释与文档保持一致。核对(无输出即为 0;写成字节序列是为了不让命令本身命中):
      `grep -rl "$(printf '\xef\xbc\x8c')" src/ index.html README.md AGENTS.md docs/`
 
