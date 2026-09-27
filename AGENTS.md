@@ -13,20 +13,20 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染
 | 项 | 值 | 复核命令 |
 |---|---|---|
 | 构建 | 通过,`16 modules transformed`(这个数字跟源码模块数绑定,加一个 `.js` 就会变),约 1 秒 | `npm run build` |
-| 产物 JS | 628.56 kB / gzip 211.60 kB | `npm run build` 末三行 |
+| 产物 JS | 628.52 kB / gzip 211.57 kB | `npm run build` 末三行 |
 | 产物 CSS | 12.65 kB / gzip 3.25 kB | `npm run build` 末三行 |
 | 产物 HTML | 2.03 kB / gzip 1.30 kB | `npm run build` 末三行 |
-| dist 全量 | 约 1.65 MB = hash 产物 731,462(JS 718,806 + CSS 12,656)+ `index.html` 2,442 + 4 张掩膜 909,306 + `README.md`(即 `public/README.md` 的体积,随文档改动而变,所以不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
+| dist 全量 | 约 1.65 MB = hash 产物 731,422(JS 718,766 + CSS 12,656)+ `index.html` 2,442 + 4 张掩膜 909,306 + `README.md`(即 `public/README.md` 的体积,随文档改动而变,所以不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
 | 语法检查 | 16 个源码文件(`src` 12 + `tools` 3 + `vite.config.js`)全部通过 | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` |
 | 自动化测试 | 无。scripts 只有 dev/build/preview | `node -e "console.log(Object.keys(require('./package.json').scripts))"` |
 | lint / 类型检查 / 格式化 | 无配置也无依赖 | `git ls-files` 里没有 `eslint*`、`tsconfig*`、`prettier*` |
 | 运行时依赖 | 只有 `three@0.169.0` | `npm ls --depth=0` |
 | 安装期包数 | 61 个(lock 展开,含 devDependencies) | `node -e "console.log(Object.keys(require('./package-lock.json').packages).length-1)"` |
 | 数据规模 | 1041 句语录 / 35 位人物 / 4 个分组 / 3400 个徽章点位 | `node --input-type=module -e "const q=(await import('./src/data/quotes.js')).quotes,{figures:f,groups:g}=(await import('./src/data/figures.js')),e=(await import('./src/data/emblem.js')).emblemPoints;console.log(q.length,f.length,g.length,e.length)"` |
-| 代码规模 | `src/` 下 12 个 `.js` 共 2908 行,另有 `style.css` | `git ls-files 'src/*.js' \| wc -l`;`cat $(git ls-files 'src/*.js') \| wc -l` |
+| 代码规模 | `src/` 下 12 个 `.js` 共 2917 行,另有 `style.css` | `git ls-files 'src/*.js' \| wc -l`;`cat $(git ls-files 'src/*.js') \| wc -l` |
 | 粒子数分档 | 桌面 28000 / 触屏或窄屏 20000 / 软件渲染 14000 / 带 `?lite` 9000 | `grep -n "const COUNT" src/main.js` |
 | 自动巡游节拍 | 停留 9 秒 + 转场 8 秒,空闲 4 秒后恢复 | `grep -n "DWELL = 9" src/core/scene.js` |
-| CI | 工作流只在 push `main` 或手动触发时跑;本机没有 `gh`,红绿灯状态无法复核,不要把它写成"CI 通过" | `.github/workflows/deploy.yml` |
+| CI | 工作流只在 push `main` 或手动触发时跑。最近一次 `Deploy to GitHub Pages` = `completed success`(提交 `f808cc6`,复核于 2026-09-27)。不装 `gh` 也能读:GitHub 的 Actions 接口对**公开仓免认证**,但 URL 里要用**仓库名 `marx-cloud`**,不是目录名 `Marx_Cloud`(用后者返回 404) | `python -c "import json,urllib.request as u;r=json.load(u.urlopen('https://api.github.com/repos/Luz7818/marx-cloud/actions/runs?per_page=1'))['workflow_runs'][0];print(r['head_commit']['id'][:7],r['status'],r['conclusion'])"` |
 | 线上版本 | HTTP 200,资源 hash 与本机 `npm run build` 一致 | `curl -s https://luz7818.github.io/marx-cloud/ \| grep -o 'assets/[a-zA-Z0-9._-]*' \| sort -u` |
 | 本机环境 | node v24.19.0 / npm 11.17.0;CI 用 node 20 | `node --version && npm --version` |
 | `dist/` | gitignore 的本地产物,不是交付物,不要提交 | `git check-ignore -v dist/index.html` |
