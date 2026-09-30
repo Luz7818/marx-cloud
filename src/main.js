@@ -306,10 +306,13 @@ const boot = async () => {
   document.getElementById('btn-daily').addEventListener('click', () => showQuote(dailyIdx()));
 
   // ---------- 点击:星尘 → 该星语录;真空 → 捞起 ----------
-  // 点亮某人物时只拾取该人物的星(其余星已隐去或属于肖像背景)
+  // 点亮的两种形态:uFocusDim=0 只做着色强调(全员星仍在,谁都可选);
+  // uFocusDim=1 其余星完全隐去,此时只拾取被点亮者的星
   function pickAllowed(idx) {
     const f = cloud.uniforms.uFocus.value;
-    return f < 0 || figIndexByParticle[idx] === f;
+    if (f < 0) return true;
+    if (cloud.uniforms.uFocusDim.value < 0.5) return true;
+    return figIndexByParticle[idx] === f;
   }
   scene.onClick((x, y) => {
     const idx = scene.pickStar(x, y, 18);

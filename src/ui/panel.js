@@ -132,7 +132,10 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
   }
 
   // ---------- 人物分组 ----------
+  // 语录不足 MERGE_BELOW 的人物并入各组末尾的「拾遗」折叠行,不再单独列出
+  const MERGE_BELOW = 6;
   const wraps = [];
+  const minorWraps = [];
   const wrapHome = new Map();
   for (const g of groups) {
     const figs = figures.filter(f => f.group === g.key);
@@ -140,9 +143,9 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
     const sec = document.createElement('div');
     sec.className = 'panel-group';
     sec.innerHTML = `<div class="panel-group-label">${g.label}</div>`;
-    for (const f of figs) {
+    const buildRow = (f, parent, minor) => {
       const row = document.createElement('div');
-      row.className = 'panel-row-wrap';
+      row.className = 'panel-row-wrap' + (minor ? ' minor-row' : '');
       row.dataset.fig = f.id;
       const list = byFigure[f.id] || [];
       row.innerHTML = `
@@ -177,14 +180,46 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
           expandQuotes(row.querySelector('.row-quotes'), list);
         });
       }
-      sec.appendChild(row);
+      parent.appendChild(row);
       wraps.push(row);
-      wrapHome.set(row, sec);
+      wrapHome.set(row, minor ? parent : sec);
+    };
+
+    const minorFigs = figs.filter(f => (counts[f.id] || 0) < MERGE_BELOW);
+    for (const f of figs) {
+      if ((counts[f.id] || 0) >= MERGE_BELOW) buildRow(f, sec, false);
+    }
+    if (minorFigs.length) {
+      const minorQuotes = minorFigs.reduce((a, f) => a + (counts[f.id] || 0), 0);
+      const minYear = Math.min(...minorFigs.map(f => birthYear(f)));
+      const mw = document.createElement('div');
+      mw.className = 'panel-minor-wrap';
+      mw.dataset.minyear = minYear;
+      mw.innerHTML = `
+        <button class="panel-row minor-toggle" type="button">
+          <span class="row-main">
+            <span class="row-name">拾遗 · ${minorFigs.length} 位</span>
+            <span class="row-years">${minorQuotes} 句 · 展开查看</span>
+          </span>
+          <span class="row-caret">▸</span>
+        </button>
+        <div class="minor-box"></div>
+      `;
+      const box = mw.querySelector('.minor-box');
+      for (const f of minorFigs) buildRow(f, box, true);
+      mw.querySelector('.minor-toggle').addEventListener('click', () => {
+        const open = mw.classList.toggle('open');
+        box.style.display = open ? 'block' : 'none';
+      });
+      sec.appendChild(mw);
+      mw._home = sec;
+      minorWraps.push(mw);
     }
     panes.figures.appendChild(sec);
   }
 
-  // 按年代排序:把行挪进一个平铺容器(只动显示顺序,不改数据数组)
+  // 按年代排序:把行挪进一个平铺容器(只动显示顺序,不改数据数组);
+  // 拾遗折叠行整体参与排序(按其成员最早生年)
   let yearMode = false;
   const flat = document.createElement('div');
   flat.className = 'panel-flat';
@@ -194,11 +229,19 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
     if (yearMode) {
       const firstGroup = panes.figures.querySelector('.panel-group');
       if (firstGroup) panes.figures.insertBefore(flat, firstGroup);
-      [...wraps].sort((a, b) => birthYear(figureMap[a.dataset.fig]) - birthYear(figureMap[b.dataset.fig]))
+      [...wraps].filter(w => !w.classList.contains('minor-row'))
+        .sort((a, b) => birthYear(figureMap[a.dataset.fig]) - birthYear(figureMap[b.dataset.fig]))
         .forEach(w => flat.appendChild(w));
+      minorWraps.sort((a, b) => (+a.dataset.minyear) - (+b.dataset.minyear))
+        .forEach(mw => flat.appendChild(mw));
       container.classList.add('yearmode');
     } else {
       wraps.forEach(w => wrapHome.get(w).appendChild(w));
+      minorWraps.forEach(mw => {
+        mw._home.appendChild(mw);
+        const box = mw.querySelector('.minor-box');
+        box.style.display = mw.classList.contains('open') ? 'block' : 'none';
+      });
       flat.remove();
       container.classList.remove('yearmode');
     }
@@ -236,6 +279,13 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
     onSelect && onSelect(id);
     const wrap = wraps.find(w => w.dataset.fig === id);
     if (wrap) {
+      // 成员在拾遗折叠行里时,先展开再定位
+      const mbox = wrap.closest('.minor-box');
+      if (mbox) {
+        mbox.style.display = 'block';
+        const mw = mbox.closest('.panel-minor-wrap');
+        if (mw) mw.classList.add('open');
+      }
       const caret = wrap.querySelector('.row-caret');
       const list = byFigure[id] || [];
       if (caret && list.length) expandQuotes(wrap.querySelector('.row-quotes'), list);
@@ -251,11 +301,27 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
       const hay = [f.name, f.en, f.region, f.role, ...(f.aka || [])].join(' ').toLowerCase();
       w.style.display = !q || hay.includes(q) ? '' : 'none';
     });
+    // 拾遗折叠:搜索命中成员时自动展开;清空搜索后恢复原折叠状态
+    minorWraps.forEach(mw => {
+      const box = mw.querySelector('.minor-box');
+      const hit = q && [...box.querySelectorAll('.panel-row-wrap')].some(r => r.style.display !== 'none');
+      if (q) {
+        mw.style.display = hit ? '' : 'none';
+        box.style.display = hit ? 'block' : 'none';
+        mw.classList.toggle('open', !!hit);
+      } else {
+        mw.style.display = '';
+        box.style.display = mw.classList.contains('open') ? 'block' : 'none';
+      }
+    });
     container.querySelectorAll('.panel-group').forEach(g => {
-      const any = [...g.querySelectorAll('.panel-row-wrap')].some(r => r.style.display !== 'none');
+      const any = [...g.querySelectorAll(':scope > .panel-row-wrap, :scope > .panel-minor-wrap')]
+        .some(r => r.style.display !== 'none');
       g.style.display = any ? '' : 'none';
     });
-    if (yearMode) flat.style.display = wraps.some(r => r.style.display !== 'none') ? '' : 'none';
+    if (yearMode) flat.style.display =
+      wraps.some(r => r.style.display !== 'none') || minorWraps.some(m => m.style.display !== 'none')
+        ? '' : 'none';
   });
   search.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;

@@ -228,6 +228,14 @@ body.panel-open #panel { transform: translateX(0); }
 .row-caret:hover { color: var(--accent); }
 .row-quotes { display: none; padding: 0 10px 6px 30px; }
 .row-quotes.open { display: block; }
+/* 拾遗折叠行:语录不足阈值的人物合并展示,展开后逐位缩进 */
+.minor-box { display: none; }
+.panel-minor-wrap .minor-toggle { opacity: 0.85; }
+.panel-minor-wrap .minor-toggle .row-name { font-size: 12px; color: var(--muted); letter-spacing: 0.12em; }
+.panel-minor-wrap .minor-toggle:hover .row-name { color: var(--text); }
+.panel-minor-wrap.open .minor-toggle .row-caret { display: inline-block; transform: rotate(90deg); }
+.minor-box .panel-row { padding-left: 28px; }
+.minor-box .row-quotes { padding-left: 44px; }
 .q-row {
   width: 100%;
   display: flex;
