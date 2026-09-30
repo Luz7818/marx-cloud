@@ -214,7 +214,48 @@ function smoothPass(mask, w, h) {
     }
 }
 
-/** 生成掩膜(裁剪空间)。返回 {mask,w,h,subj,ok} */
+/** 主体行轮廓 → 自动定位头肩窗口(头带 = 顶部行宽明显小于主体的区域) */
+function headWindow(subj, w, h) {
+  const rows = [];
+  for (let y = 0; y < h; y++) {
+    let x0 = -1, x1 = -1, n = 0;
+    for (let x = 0; x < w; x++) if (subj[y * w + x]) { if (x0 < 0) x0 = x; x1 = x; n++; }
+    rows.push({ x0, x1, n });
+  }
+  let top = -1;
+  for (let y = 0; y < h; y++) if (rows[y].n >= w * 0.02) { top = y; break; }
+  if (top < 0) return null;
+  const widths = rows.slice(top).map(r => r.n).sort((a, b) => a - b);
+  const maxW = widths[Math.floor(widths.length * 0.9)] || 1;
+  // 头带:自顶向下直到行宽持续达到主体的 72%
+  let bandEnd = top;
+  let runWide = 0;
+  for (let y = top; y < h; y++) {
+    runWide = rows[y].n >= maxW * 0.72 ? runWide + 1 : 0;
+    if (runWide >= 4) { bandEnd = Math.max(top + 3, y - 3); break; }
+    bandEnd = y;
+  }
+  if (bandEnd - top < 4) bandEnd = Math.min(h - 1, top + Math.round(h * 0.18));
+  const headH = bandEnd - top;
+  const bottom = Math.min(h - 1, bandEnd + Math.round(headH * 1.7));
+  // 头带内按行像素数加权求水平质心(杂团行像素少,权重自然低)
+  let sx = 0, sn = 0;
+  for (let y = top; y <= bandEnd; y++) {
+    if (rows[y].n <= 0) continue;
+    sx += (rows[y].x0 + rows[y].x1) / 2 * rows[y].n;
+    sn += rows[y].n;
+  }
+  const cx = sn ? sx / sn : w / 2;
+  let hx0 = 1e9, hx1 = -1e9;
+  for (let y = top; y <= Math.min(bottom, h - 1); y++) {
+    if (rows[y].n < w * 0.02) continue;
+    hx0 = Math.min(hx0, rows[y].x0); hx1 = Math.max(hx1, rows[y].x1);
+  }
+  if (hx1 < hx0) return null;
+  return { top, bandEnd, bottom, cx, hx0, hx1 };
+}
+
+/** 生成掩膜(裁剪空间)。返回 {mask,w,h,subj,ok,win} */
 function buildAutoMask(img, cfg) {
   const lum0 = toGray(img);
   const { lum, w, h } = downsample(lum0, img.w, img.h, cfg.crop);
@@ -234,28 +275,53 @@ function buildAutoMask(img, cfg) {
   const lumS = boxBlur(lum, w, h, 1);
   const feather = boxBlur(boxBlur(subj, w, h, 2), w, h, 2);
 
+  const win = headWindow(subj, w, h);
   const mask = new Float32Array(w * h);
   const cutPix = (cfg.cutY ?? 1) * h;
+  // 头肩窗口的横向衰减:以头带质心为中心,把旁侧误并入的背景团块淡出
+  let halfW = 0, softR = 0;
+  if (win) {
+    halfW = Math.max((win.hx1 - win.hx0) / 2, 6);
+    softR = halfW * 2.1;
+  }
   for (let i = 0; i < w * h; i++) {
     const edge = smooth(feather[i] * 2.2) * smooth((cutPix - (i / w | 0)) / (0.06 * h));
     if (edge <= 0.002) continue;
     const base = smooth((lumS[i] - pLo) / Math.max(1e-4, pHi - pLo));
     const hp = (lumS[i] - low[i]) * cfg.detailGain;
     const t = clamp(base + hp, 0, 1);
-    mask[i] = (cfg.ped + (1 - cfg.ped) * Math.pow(t, cfg.gamma)) * edge;
+    let v = (cfg.ped + (1 - cfg.ped) * Math.pow(t, cfg.gamma)) * edge;
+    if (win) {
+      const dx = Math.abs((i % w) - win.cx);
+      if (dx > halfW) v *= 1 - smooth((dx - halfW) / Math.max(1e-4, softR - halfW));
+    }
+    mask[i] = v;
   }
   smoothPass(mask, w, h);
-  return { mask, subj, w, h, ok: true, coverage };
+  return { mask, subj, w, h, ok: true, coverage, win };
 }
 
-/** 归一化到 4:5(顶部对齐:面部通常在上 2/3;过高则裁掉底部) */
+/** 归一化到 4:5:有头肩窗口时按窗口取景(头带居中、肩部收底),否则顶部对齐 */
 function normalize45(m) {
-  const { mask, w, h } = m;
+  const { mask, w, h, win } = m;
   const out = new Float32Array(MASK_W * MASK_H);
-  const rows = Math.min(h, MASK_H);
-  for (let y = 0; y < rows; y++)
-    for (let x = 0; x < MASK_W; x++)
-      out[y * MASK_W + x] = mask[y * w + x];
+  let sy0 = 0, sh = h, scx = w / 2, sw = h * (MASK_W / MASK_H);
+  if (win) {
+    sh = Math.min(h - win.top, win.bottom - win.top + 1);
+    sy0 = win.top;
+    sw = sh * (MASK_W / MASK_H);
+    scx = win.cx;
+    const needW = (win.hx1 - win.hx0 + 1) * 1.18;
+    if (needW > sw) sw = needW;
+  }
+  const sx0 = scx - sw / 2;
+  for (let y = 0; y < MASK_H; y++) {
+    const sy = Math.min(h - 1, Math.max(0, Math.round(sy0 + (y / MASK_H) * sh)));
+    for (let x = 0; x < MASK_W; x++) {
+      const sx = Math.round(sx0 + (x / MASK_W) * sw);
+      out[y * MASK_W + x] = sx >= 0 && sx < w ? mask[sy * w + sx] : 0;
+    }
+  }
   smoothPass(out, MASK_W, MASK_H);
   return out;
 }
@@ -337,6 +403,7 @@ for (const f of figures) {
     if (m.ok) {
       writeFileSync(join(root, 'public/portraits', `${f.id}.png`), PNG.sync.write(to45Png(m)));
       entry.mask = `portraits/${f.id}.png`;
+      entry.v = 2; // 重生成掩膜后递增,否则 Pages CDN 会继续发旧图
     } else {
       console.log(`⚠ ${f.id} 主体分割覆盖 ${(m.coverage * 100).toFixed(1)}%,跳过掩膜(仅头像)`);
     }

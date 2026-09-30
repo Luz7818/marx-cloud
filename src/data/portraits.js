@@ -7,27 +7,32 @@ export const portraits = {
   "moore": {
     "ava": "avatars/moore.jpg",
     "mask": "portraits/moore.png",
-    "credit": "Commons:Hans Holbein, the Younger - Sir Thomas More - Google Art Project.jpg(Public domain)"
+    "credit": "Commons:Hans Holbein, the Younger - Sir Thomas More - Google Art Project.jpg(Public domain)",
+    "v": 2
   },
   "campanella": {
     "ava": "avatars/campanella.jpg",
     "mask": "portraits/campanella.png",
-    "credit": "Commons:Cozza Tommaso Campanella.jpg(Public domain)"
+    "credit": "Commons:Cozza Tommaso Campanella.jpg(Public domain)",
+    "v": 2
   },
   "saintsimon": {
     "ava": "avatars/saintsimon.jpg",
     "mask": "portraits/saintsimon.png",
-    "credit": "Commons:Claude Henri de Rouvroy.jpg(Public domain)"
+    "credit": "Commons:Claude Henri de Rouvroy.jpg(Public domain)",
+    "v": 2
   },
   "owen": {
     "ava": "avatars/owen.jpg",
     "mask": "portraits/owen.png",
-    "credit": "Commons:Robert Owen by William Henry Brooke.jpg(Public domain)"
+    "credit": "Commons:Robert Owen by William Henry Brooke.jpg(Public domain)",
+    "v": 2
   },
   "fourier": {
     "ava": "avatars/fourier.jpg",
     "mask": "portraits/fourier.png",
-    "credit": "Commons:Françoise Foliot - Jean Gigoux - Portrait de Charles Fourrier (cropped) (1).jpg(CC BY-SA 4.0)"
+    "credit": "Commons:Françoise Foliot - Jean Gigoux - Portrait de Charles Fourrier (cropped) (1).jpg(CC BY-SA 4.0)",
+    "v": 2
   },
   "marx": {
     "ava": "avatars/marx.jpg",
@@ -44,12 +49,14 @@ export const portraits = {
   "plekhanov": {
     "ava": "avatars/plekhanov.jpg",
     "mask": "portraits/plekhanov.png",
-    "credit": "Commons:Georgi Valentinovich Plekhanov, ca. 1917.jpg(Public domain)"
+    "credit": "Commons:Georgi Valentinovich Plekhanov, ca. 1917.jpg(Public domain)",
+    "v": 2
   },
   "zetkin": {
     "ava": "avatars/zetkin.jpg",
     "mask": "portraits/zetkin.png",
-    "credit": "Commons:C Zetkin 1.jpg(Public domain)"
+    "credit": "Commons:C Zetkin 1.jpg(Public domain)",
+    "v": 2
   },
   "lenin": {
     "ava": "avatars/lenin.jpg",
@@ -66,361 +73,433 @@ export const portraits = {
   "stalin": {
     "ava": "avatars/stalin.jpg",
     "mask": "portraits/stalin.png",
-    "credit": "Commons:Joseph Stalin official portrait.jpg(Public domain)"
+    "credit": "Commons:Joseph Stalin official portrait.jpg(Public domain)",
+    "v": 2
   },
   "dimitrov": {
     "ava": "avatars/dimitrov.jpg",
     "mask": "portraits/dimitrov.png",
-    "credit": "Commons:Georgi Dimitrow.png(Public domain)"
+    "credit": "Commons:Georgi Dimitrow.png(Public domain)",
+    "v": 2
   },
   "lidazhao": {
     "ava": "avatars/lidazhao.jpg",
     "mask": "portraits/lidazhao.png",
-    "credit": "Commons:1989 CPA 6111.jpg(Public domain)"
+    "credit": "Commons:1989 CPA 6111.jpg(Public domain)",
+    "v": 2
   },
   "hochiminh": {
     "ava": "avatars/hochiminh.jpg",
     "mask": "portraits/hochiminh.png",
-    "credit": "Commons:Ho Chi Minh 1946.jpg(Public domain)"
+    "credit": "Commons:Ho Chi Minh 1946.jpg(Public domain)",
+    "v": 2
   },
   "gramsci": {
     "ava": "avatars/gramsci.jpg",
     "mask": "portraits/gramsci.png",
-    "credit": "Commons:Gramsci.png(Public domain)"
+    "credit": "Commons:Gramsci.png(Public domain)",
+    "v": 2
   },
   "mao": {
     "ava": "avatars/mao.jpg",
     "mask": "portraits/mao.png",
-    "credit": "Commons:Mao Tse Tung.jpg(Public domain)"
+    "credit": "Commons:Mao Tse Tung.jpg(Public domain)",
+    "v": 2
   },
   "fangzhimin": {
     "ava": "avatars/fangzhimin.jpg",
     "mask": "portraits/fangzhimin.png",
-    "credit": "Commons:Fangzhimin2.JPG(Public domain)"
+    "credit": "Commons:Fangzhimin2.JPG(Public domain)",
+    "v": 2
   },
   "xiaminghan": {
     "ava": "avatars/xiaminghan.jpg",
     "mask": "portraits/xiaminghan.png",
-    "credit": "Commons:Xia Minghan.jpg(Public domain)"
+    "credit": "Commons:Xia Minghan.jpg(Public domain)",
+    "v": 2
   },
   "dengxiaoping": {
     "ava": "avatars/dengxiaoping.jpg",
     "mask": "portraits/dengxiaoping.png",
-    "credit": "Commons:Deng Xiaoping and Jimmy Carter at the arrival ceremony for the Vice Premier of China. - NARA - 183157-restored(cropped).jpg(Public domain)"
+    "credit": "Commons:Deng Xiaoping and Jimmy Carter at the arrival ceremony for the Vice Premier of China. - NARA - 183157-restored(cropped).jpg(Public domain)",
+    "v": 2
   },
   "castro": {
     "ava": "avatars/castro.jpg",
     "mask": "portraits/castro.png",
-    "credit": "Commons:Fidel Castro 1950s.jpg(Public domain)"
+    "credit": "Commons:Fidel Castro 1950s.jpg(Public domain)",
+    "v": 2
   },
   "muntzer": {
     "ava": "avatars/muntzer.jpg",
     "mask": "portraits/muntzer.png",
-    "credit": "Commons:Thomas Muentzer.jpg(Public domain)"
+    "credit": "Commons:Thomas Muentzer.jpg(Public domain)",
+    "v": 2
   },
   "weitling": {
     "ava": "avatars/weitling.jpg",
     "mask": "portraits/weitling.png",
-    "credit": "Commons:WilhelmWeitling.jpg(Public domain)"
+    "credit": "Commons:WilhelmWeitling.jpg(Public domain)",
+    "v": 2
   },
   "bebel": {
     "ava": "avatars/bebel.jpg",
     "mask": "portraits/bebel.png",
-    "credit": "Commons:August Bebel 2.jpg(Public domain)"
+    "credit": "Commons:August Bebel 2.jpg(Public domain)",
+    "v": 2
   },
   "lafargue": {
     "ava": "avatars/lafargue.jpg",
     "mask": "portraits/lafargue.png",
-    "credit": "Commons:Paul Lafargue 1869.jpg(Public domain)"
+    "credit": "Commons:Paul Lafargue 1869.jpg(Public domain)",
+    "v": 2
   },
   "morris": {
     "ava": "avatars/morris.jpg",
     "mask": "portraits/morris.png",
-    "credit": "Commons:William Morris age 53.jpg(Public domain)"
+    "credit": "Commons:William Morris age 53.jpg(Public domain)",
+    "v": 2
   },
   "guevara": {
     "ava": "avatars/guevara.jpg",
     "mask": "portraits/guevara.png",
-    "credit": "Commons:Che Guevara - ca. 1945.jpg(Public domain)"
+    "credit": "Commons:Che Guevara - ca. 1945.jpg(Public domain)",
+    "v": 2
   },
   "mariategui": {
     "ava": "avatars/mariategui.jpg",
     "mask": "portraits/mariategui.png",
-    "credit": "Commons:José Carlos Mariátegui in 1929.jpg(Public domain)"
+    "credit": "Commons:José Carlos Mariátegui in 1929.jpg(Public domain)",
+    "v": 2
   },
   "quqiubai": {
     "ava": "avatars/quqiubai.jpg",
     "mask": "portraits/quqiubai.png",
-    "credit": "Commons:Qu Qiubai.JPG(Public domain)"
+    "credit": "Commons:Qu Qiubai.JPG(Public domain)",
+    "v": 2
   },
   "caihesen": {
     "ava": "avatars/caihesen.jpg",
     "mask": "portraits/caihesen.png",
-    "credit": "Commons:Cai Hesen.jpg(Public domain)"
+    "credit": "Commons:Cai Hesen.jpg(Public domain)",
+    "v": 2
   },
   "dengzhongxia": {
     "ava": "avatars/dengzhongxia.jpg",
     "mask": "portraits/dengzhongxia.png",
-    "credit": "Commons:Deng Zhongxia.jpg(Public domain)"
+    "credit": "Commons:Deng Zhongxia.jpg(Public domain)",
+    "v": 2
   },
   "zhaoyiman": {
     "ava": "avatars/zhaoyiman.jpg",
     "mask": "portraits/zhaoyiman.png",
-    "credit": "Commons:Zhao Yiman.jpg(Public domain)"
+    "credit": "Commons:Zhao Yiman.jpg(Public domain)",
+    "v": 2
   },
   "yundaiying": {
     "ava": "avatars/yundaiying.jpg",
     "mask": "portraits/yundaiying.png",
-    "credit": "Commons:Yun Daiying.jpg(Public domain)"
+    "credit": "Commons:Yun Daiying.jpg(Public domain)",
+    "v": 2
   },
   "asiqi": {
     "ava": "avatars/asiqi.jpg",
     "mask": "portraits/asiqi.png",
-    "credit": "Commons:艾思奇 (Cropped).jpg(CC BY-SA 4.0)"
+    "credit": "Commons:艾思奇 (Cropped).jpg(CC BY-SA 4.0)",
+    "v": 2
   },
   "babeuf": {
     "ava": "avatars/babeuf.jpg",
     "mask": "portraits/babeuf.png",
-    "credit": "Commons:François-Noël Babeuf.jpg(Public domain)"
+    "credit": "Commons:François-Noël Babeuf.jpg(Public domain)",
+    "v": 2
   },
   "cabet": {
     "ava": "avatars/cabet.jpg",
     "mask": "portraits/cabet.png",
-    "credit": "Commons:Etienne Cabet (1788-1856) même portrait, l'habit simplement esquissé, D.1740.jpg(CC0)"
+    "credit": "Commons:Etienne Cabet (1788-1856) même portrait, l'habit simplement esquissé, D.1740.jpg(CC0)",
+    "v": 2
   },
   "bakunin": {
     "ava": "avatars/bakunin.jpg",
     "mask": "portraits/bakunin.png",
-    "credit": "Commons:Bakunin Nadar.jpg(Public domain)"
+    "credit": "Commons:Bakunin Nadar.jpg(Public domain)",
+    "v": 2
   },
   "herzen": {
     "ava": "avatars/herzen.jpg",
     "mask": "portraits/herzen.png",
-    "credit": "Commons:Herzen ge.png(Public domain)"
+    "credit": "Commons:Herzen ge.png(Public domain)",
+    "v": 2
   },
   "lassalle": {
     "ava": "avatars/lassalle.jpg",
     "mask": "portraits/lassalle.png",
-    "credit": "Commons:Ferdinandlasalle.jpg(Public domain)"
+    "credit": "Commons:Ferdinandlasalle.jpg(Public domain)",
+    "v": 2
   },
   "pottier": {
     "ava": "avatars/pottier.jpg",
     "mask": "portraits/pottier.png",
-    "credit": "Commons:Eugène Pottier par Étienne Carjat.jpg(Public domain)"
+    "credit": "Commons:Eugène Pottier par Étienne Carjat.jpg(Public domain)",
+    "v": 2
   },
   "jaures": {
     "ava": "avatars/jaures.jpg",
     "mask": "portraits/jaures.png",
-    "credit": "Commons:Jean Jaurès, 1904, par Nadar.jpg(Public domain)"
+    "credit": "Commons:Jean Jaurès, 1904, par Nadar.jpg(Public domain)",
+    "v": 2
   },
   "kautsky": {
     "ava": "avatars/kautsky.jpg",
     "mask": "portraits/kautsky.png",
-    "credit": "Commons:Karl Kautsky.jpg(Public domain)"
+    "credit": "Commons:Karl Kautsky.jpg(Public domain)",
+    "v": 2
   },
   "bernstein": {
     "ava": "avatars/bernstein.jpg",
     "mask": "portraits/bernstein.png",
-    "credit": "Commons:Eduard Bernstein (portrait).jpg(Public domain)"
+    "credit": "Commons:Eduard Bernstein (portrait).jpg(Public domain)",
+    "v": 2
   },
   "liebknecht": {
     "ava": "avatars/liebknecht.jpg",
     "mask": "portraits/liebknecht.png",
-    "credit": "Commons:Karl Liebknecht portrait (cropped).jpg(Public domain)"
+    "credit": "Commons:Karl Liebknecht portrait (cropped).jpg(Public domain)",
+    "v": 2
   },
   "thalmann": {
     "ava": "avatars/thalmann.jpg",
     "mask": "portraits/thalmann.png",
-    "credit": "Commons:Bundesarchiv Bild 102-12940, Ernst Thälmann (scrap).jpg(CC BY-SA 3.0 de)"
+    "credit": "Commons:Bundesarchiv Bild 102-12940, Ernst Thälmann (scrap).jpg(CC BY-SA 3.0 de)",
+    "v": 2
   },
   "kollontai": {
     "ava": "avatars/kollontai.jpg",
     "mask": "portraits/kollontai.png",
-    "credit": "Commons:Alexandra Kollontai 1946.jpg(Public domain)"
+    "credit": "Commons:Alexandra Kollontai 1946.jpg(Public domain)",
+    "v": 2
   },
   "krupskaya": {
     "ava": "avatars/krupskaya.jpg",
     "mask": "portraits/krupskaya.png",
-    "credit": "Commons:KrupskayaY 1922PorMariaUlyanova (cropped).jpg(Public domain)"
+    "credit": "Commons:KrupskayaY 1922PorMariaUlyanova (cropped).jpg(Public domain)",
+    "v": 2
   },
   "lunacharsky": {
     "ava": "avatars/lunacharsky.jpg",
     "mask": "portraits/lunacharsky.png",
-    "credit": "Commons:Lunacharsky.jpg(Public domain)"
+    "credit": "Commons:Lunacharsky.jpg(Public domain)",
+    "v": 2
   },
   "bukharin": {
     "ava": "avatars/bukharin.jpg",
     "mask": "portraits/bukharin.png",
-    "credit": "Commons:Bucharin.bra.jpg(Public domain)"
+    "credit": "Commons:Bucharin.bra.jpg(Public domain)",
+    "v": 2
   },
   "gorky": {
     "ava": "avatars/gorky.jpg",
     "mask": "portraits/gorky.png",
-    "credit": "Commons:Maxim Gorky LOC Restored edit1.jpg(Public domain)"
+    "credit": "Commons:Maxim Gorky LOC Restored edit1.jpg(Public domain)",
+    "v": 2
   },
   "mayakovsky": {
     "ava": "avatars/mayakovsky.jpg",
     "mask": "portraits/mayakovsky.png",
-    "credit": "Commons:Majakovszkij.jpg(Public domain)"
+    "credit": "Commons:Majakovszkij.jpg(Public domain)",
+    "v": 2
   },
   "ostrovsky": {
     "ava": "avatars/ostrovsky.jpg",
     "mask": "portraits/ostrovsky.png",
-    "credit": "Commons:N Ostrovskiy.jpg(Public domain)"
+    "credit": "Commons:N Ostrovskiy.jpg(Public domain)",
+    "v": 2
   },
   "makarenko": {
     "ava": "avatars/makarenko.jpg",
     "mask": "portraits/makarenko.png",
-    "credit": "Commons:Makarenko.jpg(Public domain)"
+    "credit": "Commons:Makarenko.jpg(Public domain)",
+    "v": 2
   },
   "togliatti": {
     "ava": "avatars/togliatti.jpg",
     "mask": "portraits/togliatti.png",
-    "credit": "Commons:Palmiro-Togliatti-00504708.jpg(Public domain)"
+    "credit": "Commons:Palmiro-Togliatti-00504708.jpg(Public domain)",
+    "v": 2
   },
   "lukacs": {
     "ava": "avatars/lukacs.jpg",
     "mask": "portraits/lukacs.png",
-    "credit": "Commons:Lukács György.jpg(CC BY-SA 3.0 de)"
+    "credit": "Commons:Lukács György.jpg(CC BY-SA 3.0 de)",
+    "v": 2
   },
   "marcuse": {
     "ava": "avatars/marcuse.jpg",
     "mask": "portraits/marcuse.png",
-    "credit": "Commons:Herbert Marcuse in Newton, Massachusetts 1955.jpeg(CC BY-SA 3.0)"
+    "credit": "Commons:Herbert Marcuse in Newton, Massachusetts 1955.jpeg(CC BY-SA 3.0)",
+    "v": 2
   },
   "debs": {
     "ava": "avatars/debs.jpg",
     "mask": "portraits/debs.png",
-    "credit": "Commons:Eugene V Debs 1912.jpg(Public domain)"
+    "credit": "Commons:Eugene V Debs 1912.jpg(Public domain)",
+    "v": 2
   },
   "foster": {
     "ava": "avatars/foster.jpg",
     "mask": "portraits/foster.png",
-    "credit": "Commons:William Z. Foster, cropped.PNG(Public domain)"
+    "credit": "Commons:William Z. Foster, cropped.PNG(Public domain)",
+    "v": 2
   },
   "bethune": {
     "ava": "avatars/bethune.jpg",
     "mask": "portraits/bethune.png",
-    "credit": "Commons:Norman Bethune graduation 1922.jpg(Public domain)"
+    "credit": "Commons:Norman Bethune graduation 1922.jpg(Public domain)",
+    "v": 2
   },
   "kotoku": {
     "ava": "avatars/kotoku.jpg",
     "mask": "portraits/kotoku.png",
-    "credit": "Commons:KotokuShusui.jpg(Public domain)"
+    "credit": "Commons:KotokuShusui.jpg(Public domain)",
+    "v": 2
   },
   "katayama": {
     "ava": "avatars/katayama.jpg",
     "mask": "portraits/katayama.png",
-    "credit": "Commons:Sen Katayama.jpg(Public domain)"
+    "credit": "Commons:Sen Katayama.jpg(Public domain)",
+    "v": 2
   },
   "allende": {
     "ava": "avatars/allende.jpg",
     "mask": "portraits/allende.png",
-    "credit": "Commons:Salvador Allende, President of Chile, gtfy.00154.jpg(Public domain)"
+    "credit": "Commons:Salvador Allende, President of Chile, gtfy.00154.jpg(Public domain)",
+    "v": 2
   },
   "chenduxiu": {
     "ava": "avatars/chenduxiu.jpg",
     "mask": "portraits/chenduxiu.png",
-    "credit": "Commons:Chen Duxiu4.jpg(Public domain)"
+    "credit": "Commons:Chen Duxiu4.jpg(Public domain)",
+    "v": 2
   },
   "zhouenlai": {
     "ava": "avatars/zhouenlai.jpg",
     "mask": "portraits/zhouenlai.png",
-    "credit": "Commons:國共內戰時期周恩來.jpg(Public domain)"
+    "credit": "Commons:國共內戰時期周恩來.jpg(Public domain)",
+    "v": 2
   },
   "liushaoqi": {
     "ava": "avatars/liushaoqi.jpg",
     "mask": "portraits/liushaoqi.png",
-    "credit": "Commons:Liu Shaoqi (cropped).jpg(Public domain)"
+    "credit": "Commons:Liu Shaoqi (cropped).jpg(Public domain)",
+    "v": 2
   },
   "zhude": {
     "ava": "avatars/zhude.jpg",
     "mask": "portraits/zhude.png",
-    "credit": "Commons:Zhu De, Commander of PLA.jpg(Public domain)"
+    "credit": "Commons:Zhu De, Commander of PLA.jpg(Public domain)",
+    "v": 2
   },
   "luxun": {
     "ava": "avatars/luxun.jpg",
     "mask": "portraits/luxun.png",
-    "credit": "Commons:LuXun1930.jpg(Public domain)"
+    "credit": "Commons:LuXun1930.jpg(Public domain)",
+    "v": 2
   },
   "pengpai": {
     "ava": "avatars/pengpai.jpg",
     "mask": "portraits/pengpai.png",
-    "credit": "Commons:Peng Pai.jpg(Public domain)"
+    "credit": "Commons:Peng Pai.jpg(Public domain)",
+    "v": 2
   },
   "xiangjingyu": {
     "ava": "avatars/xiangjingyu.jpg",
     "mask": "portraits/xiangjingyu.png",
-    "credit": "Commons:向警予.jpg(Public domain)"
+    "credit": "Commons:向警予.jpg(Public domain)",
+    "v": 2
   },
   "zhangtailei": {
     "ava": "avatars/zhangtailei.jpg",
     "mask": "portraits/zhangtailei.png",
-    "credit": "Commons:Zhang Tailei.jpg(Public domain)"
+    "credit": "Commons:Zhang Tailei.jpg(Public domain)",
+    "v": 2
   },
   "zhaoshiyan": {
     "ava": "avatars/zhaoshiyan.jpg",
     "mask": "portraits/zhaoshiyan.png",
-    "credit": "Commons:Zhao Shiyan.jpg(Public domain)"
+    "credit": "Commons:Zhao Shiyan.jpg(Public domain)",
+    "v": 2
   },
   "dongbiwu": {
     "ava": "avatars/dongbiwu.jpg",
     "mask": "portraits/dongbiwu.png",
-    "credit": "Commons:DONGBIWU.JPG(Public domain)"
+    "credit": "Commons:DONGBIWU.JPG(Public domain)",
+    "v": 2
   },
   "pengdehuai": {
     "ava": "avatars/pengdehuai.jpg",
     "mask": "portraits/pengdehuai.png",
-    "credit": "Commons:General Peng Dehuai.jpg(Public domain)"
+    "credit": "Commons:General Peng Dehuai.jpg(Public domain)",
+    "v": 2
   },
   "songqingling": {
     "ava": "avatars/songqingling.jpg",
     "mask": "portraits/songqingling.png",
-    "credit": "Commons:Soong Ching-ling.jpg(Public domain)"
+    "credit": "Commons:Soong Ching-ling.jpg(Public domain)",
+    "v": 2
   },
   "liuhulan": {
     "ava": "avatars/liuhulan.jpg",
     "mask": "portraits/liuhulan.png",
-    "credit": "Commons:195202 1952年 刘胡兰雕塑.png(Public domain)"
+    "credit": "Commons:195202 1952年 刘胡兰雕塑.png(Public domain)",
+    "v": 2
   },
   "leifeng": {
     "ava": "avatars/leifeng.jpg",
     "mask": "portraits/leifeng.png",
-    "credit": "Commons:Lei Feng 13.jpg(Public domain)"
+    "credit": "Commons:Lei Feng 13.jpg(Public domain)",
+    "v": 2
   },
   "jiaoyulu": {
     "ava": "avatars/jiaoyulu.jpg",
     "mask": "portraits/jiaoyulu.png",
-    "credit": "Commons:Jiaoyulu.jpg(Public domain)"
+    "credit": "Commons:Jiaoyulu.jpg(Public domain)",
+    "v": 2
   },
   "wangjinxi": {
     "ava": "avatars/wangjinxi.jpg",
     "mask": "portraits/wangjinxi.png",
-    "credit": "Commons:1966-07 大庆铁人王进喜.jpg(Public domain)"
+    "credit": "Commons:1966-07 大庆铁人王进喜.jpg(Public domain)",
+    "v": 2
   },
   "yuanlongping": {
     "ava": "avatars/yuanlongping.jpg",
     "mask": "portraits/yuanlongping.png",
-    "credit": "Commons:Yuan Longping at news conference (cropped).png(CC BY 3.0)"
+    "credit": "Commons:Yuan Longping at news conference (cropped).png(CC BY 3.0)",
+    "v": 2
   },
   "qianxuesen": {
     "ava": "avatars/qianxuesen.jpg",
     "mask": "portraits/qianxuesen.png",
-    "credit": "Commons:歸國後的錢學森.png(Public domain)"
+    "credit": "Commons:歸國後的錢學森.png(Public domain)",
+    "v": 2
   },
   "guomoruo": {
     "ava": "avatars/guomoruo.jpg",
     "mask": "portraits/guomoruo.png",
-    "credit": "Commons:郭开贞.jpg(Public domain)"
+    "credit": "Commons:郭开贞.jpg(Public domain)",
+    "v": 2
   },
   "aiqing": {
     "ava": "avatars/aiqing.jpg",
     "mask": "portraits/aiqing.png",
-    "credit": "Commons:Ai Qing 1929.jpg(Public domain)"
+    "credit": "Commons:Ai Qing 1929.jpg(Public domain)",
+    "v": 2
   },
   "taoxingzhi": {
     "ava": "avatars/taoxingzhi.jpg",
     "mask": "portraits/taoxingzhi.png",
-    "credit": "Commons:Tao Xing-zhi.jpg(Public domain)"
+    "credit": "Commons:Tao Xing-zhi.jpg(Public domain)",
+    "v": 2
   }
 };
