@@ -1,0 +1,87 @@
+# 人物肖像来源与许可
+
+> 本目录与 `avatars/` 的素材用于教育演示。Commons 文件许可以链接页为准。
+
+- **托马斯·莫尔**(`moore`):[Hans Holbein, the Younger - Sir Thomas More - Google Art Project.jpg](https://commons.wikimedia.org/wiki/File%3AHans%20Holbein%2C%20the%20Younger%20-%20Sir%20Thomas%20More%20-%20Google%20Art%20Project.jpg) · Public domain · Hans Holbein the Younger
+- **康帕内拉**(`campanella`):[Cozza Tommaso Campanella.jpg](https://commons.wikimedia.org/wiki/File%3ACozza%20Tommaso%20Campanella.jpg) · Public domain · Francesco Cozza
+- **圣西门**(`saintsimon`):[Claude Henri de Rouvroy.jpg](https://commons.wikimedia.org/wiki/File%3AClaude%20Henri%20de%20Rouvroy.jpg) · Public domain · Godefroy Engelmann the Elder
+- **罗伯特·欧文**(`owen`):[Robert Owen by William Henry Brooke.jpg](https://commons.wikimedia.org/wiki/File%3ARobert%20Owen%20by%20William%20Henry%20Brooke.jpg) · Public domain · William Henry Brooke
+- **傅立叶**(`fourier`):[Françoise Foliot - Jean Gigoux - Portrait de Charles Fourrier (cropped) (1).jpg](https://commons.wikimedia.org/wiki/File%3AFran%C3%A7oise%20Foliot%20-%20Jean%20Gigoux%20-%20Portrait%20de%20Charles%20Fourrier%20(cropped)%20(1).jpg) · CC BY-SA 4.0 · Jean Gigoux
+- **卡尔·马克思**(`marx`):本仓 tools/ 手工标定照片;掩膜 public/marx-mask.png
+- **弗里德里希·恩格斯**(`engels`):本仓 tools/ 手工标定照片;掩膜 public/engels-mask.png
+- **普列汉诺夫**(`plekhanov`):[Georgi Valentinovich Plekhanov, ca. 1917.jpg](https://commons.wikimedia.org/wiki/File%3AGeorgi%20Valentinovich%20Plekhanov%2C%20ca.%201917.jpg) · Public domain · Karl Bulla
+- **克拉拉·蔡特金**(`zetkin`):[C Zetkin 1.jpg](https://commons.wikimedia.org/wiki/File%3AC%20Zetkin%201.jpg) · Public domain · Unknown authorUnknown author
+- **弗拉基米尔·列宁**(`lenin`):本仓 tools/ 手工标定照片;掩膜 public/lenin-mask.png
+- **罗莎·卢森堡**(`luxemburg`):本仓 tools/ 手工标定照片;掩膜 public/luxemburg-mask.png
+- **约瑟夫·斯大林**(`stalin`):[Joseph Stalin official portrait.jpg](https://commons.wikimedia.org/wiki/File%3AJoseph%20Stalin%20official%20portrait.jpg) · Public domain · Ivan Shagin
+- **季米特洛夫**(`dimitrov`):[Georgi Dimitrow.png](https://commons.wikimedia.org/wiki/File%3AGeorgi%20Dimitrow.png) · Public domain · Unknown authorUnknown author
+- **李大钊**(`lidazhao`):[1989 CPA 6111.jpg](https://commons.wikimedia.org/wiki/File%3A1989%20CPA%206111.jpg) · Public domain · USSR Post
+- **胡志明**(`hochiminh`):[Ho Chi Minh 1946.jpg](https://commons.wikimedia.org/wiki/File%3AHo%20Chi%20Minh%201946.jpg) · Public domain · Unknown authorUnknown author
+- **葛兰西**(`gramsci`):[Gramsci.png](https://commons.wikimedia.org/wiki/File%3AGramsci.png) · Public domain · Unknown authorUnknown author
+- **毛泽东**(`mao`):[Mao Tse Tung.jpg](https://commons.wikimedia.org/wiki/File%3AMao%20Tse%20Tung.jpg) · Public domain · Chen Zhengqing (1917–1966)
+- **方志敏**(`fangzhimin`):[Fangzhimin2.JPG](https://commons.wikimedia.org/wiki/File%3AFangzhimin2.JPG) · Public domain · The original uploader was Pashan at Chinese Wikipedia.
+- **夏明翰**(`xiaminghan`):[Xia Minghan.jpg](https://commons.wikimedia.org/wiki/File%3AXia%20Minghan.jpg) · Public domain · The original uploader was A5948736 at Chinese Wikipedia.
+- **邓小平**(`dengxiaoping`):[Deng Xiaoping and Jimmy Carter at the arrival ceremony for the Vice Premier of China. - NARA - 183157-restored(cropped).jpg](https://commons.wikimedia.org/wiki/File%3ADeng%20Xiaoping%20and%20Jimmy%20Carter%20at%20the%20arrival%20ceremony%20for%20the%20Vice%20Premier%20of%20China.%20-%20NARA%20-%20183157-restored(cropped).jpg) · Public domain · Unknown authorUnknown author
+- **菲德尔·卡斯特罗**(`castro`):[Fidel Castro 1950s.jpg](https://commons.wikimedia.org/wiki/File%3AFidel%20Castro%201950s.jpg) · Public domain · Unknown (Mondadori Publishers)
+- **托马斯·闵采尔**(`muntzer`):[Thomas Muentzer.jpg](https://commons.wikimedia.org/wiki/File%3AThomas%20Muentzer.jpg) · Public domain · Christoph van Sichem
+- **威廉·魏特林**(`weitling`):[WilhelmWeitling.jpg](https://commons.wikimedia.org/wiki/File%3AWilhelmWeitling.jpg) · Public domain · Unknown authorUnknown author
+- **奥古斯特·倍倍尔**(`bebel`):[August Bebel 2.jpg](https://commons.wikimedia.org/wiki/File%3AAugust%20Bebel%202.jpg) · Public domain
+- **保尔·拉法格**(`lafargue`):[Paul Lafargue 1869.jpg](https://commons.wikimedia.org/wiki/File%3APaul%20Lafargue%201869.jpg) · Public domain · German Fehrenbach
+- **威廉·莫里斯**(`morris`):[William Morris age 53.jpg](https://commons.wikimedia.org/wiki/File%3AWilliam%20Morris%20age%2053.jpg) · Public domain · Frederick Hollyer
+- **切·格瓦拉**(`guevara`):[Che Guevara - ca. 1945.jpg](https://commons.wikimedia.org/wiki/File%3AChe%20Guevara%20-%20ca.%201945.jpg) · Public domain · Unknown authorUnknown author
+- **马里亚特吉**(`mariategui`):[José Carlos Mariátegui in 1929.jpg](https://commons.wikimedia.org/wiki/File%3AJos%C3%A9%20Carlos%20Mari%C3%A1tegui%20in%201929.jpg) · Public domain · José Malanca
+- **瞿秋白**(`quqiubai`):[Qu Qiubai.JPG](https://commons.wikimedia.org/wiki/File%3AQu%20Qiubai.JPG) · Public domain · Unknown authorUnknown author
+- **蔡和森**(`caihesen`):[Cai Hesen.jpg](https://commons.wikimedia.org/wiki/File%3ACai%20Hesen.jpg) · Public domain · 不详
+- **邓中夏**(`dengzhongxia`):[Deng Zhongxia.jpg](https://commons.wikimedia.org/wiki/File%3ADeng%20Zhongxia.jpg) · Public domain · Unknown authorUnknown author
+- **赵一曼**(`zhaoyiman`):[Zhao Yiman.jpg](https://commons.wikimedia.org/wiki/File%3AZhao%20Yiman.jpg) · Public domain · Unknown authorUnknown author
+- **恽代英**(`yundaiying`):[Yun Daiying.jpg](https://commons.wikimedia.org/wiki/File%3AYun%20Daiying.jpg) · Public domain · Unknown authorUnknown author
+- **艾思奇**(`asiqi`):[艾思奇 (Cropped).jpg](https://commons.wikimedia.org/wiki/File%3A%E8%89%BE%E6%80%9D%E5%A5%87%20(Cropped).jpg) · CC BY-SA 4.0 · 瑞丽江的河水
+- **巴贝夫**(`babeuf`):[François-Noël Babeuf.jpg](https://commons.wikimedia.org/wiki/File%3AFran%C3%A7ois-No%C3%ABl%20Babeuf.jpg) · Public domain · François Bonneville
+- **卡贝**(`cabet`):[Etienne Cabet (1788-1856) même portrait, l'habit simplement esquissé, D.1740.jpg](https://commons.wikimedia.org/wiki/File%3AEtienne%20Cabet%20(1788-1856)%20m%C3%AAme%20portrait%2C%20l'habit%20simplement%20esquiss%C3%A9%2C%20D.1740.jpg) · CC0 · Auguste Toussaint Lecler
+- **巴枯宁**(`bakunin`):[Bakunin Nadar.jpg](https://commons.wikimedia.org/wiki/File%3ABakunin%20Nadar.jpg) · Public domain · Nadar
+- **赫尔岑**(`herzen`):[Herzen ge.png](https://commons.wikimedia.org/wiki/File%3AHerzen%20ge.png) · Public domain · Ге Николай Николаевич (1831 -1894)
+- **拉萨尔**(`lassalle`):[Ferdinandlasalle.jpg](https://commons.wikimedia.org/wiki/File%3AFerdinandlasalle.jpg) · Public domain
+- **鲍狄埃**(`pottier`):[Eugène Pottier par Étienne Carjat.jpg](https://commons.wikimedia.org/wiki/File%3AEug%C3%A8ne%20Pottier%20par%20%C3%89tienne%20Carjat.jpg) · Public domain · Étienne Carjat
+- **若雷斯**(`jaures`):[Jean Jaurès, 1904, par Nadar.jpg](https://commons.wikimedia.org/wiki/File%3AJean%20Jaur%C3%A8s%2C%201904%2C%20par%20Nadar.jpg) · Public domain · Nadar
+- **考茨基**(`kautsky`):[Karl Kautsky.jpg](https://commons.wikimedia.org/wiki/File%3AKarl%20Kautsky.jpg) · Public domain · Unknown
+- **伯恩施坦**(`bernstein`):[Eduard Bernstein (portrait).jpg](https://commons.wikimedia.org/wiki/File%3AEduard%20Bernstein%20(portrait).jpg) · Public domain · Unknown authorUnknown author
+- **卡尔·李卜克内西**(`liebknecht`):[Karl Liebknecht portrait (cropped).jpg](https://commons.wikimedia.org/wiki/File%3AKarl%20Liebknecht%20portrait%20(cropped).jpg) · Public domain · Unknown authorUnknown author
+- **台尔曼**(`thalmann`):[Bundesarchiv Bild 102-12940, Ernst Thälmann (scrap).jpg](https://commons.wikimedia.org/wiki/File%3ABundesarchiv%20Bild%20102-12940%2C%20Ernst%20Th%C3%A4lmann%20(scrap).jpg) · CC BY-SA 3.0 de · UnknownUnknown
+- **柯伦泰**(`kollontai`):[Alexandra Kollontai 1946.jpg](https://commons.wikimedia.org/wiki/File%3AAlexandra%20Kollontai%201946.jpg) · Public domain · Unknown (Sovfoto)
+- **克鲁普斯卡娅**(`krupskaya`):[KrupskayaY 1922PorMariaUlyanova (cropped).jpg](https://commons.wikimedia.org/wiki/File%3AKrupskayaY%201922PorMariaUlyanova%20(cropped).jpg) · Public domain · Maria Ulyanova
+- **卢那察尔斯基**(`lunacharsky`):[Lunacharsky.jpg](https://commons.wikimedia.org/wiki/File%3ALunacharsky.jpg) · Public domain
+- **布哈林**(`bukharin`):[Bucharin.bra.jpg](https://commons.wikimedia.org/wiki/File%3ABucharin.bra.jpg) · Public domain · Unknown authorUnknown author
+- **高尔基**(`gorky`):[Maxim Gorky LOC Restored edit1.jpg](https://commons.wikimedia.org/wiki/File%3AMaxim%20Gorky%20LOC%20Restored%20edit1.jpg) · Public domain · Herman Mishkin
+- **马雅可夫斯基**(`mayakovsky`):[Majakovszkij.jpg](https://commons.wikimedia.org/wiki/File%3AMajakovszkij.jpg) · Public domain · Unidentified photographer
+- **奥斯特洛夫斯基**(`ostrovsky`):[N Ostrovskiy.jpg](https://commons.wikimedia.org/wiki/File%3AN%20Ostrovskiy.jpg) · Public domain · Unknown authorUnknown author
+- **马卡连柯**(`makarenko`):[Makarenko.jpg](https://commons.wikimedia.org/wiki/File%3AMakarenko.jpg) · Public domain
+- **陶里亚蒂**(`togliatti`):[Palmiro-Togliatti-00504708.jpg](https://commons.wikimedia.org/wiki/File%3APalmiro-Togliatti-00504708.jpg) · Public domain · Unknown photographer
+- **卢卡奇**(`lukacs`):[Lukács György.jpg](https://commons.wikimedia.org/wiki/File%3ALuk%C3%A1cs%20Gy%C3%B6rgy.jpg) · CC BY-SA 3.0 de · Horst Sturm
+- **马尔库塞**(`marcuse`):[Herbert Marcuse in Newton, Massachusetts 1955.jpeg](https://commons.wikimedia.org/wiki/File%3AHerbert%20Marcuse%20in%20Newton%2C%20Massachusetts%201955.jpeg) · CC BY-SA 3.0 · Copyright holder: Marcuse family, represented by Harold Marcuse
+- **德布斯**(`debs`):[Eugene V Debs 1912.jpg](https://commons.wikimedia.org/wiki/File%3AEugene%20V%20Debs%201912.jpg) · Public domain
+- **福斯特**(`foster`):[William Z. Foster, cropped.PNG](https://commons.wikimedia.org/wiki/File%3AWilliam%20Z.%20Foster%2C%20cropped.PNG) · Public domain · Published in USA between 1923 and 1978 with no notice of copyright in original publication, public domain. Digital editing by Tim Davenport ("Carrite") for Wikipedia, no copyright claimed, file released to the public domain without restriction.
+- **白求恩**(`bethune`):[Norman Bethune graduation 1922.jpg](https://commons.wikimedia.org/wiki/File%3ANorman%20Bethune%20graduation%201922.jpg) · Public domain · Credit: Library and Archives Canada/PA-160708Copyright: Expired
+- **幸德秋水**(`kotoku`):[KotokuShusui.jpg](https://commons.wikimedia.org/wiki/File%3AKotokuShusui.jpg) · Public domain
+- **片山潜**(`katayama`):[Sen Katayama.jpg](https://commons.wikimedia.org/wiki/File%3ASen%20Katayama.jpg) · Public domain · Unknown authorUnknown author
+- **阿连德**(`allende`):[Salvador Allende, President of Chile, gtfy.00154.jpg](https://commons.wikimedia.org/wiki/File%3ASalvador%20Allende%2C%20President%20of%20Chile%2C%20gtfy.00154.jpg) · Public domain · Bernard Gotfryd
+- **陈独秀**(`chenduxiu`):[Chen Duxiu4.jpg](https://commons.wikimedia.org/wiki/File%3AChen%20Duxiu4.jpg) · Public domain · Unknown authorUnknown author
+- **周恩来**(`zhouenlai`):[國共內戰時期周恩來.jpg](https://commons.wikimedia.org/wiki/File%3A%E5%9C%8B%E5%85%B1%E5%85%A7%E6%88%B0%E6%99%82%E6%9C%9F%E5%91%A8%E6%81%A9%E4%BE%86.jpg) · Public domain · Unknown authorUnknown author
+- **刘少奇**(`liushaoqi`):[Liu Shaoqi (cropped).jpg](https://commons.wikimedia.org/wiki/File%3ALiu%20Shaoqi%20(cropped).jpg) · Public domain · unknown author
+- **朱德**(`zhude`):[Zhu De, Commander of PLA.jpg](https://commons.wikimedia.org/wiki/File%3AZhu%20De%2C%20Commander%20of%20PLA.jpg) · Public domain · anonymous (Gov)
+- **鲁迅**(`luxun`):[LuXun1930.jpg](https://commons.wikimedia.org/wiki/File%3ALuXun1930.jpg) · Public domain · Unknown authorUnknown author
+- **彭湃**(`pengpai`):[Peng Pai.jpg](https://commons.wikimedia.org/wiki/File%3APeng%20Pai.jpg) · Public domain · Unknown authorUnknown author
+- **向警予**(`xiangjingyu`):[向警予.jpg](https://commons.wikimedia.org/wiki/File%3A%E5%90%91%E8%AD%A6%E4%BA%88.jpg) · Public domain · The original uploader was Juansheng at Chinese Wikipedia.
+- **张太雷**(`zhangtailei`):[Zhang Tailei.jpg](https://commons.wikimedia.org/wiki/File%3AZhang%20Tailei.jpg) · Public domain · 不详
+- **赵世炎**(`zhaoshiyan`):[Zhao Shiyan.jpg](https://commons.wikimedia.org/wiki/File%3AZhao%20Shiyan.jpg) · Public domain · 不详
+- **董必武**(`dongbiwu`):[DONGBIWU.JPG](https://commons.wikimedia.org/wiki/File%3ADONGBIWU.JPG) · Public domain · The original uploader was MY456L at Chinese Wikipedia.
+- **彭德怀**(`pengdehuai`):[General Peng Dehuai.jpg](https://commons.wikimedia.org/wiki/File%3AGeneral%20Peng%20Dehuai.jpg) · Public domain · ​《新华社》记者 郑景康
+- **宋庆龄**(`songqingling`):[Soong Ching-ling.jpg](https://commons.wikimedia.org/wiki/File%3ASoong%20Ching-ling.jpg) · Public domain · Unknown authorUnknown author
+- **刘胡兰**(`liuhulan`):[195202 1952年 刘胡兰雕塑.png](https://commons.wikimedia.org/wiki/File%3A195202%201952%E5%B9%B4%20%E5%88%98%E8%83%A1%E5%85%B0%E9%9B%95%E5%A1%91.png) · Public domain · 《人民画报》
+- **雷锋**(`leifeng`):[Lei Feng 13.jpg](https://commons.wikimedia.org/wiki/File%3ALei%20Feng%2013.jpg) · Public domain · Unknown authorUnknown author
+- **焦裕禄**(`jiaoyulu`):[Jiaoyulu.jpg](https://commons.wikimedia.org/wiki/File%3AJiaoyulu.jpg) · Public domain · Unknown authorUnknown author
+- **王进喜**(`wangjinxi`):[1966-07 大庆铁人王进喜.jpg](https://commons.wikimedia.org/wiki/File%3A1966-07%20%E5%A4%A7%E5%BA%86%E9%93%81%E4%BA%BA%E7%8E%8B%E8%BF%9B%E5%96%9C.jpg) · Public domain · 《人民画报》
+- **袁隆平**(`yuanlongping`):[Yuan Longping at news conference (cropped).png](https://commons.wikimedia.org/wiki/File%3AYuan%20Longping%20at%20news%20conference%20(cropped).png) · CC BY 3.0 · China News Service
+- **钱学森**(`qianxuesen`):[歸國後的錢學森.png](https://commons.wikimedia.org/wiki/File%3A%E6%AD%B8%E5%9C%8B%E5%BE%8C%E7%9A%84%E9%8C%A2%E5%AD%B8%E6%A3%AE.png) · Public domain · Unknown authorUnknown author
+- **郭沫若**(`guomoruo`):[郭开贞.jpg](https://commons.wikimedia.org/wiki/File%3A%E9%83%AD%E5%BC%80%E8%B4%9E.jpg) · Public domain · Unknown authorUnknown author
+- **艾青**(`aiqing`):[Ai Qing 1929.jpg](https://commons.wikimedia.org/wiki/File%3AAi%20Qing%201929.jpg) · Public domain · Unknown authorUnknown author
+- **陶行知**(`taoxingzhi`):[Tao Xing-zhi.jpg](https://commons.wikimedia.org/wiki/File%3ATao%20Xing-zhi.jpg) · Public domain · Unknown authorUnknown author

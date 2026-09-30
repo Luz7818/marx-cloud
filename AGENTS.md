@@ -5,25 +5,25 @@
 
 ## 一句话
 
-Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染成星尘,相机每转过 90°
-聚合成一位思想家的肖像。构建产物是纯静态文件,没有后端、没有运行时服务、没有数据库。
+Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:2629 句语录渲染成星尘,相机每转过 90°
+聚合成一位思想家的肖像(91 位人物,点亮可换装)。构建产物是纯静态文件,没有后端、没有运行时服务、没有数据库。
 
 ## 当前真实状态
 
 | 项 | 值 | 复核命令 |
 |---|---|---|
-| 构建 | 通过,`16 modules transformed`(这个数字跟源码模块数绑定,加一个 `.js` 就会变),约 1 秒 | `npm run build` |
-| 产物 JS | 628.52 kB / gzip 211.57 kB | `npm run build` 末三行 |
-| 产物 CSS | 12.65 kB / gzip 3.25 kB | `npm run build` 末三行 |
-| 产物 HTML | 2.03 kB / gzip 1.30 kB | `npm run build` 末三行 |
-| dist 全量 | 约 1.65 MB = hash 产物 731,422(JS 718,766 + CSS 12,656)+ `index.html` 2,442 + 4 张掩膜 909,306 + `README.md`(即 `public/README.md` 的体积,随文档改动而变,所以不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
-| 语法检查 | 16 个源码文件(`src` 12 + `tools` 3 + `vite.config.js`)全部通过 | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` |
-| 自动化测试 | 无。scripts 只有 dev/build/preview | `node -e "console.log(Object.keys(require('./package.json').scripts))"` |
+| 构建 | 通过,`18 modules transformed`(这个数字跟源码模块数绑定,加一个 `.js` 就会变),约 1 秒 | `npm run build` |
+| 产物 JS | 780.51 kB / gzip 306.09 kB | `npm run build` 末三行 |
+| 产物 CSS | 15.99 kB / gzip 3.86 kB | `npm run build` 末三行 |
+| 产物 HTML | 2.17 kB / gzip 1.38 kB | `npm run build` 末三行 |
+| dist 全量 | 约 9.82 MB = `assets/` 1,001,807(JS 785k + CSS 16k)+ `index.html` + 4 张固定肖像掩膜 909,306 + `portraits/` 换装掩膜 7,533,726(80 张,按需加载)+ `avatars/` 372,121 + `README.md`(随文档改动而变,不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
+| 语法检查 | 21 个源码文件(`src` 14 + `tools` 6 + `vite.config.js`)全部通过 | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` |
+| 数据契约校验 | `npm run verify`(`tools/verify-data.mjs`,零依赖):语录↔人物 id、每人物至少 1 条、分组 key、DOM id、无全角逗号、无重复(f+t)、肖像清单文件存在 | 退出码 0,结尾打印「数据契约校验通过:91 位人物 / N 条语录 / 4 个分组 / 肖像平面 4 块」 |
 | lint / 类型检查 / 格式化 | 无配置也无依赖 | `git ls-files` 里没有 `eslint*`、`tsconfig*`、`prettier*` |
 | 运行时依赖 | 只有 `three@0.169.0` | `npm ls --depth=0` |
 | 安装期包数 | 61 个(lock 展开,含 devDependencies) | `node -e "console.log(Object.keys(require('./package-lock.json').packages).length-1)"` |
-| 数据规模 | 1041 句语录 / 35 位人物 / 4 个分组 / 3400 个徽章点位 | `node --input-type=module -e "const q=(await import('./src/data/quotes.js')).quotes,{figures:f,groups:g}=(await import('./src/data/figures.js')),e=(await import('./src/data/emblem.js')).emblemPoints;console.log(q.length,f.length,g.length,e.length)"` |
-| 代码规模 | `src/` 下 12 个 `.js` 共 2917 行,另有 `style.css` | `git ls-files 'src/*.js' \| wc -l`;`cat $(git ls-files 'src/*.js') \| wc -l` |
+| 数据规模 | 2629 句语录 / 91 位人物 / 4 个分组 / 3400 个徽章点位 | `node --input-type=module -e "const q=(await import('./src/data/quotes.js')).quotes,{figures:f,groups:g}=(await import('./src/data/figures.js')),e=(await import('./src/data/emblem.js')).emblemPoints;console.log(q.length,f.length,g.length,e.length)"` |
+| 代码规模 | `src/` 下 14 个 `.js` 共 4035 行,另有 `style.css` | `git ls-files 'src/*.js' \| wc -l`;`cat $(git ls-files 'src/*.js') \| wc -l` |
 | 粒子数分档 | 桌面 28000 / 触屏或窄屏 20000 / 软件渲染 14000 / 带 `?lite` 9000 | `grep -n "const COUNT" src/main.js` |
 | 自动巡游节拍 | 停留 9 秒 + 转场 8 秒,空闲 4 秒后恢复 | `grep -n "DWELL = 9" src/core/scene.js` |
 | CI | 工作流只在 push `main` 或手动触发时跑。**这里不写"最近一次是哪个提交"**——分支每推一次它就变,写进文档同一次提交里就作废了。当前分支 HEAD 的徽章为 `passing`(复核见右)。不装 `gh` 也能读:徽章与 Actions 接口对**公开仓都免认证**,但 URL 里要用**仓库名 `marx-cloud`**,不是目录名 `Marx_Cloud`(用后者返回 404)。要提交号与耗时再用 `/actions/runs`(匿名限 60 次/小时/IP,别拿它轮询) | `python -c "import urllib.request as u;b=u.urlopen(u.Request('https://github.com/Luz7818/marx-cloud/workflows/Deploy%20to%20GitHub%20Pages/badge.svg',headers={'User-Agent':'Mozilla/5.0'}),timeout=30).read().decode();print('passing' in b)"` 应为 `True` |
@@ -40,7 +40,7 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染
 | `index.html` | 唯一页面骨架与 DOM 契约 | 18 个 `id`,其中 14 个被 `src/main.js` 用 `getElementById` 取走,改名片刻就 `null` 报错。计数:`grep -o 'id="[a-z-]*"' index.html \| wc -l` |
 | `vite.config.js` | 只有 `base: './'` 与 `chunkSizeWarningLimit: 900` | 相对 base 决定运行时请求掩膜的前缀,见「关键约定 3」 |
 | `vercel.json` | Vercel 侧构建参数(`npm ci` / `npm run build` / `dist`) | 不被 GitHub Pages 工作流读取;实测在线入口是 Pages(见状态表) |
-| `.github/workflows/deploy.yml` | 推 main → `npm ci` → `npm run build` → 发布 `dist` 到 Pages | 两个 job:`build` 上传产物,`deploy` 调 `deploy-pages@v4` |
+| `.github/workflows/deploy.yml` | 推 main → `npm ci` → `npm run verify` → `npm run build` → 发布 `dist` 到 Pages | 两个 job:`build` 上传产物,`deploy` 调 `deploy-pages@v4` |
 | `src/main.js` | 装配层:索引数据、生成粒子属性、接线 UI 与场景、按键与自适应 | 不导出任何东西;`window.__dbg` 见「关键约定 9」 |
 | `src/core/mask.js` | 从掩膜 PNG 反比例 CDF 采样星尘点位 | 导出 `samplePortrait` / `samplePortraits` |
 | `src/core/cloud.js` | GLSL 粒子几何与材质:四块平面 + 徽章位 + 星云位 | 导出 `createCloud` / `createBackdrop` |
@@ -50,26 +50,29 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染
 | `src/ui/intro.js` | 三页开场引导 | 导出 `initIntro`,返回 `{reopen}` |
 | `src/ui/favorites.js` | 拾遗读写 localStorage | 键 `marxcloud.favs.v1`,存的是语录下标 |
 | `src/ui/postcard.js` | 「留影」导出 1200×1500 PNG | 依赖 `scene.renderNow()` 与 `<a download>` |
-| `src/data/figures.js` | 35 位人物元数据 + 4 个分组 + 搜索别名 | 手工维护,`weight` 由语录数自动推导 |
-| `src/data/quotes.js` | 1041 条语录数组 | 手工维护,顺序即编号,只在末尾追加 |
+| `src/data/figures.js` | 91 位人物元数据 + 4 个分组 + 搜索别名 | 手工维护,`weight` 由语录数自动推导 |
+| `src/data/quotes.js` | 约 1 万条语录数组(准确数见「当前真实状态」) | 末尾约 9 千条由 `tools/gen/merge.mjs` 从批次生成,顺序即编号,只在末尾追加 |
 | `src/data/emblem.js` | 3400 个徽章点位 | `tools/make-emblem.mjs` 生成,勿手改 |
+| `src/data/portraits.js` | 头像清单(人物 id → `public/avatars/*.jpg`) | `tools/fetch-portraits.mjs` + `tools/make-portraits.mjs` 生成,缺失的人物侧栏回退姓氏徽记 |
 | `src/style.css` | 全部界面样式,单个 media query 管移动端 | 见「关键约定 8」的未定义类 |
 | `public/*-mask.png` | 4 张亮度掩膜,运行时按 `./<id>-mask.png?v=<n>` 拉取 | 会被 Vite 原样拷进 `dist/` |
-| `tools/*.mjs` | 三个离线生成脚本 | 只有 `make-emblem.mjs` 会写 `src/data/`,见「改动后的验证」 |
+| `public/avatars/*.jpg`、`public/portraits/*.png` | 83 张侧栏小头像 + 80 张人物星尘掩膜(点亮换装用,按需加载) | `public/portraits/CREDITS.md` 记录来源(Wikimedia Commons 等)与授权;清单在 `src/data/portraits.js` |
+| `tools/*.mjs` | 离线脚本:`verify-data`(契约校验)、`prepare-mask`、`make-emblem`、`make-banner`、`fetch-portraits`、`make-portraits` | 只有 `make-emblem.mjs` 会写 `src/data/`,见「改动后的验证」;`fetch/make-portraits` 写 `public/` 与 `src/data/portraits.js` |
+| `tools/gen/` | 数据扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs`(批校验)+ `merge.mjs`(合并进 quotes.js)+ `stats.mjs`(分布统计) | 批次文件合并后仍留在仓库供追溯;新增语录走「数据扩充流水线」,见下节 |
 | `tools/*-photo.jpg`、`tools/emblem-ref.png` | 生成脚本的输入素材,合计 3.20 MiB | 不进构建、不被 `src/` 引用 |
 | `docs/banner.svg` | README 横幅 | `tools/make-banner.mjs` 生成 |
-| `package.json` | 只有 `dev` / `build` / `preview` 三条 scripts | 依赖:`three` 一个 runtime,`vite`/`jpeg-js`/`pngjs` 三个 dev |
+| `package.json` | `dev` / `build` / `preview` / `verify` 四条 scripts | 依赖:`three` 一个 runtime,`vite`/`jpeg-js`/`pngjs` 三个 dev |
 | `package-lock.json` | lockfileVersion 3,61 个包 | CI 用 `npm ci` 按它精确装 |
 | `.gitignore` | 挡掉 `node_modules/`、`dist/`、`tools/preview-*.png`、`.zcode/`、`*.log` | 掩膜与徽章点位**不在**这里,它们是入库的产物 |
 | `LICENSE` | MIT,版权行写 2026 Luz7818 | — |
 
 ## 关键约定(违反会出问题的才写)
 
-1. **`quotes[].f` 必须是 `figures[].id`**。这条没有任何校验(仓库里没有测试脚本)。
+1. **`quotes[].f` 必须是 `figures[].id`**。`npm run verify` 会逐条核对,并在某人物一条语录都没有时报错。
    写错 id 的后果:该句在侧栏目录与"同人物下一条"里永远不出现,但 `#q=N` 仍能打开它。
    反向同理:某人物若一条语录都没有,仍会按权重 1 分到星点,而它的 `quoteIdx` 兜底成 `0`,
    于是那颗星涂的是新人物的颜色、点开却是第 1 句马克思。核对:
-   `node --input-type=module -e "const{quotes}=await import('./src/data/quotes.js');const{figureMap}=await import('./src/data/figures.js');console.log(quotes.filter(q=>!figureMap[q.f]).length)"`
+   `npm run verify`(结束时打印人物数 / 语录数 / 分组数,有问题列出明细并以退出码 1 结束)。
 
 2. **语录数组的下标就是对外编号**。`#q=N`、拾遗收藏、留影文件名用的都是 `quotes` 的 0 起下标。
    中间插入或删一条,会把已分享的深链、别人本机的收藏整体错位。所以只在文件末尾追加;
@@ -77,8 +80,8 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染
    是 1 起,两者差 1。
 
 3. **掩膜链路是 `figures[].id` → `PORTRAIT_PLANES[].id` → `public/<id>-mask.png` → `?v=`**。
-   35 位人物里只有 4 位有掩膜(马克思、恩格斯、列宁、卢森堡),其余 31 位只有星群与色,
-   不该去找他们的掩膜图。`src/main.js` 里 `{ id: 'marx', v: 7 }` 拼出请求 URL
+   91 位人物里只有 4 位有掩膜(马克思、恩格斯、列宁、卢森堡),其余 87 位只有星群与色,
+   侧栏则另有 83 位配了 `public/avatars/` 小头像。不该去找其余人物的掩膜图。`src/main.js` 里 `{ id: 'marx', v: 7 }` 拼出请求 URL
    `./marx-mask.png?v=7`:id 三处必须一致,`v` 只是缓存串。重画掩膜后不改 `v`,
    Pages 的 CDN 与浏览器会继续发旧图,现象是"掩膜没生效"。
    生成规则:`${import.meta.env.BASE_URL}${id}-mask.png?v=${v}`,构建期 `BASE_URL` 被替换成 `./`。
@@ -134,13 +137,32 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:1041 句语录渲染
      语录、注释与文档保持一致。核对(无输出即为 0;写成字节序列是为了不让命令本身命中):
      `grep -rl "$(printf '\xef\xbc\x8c')" src/ index.html README.md AGENTS.md docs/`
 
+## 数据扩充流水线(tools/gen/)
+
+语录扩到约 1 万条走的是「批次 ndjson → 批校验 → 合并」三步,产物可追溯:
+
+1. **批次生成**:`tools/gen/quotes-<组名>-<人物id>-<序号>.ndjson`,每行一个 JSON 对象
+   `{"f":"人物id","w":"《著作》","y":年份或null,"t":"原文"}`。t 必须是真实可查的经典原文
+   (校验脚本管住格式与重复,管不住真伪,录入时宁少勿滥)。
+2. **批校验**:`node tools/gen/selfcheck.mjs <组名>` 校验指定组,`--all` 校验全部批次,
+   `--post` 在合并后自检(跳过「与现有语录库重复」检查,因为批次已在库内)。
+   检查:JSON 可解析 / f 合法 / w 以《》包裹 / y 合法 / t 长度 6~130 / t 无全角逗号 U+FF0C
+   与半角双引号 / 批内不重复 / 与 quotes.js 现有库不重复。
+3. **合并**:`node tools/gen/merge.mjs`(加 `--dry` 只预览)把全部批次追加到 quotes.js
+   末尾,重复行自动跳过。合并后必须 `npm run verify` + `npm run build`。
+4. `tools/gen/stats.mjs` 打印每人物条数分布,用于查覆盖缺口。
+
+注意:merge.mjs 以「行内容」判定重复,所以批内/批间重复会在合并时静默跳过(控制台报出条数);
+先跑 `selfcheck --all` 清零问题再合并,才是干净流程。
+
 ## 改动后的验证
 
 | 动了什么 | 必须跑 | 通过判据 |
 |---|---|---|
 | 任意 `.js` | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` | 无输出 |
 | 任意代码 | `npm run build` | 退出码 0,`16 modules transformed`,无 `chunk size` 警告 |
-| `src/data/quotes.js`、`src/data/figures.js` | 「数据规模」行的 node 命令 + 「关键约定 1」的 id 核对命令 | 句数与预期一致,且 id 核对输出 `0` |
+| `src/data/quotes.js`、`src/data/figures.js` | `npm run verify` + 「数据规模」行的 node 命令 | verify 退出码 0;句数与预期一致 |
+| `tools/gen/` 批次文件 | `node tools/gen/selfcheck.mjs --all`,然后 `node tools/gen/merge.mjs` + `npm run verify` | selfcheck「问题 0 个」;verify 退出码 0 |
 | `public/*-mask.png` | 同时改 `src/main.js` 的 `v` → `npm run build` → `npm run preview` | 肖像轮廓对得上照片,转 90° 换人 |
 | `tools/emblem-ref.png` 或 `make-emblem.mjs` | `node tools/make-emblem.mjs`(会覆盖 `src/data/emblem.js`) | 控制台点位仍是 3400,徽章视图能认出镰刀锤头 |
 | `cloud.js` 或 `scene.js` 的位置公式 | `npm run dev` 后逐个姿态点星 | 成形/散开/徽章三种姿态都能点中,气泡与卡片同人同句 |

@@ -1,6 +1,8 @@
 /**
  * 语录卡片:点击星尘或"从虚空捞起"时展示一条经典。
  */
+import { avaHTML, hydrateAvas } from './avatar.js';
+
 export function initQuoteCard(container) {
   let nextFn = null;
 
@@ -11,14 +13,16 @@ export function initQuoteCard(container) {
     setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 1200);
   }
 
-  function show({ quote, figure, index, total, fished = false, onNext = null, onCopy = null, onShare = null, onFav = null, isFav = false, onPostcard = null }) {
+  function show({ quote, figure, index, total, fished = false, onNext = null, onFigure = null, onCopy = null, onShare = null, onFav = null, isFav = false, onPostcard = null }) {
     nextFn = onNext;
     container.innerHTML = `
       ${fished ? '<div class="card-fished">◌ 从虚空捞起</div>' : ''}
       <header class="card-head">
-        <span class="dot" style="--c:${figure.color}"></span>
-        <span class="card-name">${figure.name}</span>
-        <span class="card-sub">${figure.years} · ${figure.region}</span>
+        ${avaHTML(figure.id, figure.name, figure.color, 'ava-lg')}
+        <span class="card-head-main">
+          <span class="card-name">${figure.name}</span>
+          <span class="card-sub">${figure.years} · ${figure.region}</span>
+        </span>
         <button class="card-close" type="button" aria-label="关闭">×</button>
       </header>
       <blockquote class="card-quote">“${quote.t}”</blockquote>
@@ -28,6 +32,7 @@ export function initQuoteCard(container) {
       </footer>
       <div class="card-actions">
         ${onNext ? '<button class="card-next" type="button">同人物下一条 →</button>' : ''}
+        ${onFigure ? '<button class="card-act" data-act="figure" type="button" title="在侧栏打开该人物的语录目录">人物全集</button>' : ''}
         <button class="card-act" data-act="fav" type="button">${isFav ? '已在拾遗 ✓' : '收进拾遗'}</button>
         <button class="card-act" data-act="postcard" type="button" title="连星图一起导出成图片">留影</button>
         <button class="card-act" data-act="copy" type="button">复制原文</button>
@@ -37,6 +42,8 @@ export function initQuoteCard(container) {
     container.querySelector('.card-close').addEventListener('click', hide);
     const nx = container.querySelector('.card-next');
     if (nx) nx.addEventListener('click', () => nextFn && nextFn());
+    const fg = container.querySelector('[data-act="figure"]');
+    if (fg) fg.addEventListener('click', () => onFigure && onFigure());
     container.querySelector('[data-act="fav"]').addEventListener('click', (e) => {
       if (!onFav) return;
       const on = onFav();
@@ -51,6 +58,7 @@ export function initQuoteCard(container) {
     container.querySelector('[data-act="share"]').addEventListener('click', (e) => {
       if (onShare) Promise.resolve(onShare()).then((ok) => ok && flash(e.currentTarget, '已复制链接'));
     });
+    hydrateAvas(container);
     container.classList.add('show');
   }
 

@@ -1,0 +1,583 @@
+{
+ "moore": {
+  "figure": "托马斯·莫尔",
+  "file": "Hans Holbein, the Younger - Sir Thomas More - Google Art Project.jpg",
+  "license": "Public domain",
+  "artist": "Hans Holbein the Younger",
+  "url": "https://commons.wikimedia.org/wiki/File%3AHans%20Holbein%2C%20the%20Younger%20-%20Sir%20Thomas%20More%20-%20Google%20Art%20Project.jpg"
+ },
+ "campanella": {
+  "figure": "康帕内拉",
+  "file": "Cozza Tommaso Campanella.jpg",
+  "license": "Public domain",
+  "artist": "Francesco Cozza",
+  "url": "https://commons.wikimedia.org/wiki/File%3ACozza%20Tommaso%20Campanella.jpg"
+ },
+ "saintsimon": {
+  "figure": "圣西门",
+  "file": "Claude Henri de Rouvroy.jpg",
+  "license": "Public domain",
+  "artist": "Godefroy Engelmann the Elder",
+  "url": "https://commons.wikimedia.org/wiki/File%3AClaude%20Henri%20de%20Rouvroy.jpg"
+ },
+ "owen": {
+  "figure": "罗伯特·欧文",
+  "file": "Robert Owen by William Henry Brooke.jpg",
+  "license": "Public domain",
+  "artist": "William Henry Brooke",
+  "url": "https://commons.wikimedia.org/wiki/File%3ARobert%20Owen%20by%20William%20Henry%20Brooke.jpg"
+ },
+ "fourier": {
+  "figure": "傅立叶",
+  "file": "Françoise Foliot - Jean Gigoux - Portrait de Charles Fourrier (cropped) (1).jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "Jean Gigoux",
+  "url": "https://commons.wikimedia.org/wiki/File%3AFran%C3%A7oise%20Foliot%20-%20Jean%20Gigoux%20-%20Portrait%20de%20Charles%20Fourrier%20(cropped)%20(1).jpg"
+ },
+ "marx": {
+  "figure": "卡尔·马克思",
+  "file": "Karl Marx 001 restored.jpg",
+  "license": "Public domain",
+  "artist": "John Jabez Edwin Mayall",
+  "url": "https://commons.wikimedia.org/wiki/File%3AKarl%20Marx%20001%20restored.jpg"
+ },
+ "engels": {
+  "figure": "弗里德里希·恩格斯",
+  "file": "Friedrich Engels portrait (cropped).jpg",
+  "license": "Public domain",
+  "artist": "William Hall (1826–ca. 1898) (cropped and sepia tone removed)",
+  "url": "https://commons.wikimedia.org/wiki/File%3AFriedrich%20Engels%20portrait%20(cropped).jpg"
+ },
+ "plekhanov": {
+  "figure": "普列汉诺夫",
+  "file": "Georgi Valentinovich Plekhanov, ca. 1917.jpg",
+  "license": "Public domain",
+  "artist": "Karl Bulla",
+  "url": "https://commons.wikimedia.org/wiki/File%3AGeorgi%20Valentinovich%20Plekhanov%2C%20ca.%201917.jpg"
+ },
+ "zetkin": {
+  "figure": "克拉拉·蔡特金",
+  "file": "C Zetkin 1.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AC%20Zetkin%201.jpg"
+ },
+ "lenin": {
+  "figure": "弗拉基米尔·列宁",
+  "file": "Vladimir Lenin in July 1920 by Pavel Zhukov.jpg",
+  "license": "Public domain",
+  "artist": "Pavel Zhukov",
+  "url": "https://commons.wikimedia.org/wiki/File%3AVladimir%20Lenin%20in%20July%201920%20by%20Pavel%20Zhukov.jpg"
+ },
+ "luxemburg": {
+  "figure": "罗莎·卢森堡",
+  "file": "Rosa Luxemburg.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3ARosa%20Luxemburg.jpg"
+ },
+ "stalin": {
+  "figure": "约瑟夫·斯大林",
+  "file": "Joseph Stalin official portrait.jpg",
+  "license": "Public domain",
+  "artist": "Ivan Shagin",
+  "url": "https://commons.wikimedia.org/wiki/File%3AJoseph%20Stalin%20official%20portrait.jpg"
+ },
+ "dimitrov": {
+  "figure": "季米特洛夫",
+  "file": "Georgi Dimitrow.png",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AGeorgi%20Dimitrow.png"
+ },
+ "lidazhao": {
+  "figure": "李大钊",
+  "file": "1989 CPA 6111.jpg",
+  "license": "Public domain",
+  "artist": "USSR Post",
+  "url": "https://commons.wikimedia.org/wiki/File%3A1989%20CPA%206111.jpg"
+ },
+ "hochiminh": {
+  "figure": "胡志明",
+  "file": "Ho Chi Minh 1946.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AHo%20Chi%20Minh%201946.jpg"
+ },
+ "gramsci": {
+  "figure": "葛兰西",
+  "file": "Gramsci.png",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AGramsci.png"
+ },
+ "mao": {
+  "figure": "毛泽东",
+  "file": "Mao Tse Tung.jpg",
+  "license": "Public domain",
+  "artist": "Chen Zhengqing (1917–1966)",
+  "url": "https://commons.wikimedia.org/wiki/File%3AMao%20Tse%20Tung.jpg"
+ },
+ "fangzhimin": {
+  "figure": "方志敏",
+  "file": "Fangzhimin2.JPG",
+  "license": "Public domain",
+  "artist": "The original uploader was Pashan at Chinese Wikipedia.",
+  "url": "https://commons.wikimedia.org/wiki/File%3AFangzhimin2.JPG"
+ },
+ "xiaminghan": {
+  "figure": "夏明翰",
+  "file": "Xia Minghan.jpg",
+  "license": "Public domain",
+  "artist": "The original uploader was A5948736 at Chinese Wikipedia.",
+  "url": "https://commons.wikimedia.org/wiki/File%3AXia%20Minghan.jpg"
+ },
+ "dengxiaoping": {
+  "figure": "邓小平",
+  "file": "Deng Xiaoping and Jimmy Carter at the arrival ceremony for the Vice Premier of China. - NARA - 183157-restored(cropped).jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3ADeng%20Xiaoping%20and%20Jimmy%20Carter%20at%20the%20arrival%20ceremony%20for%20the%20Vice%20Premier%20of%20China.%20-%20NARA%20-%20183157-restored(cropped).jpg"
+ },
+ "castro": {
+  "figure": "菲德尔·卡斯特罗",
+  "file": "Fidel Castro 1950s.jpg",
+  "license": "Public domain",
+  "artist": "Unknown (Mondadori Publishers)",
+  "url": "https://commons.wikimedia.org/wiki/File%3AFidel%20Castro%201950s.jpg"
+ },
+ "muntzer": {
+  "figure": "托马斯·闵采尔",
+  "file": "Thomas Muentzer.jpg",
+  "license": "Public domain",
+  "artist": "Christoph van Sichem",
+  "url": "https://commons.wikimedia.org/wiki/File%3AThomas%20Muentzer.jpg"
+ },
+ "weitling": {
+  "figure": "威廉·魏特林",
+  "file": "WilhelmWeitling.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AWilhelmWeitling.jpg"
+ },
+ "bebel": {
+  "figure": "奥古斯特·倍倍尔",
+  "file": "August Bebel 2.jpg",
+  "license": "Public domain",
+  "artist": "",
+  "url": "https://commons.wikimedia.org/wiki/File%3AAugust%20Bebel%202.jpg"
+ },
+ "lafargue": {
+  "figure": "保尔·拉法格",
+  "file": "Paul Lafargue 1869.jpg",
+  "license": "Public domain",
+  "artist": "German Fehrenbach",
+  "url": "https://commons.wikimedia.org/wiki/File%3APaul%20Lafargue%201869.jpg"
+ },
+ "morris": {
+  "figure": "威廉·莫里斯",
+  "file": "William Morris age 53.jpg",
+  "license": "Public domain",
+  "artist": "Frederick Hollyer",
+  "url": "https://commons.wikimedia.org/wiki/File%3AWilliam%20Morris%20age%2053.jpg"
+ },
+ "guevara": {
+  "figure": "切·格瓦拉",
+  "file": "Che Guevara - ca. 1945.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AChe%20Guevara%20-%20ca.%201945.jpg"
+ },
+ "mariategui": {
+  "figure": "马里亚特吉",
+  "file": "José Carlos Mariátegui in 1929.jpg",
+  "license": "Public domain",
+  "artist": "José Malanca",
+  "url": "https://commons.wikimedia.org/wiki/File%3AJos%C3%A9%20Carlos%20Mari%C3%A1tegui%20in%201929.jpg"
+ },
+ "quqiubai": {
+  "figure": "瞿秋白",
+  "file": "Qu Qiubai.JPG",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AQu%20Qiubai.JPG"
+ },
+ "caihesen": {
+  "figure": "蔡和森",
+  "file": "Cai Hesen.jpg",
+  "license": "Public domain",
+  "artist": "不详",
+  "url": "https://commons.wikimedia.org/wiki/File%3ACai%20Hesen.jpg"
+ },
+ "dengzhongxia": {
+  "figure": "邓中夏",
+  "file": "Deng Zhongxia.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3ADeng%20Zhongxia.jpg"
+ },
+ "zhaoyiman": {
+  "figure": "赵一曼",
+  "file": "Zhao Yiman.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AZhao%20Yiman.jpg"
+ },
+ "yundaiying": {
+  "figure": "恽代英",
+  "file": "Yun Daiying.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AYun%20Daiying.jpg"
+ },
+ "asiqi": {
+  "figure": "艾思奇",
+  "file": "艾思奇 (Cropped).jpg",
+  "license": "CC BY-SA 4.0",
+  "artist": "瑞丽江的河水",
+  "url": "https://commons.wikimedia.org/wiki/File%3A%E8%89%BE%E6%80%9D%E5%A5%87%20(Cropped).jpg"
+ },
+ "babeuf": {
+  "figure": "巴贝夫",
+  "file": "François-Noël Babeuf.jpg",
+  "license": "Public domain",
+  "artist": "François Bonneville",
+  "url": "https://commons.wikimedia.org/wiki/File%3AFran%C3%A7ois-No%C3%ABl%20Babeuf.jpg"
+ },
+ "cabet": {
+  "figure": "卡贝",
+  "file": "Etienne Cabet (1788-1856) même portrait, l'habit simplement esquissé, D.1740.jpg",
+  "license": "CC0",
+  "artist": "Auguste Toussaint Lecler",
+  "url": "https://commons.wikimedia.org/wiki/File%3AEtienne%20Cabet%20(1788-1856)%20m%C3%AAme%20portrait%2C%20l'habit%20simplement%20esquiss%C3%A9%2C%20D.1740.jpg"
+ },
+ "bakunin": {
+  "figure": "巴枯宁",
+  "file": "Bakunin Nadar.jpg",
+  "license": "Public domain",
+  "artist": "Nadar",
+  "url": "https://commons.wikimedia.org/wiki/File%3ABakunin%20Nadar.jpg"
+ },
+ "herzen": {
+  "figure": "赫尔岑",
+  "file": "Herzen ge.png",
+  "license": "Public domain",
+  "artist": "Ге Николай Николаевич (1831 -1894)",
+  "url": "https://commons.wikimedia.org/wiki/File%3AHerzen%20ge.png"
+ },
+ "lassalle": {
+  "figure": "拉萨尔",
+  "file": "Ferdinandlasalle.jpg",
+  "license": "Public domain",
+  "artist": "",
+  "url": "https://commons.wikimedia.org/wiki/File%3AFerdinandlasalle.jpg"
+ },
+ "pottier": {
+  "figure": "鲍狄埃",
+  "file": "Eugène Pottier par Étienne Carjat.jpg",
+  "license": "Public domain",
+  "artist": "Étienne Carjat",
+  "url": "https://commons.wikimedia.org/wiki/File%3AEug%C3%A8ne%20Pottier%20par%20%C3%89tienne%20Carjat.jpg"
+ },
+ "jaures": {
+  "figure": "若雷斯",
+  "file": "Jean Jaurès, 1904, par Nadar.jpg",
+  "license": "Public domain",
+  "artist": "Nadar",
+  "url": "https://commons.wikimedia.org/wiki/File%3AJean%20Jaur%C3%A8s%2C%201904%2C%20par%20Nadar.jpg"
+ },
+ "kautsky": {
+  "figure": "考茨基",
+  "file": "Karl Kautsky.jpg",
+  "license": "Public domain",
+  "artist": "Unknown",
+  "url": "https://commons.wikimedia.org/wiki/File%3AKarl%20Kautsky.jpg"
+ },
+ "bernstein": {
+  "figure": "伯恩施坦",
+  "file": "Eduard Bernstein (portrait).jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AEduard%20Bernstein%20(portrait).jpg"
+ },
+ "liebknecht": {
+  "figure": "卡尔·李卜克内西",
+  "file": "Karl Liebknecht portrait (cropped).jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AKarl%20Liebknecht%20portrait%20(cropped).jpg"
+ },
+ "thalmann": {
+  "figure": "台尔曼",
+  "file": "Bundesarchiv Bild 102-12940, Ernst Thälmann (scrap).jpg",
+  "license": "CC BY-SA 3.0 de",
+  "artist": "UnknownUnknown",
+  "url": "https://commons.wikimedia.org/wiki/File%3ABundesarchiv%20Bild%20102-12940%2C%20Ernst%20Th%C3%A4lmann%20(scrap).jpg"
+ },
+ "kollontai": {
+  "figure": "柯伦泰",
+  "file": "Alexandra Kollontai 1946.jpg",
+  "license": "Public domain",
+  "artist": "Unknown (Sovfoto)",
+  "url": "https://commons.wikimedia.org/wiki/File%3AAlexandra%20Kollontai%201946.jpg"
+ },
+ "krupskaya": {
+  "figure": "克鲁普斯卡娅",
+  "file": "KrupskayaY 1922PorMariaUlyanova (cropped).jpg",
+  "license": "Public domain",
+  "artist": "Maria Ulyanova",
+  "url": "https://commons.wikimedia.org/wiki/File%3AKrupskayaY%201922PorMariaUlyanova%20(cropped).jpg"
+ },
+ "lunacharsky": {
+  "figure": "卢那察尔斯基",
+  "file": "Lunacharsky.jpg",
+  "license": "Public domain",
+  "artist": "",
+  "url": "https://commons.wikimedia.org/wiki/File%3ALunacharsky.jpg"
+ },
+ "bukharin": {
+  "figure": "布哈林",
+  "file": "Bucharin.bra.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3ABucharin.bra.jpg"
+ },
+ "gorky": {
+  "figure": "高尔基",
+  "file": "Maxim Gorky LOC Restored edit1.jpg",
+  "license": "Public domain",
+  "artist": "Herman Mishkin",
+  "url": "https://commons.wikimedia.org/wiki/File%3AMaxim%20Gorky%20LOC%20Restored%20edit1.jpg"
+ },
+ "mayakovsky": {
+  "figure": "马雅可夫斯基",
+  "file": "Majakovszkij.jpg",
+  "license": "Public domain",
+  "artist": "Unidentified photographer",
+  "url": "https://commons.wikimedia.org/wiki/File%3AMajakovszkij.jpg"
+ },
+ "ostrovsky": {
+  "figure": "奥斯特洛夫斯基",
+  "file": "N Ostrovskiy.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AN%20Ostrovskiy.jpg"
+ },
+ "makarenko": {
+  "figure": "马卡连柯",
+  "file": "Makarenko.jpg",
+  "license": "Public domain",
+  "artist": "",
+  "url": "https://commons.wikimedia.org/wiki/File%3AMakarenko.jpg"
+ },
+ "togliatti": {
+  "figure": "陶里亚蒂",
+  "file": "Palmiro-Togliatti-00504708.jpg",
+  "license": "Public domain",
+  "artist": "Unknown photographer",
+  "url": "https://commons.wikimedia.org/wiki/File%3APalmiro-Togliatti-00504708.jpg"
+ },
+ "lukacs": {
+  "figure": "卢卡奇",
+  "file": "Lukács György.jpg",
+  "license": "CC BY-SA 3.0 de",
+  "artist": "Horst Sturm",
+  "url": "https://commons.wikimedia.org/wiki/File%3ALuk%C3%A1cs%20Gy%C3%B6rgy.jpg"
+ },
+ "marcuse": {
+  "figure": "马尔库塞",
+  "file": "Herbert Marcuse in Newton, Massachusetts 1955.jpeg",
+  "license": "CC BY-SA 3.0",
+  "artist": "Copyright holder: Marcuse family, represented by Harold Marcuse",
+  "url": "https://commons.wikimedia.org/wiki/File%3AHerbert%20Marcuse%20in%20Newton%2C%20Massachusetts%201955.jpeg"
+ },
+ "debs": {
+  "figure": "德布斯",
+  "file": "Eugene V Debs 1912.jpg",
+  "license": "Public domain",
+  "artist": "",
+  "url": "https://commons.wikimedia.org/wiki/File%3AEugene%20V%20Debs%201912.jpg"
+ },
+ "foster": {
+  "figure": "福斯特",
+  "file": "William Z. Foster, cropped.PNG",
+  "license": "Public domain",
+  "artist": "Published in USA between 1923 and 1978 with no notice of copyright in original publication, public domain. Digital editing by Tim Davenport (\"Carrite\") for Wikipedia, no copyright claimed, file released to the public domain without restriction.",
+  "url": "https://commons.wikimedia.org/wiki/File%3AWilliam%20Z.%20Foster%2C%20cropped.PNG"
+ },
+ "bethune": {
+  "figure": "白求恩",
+  "file": "Norman Bethune graduation 1922.jpg",
+  "license": "Public domain",
+  "artist": "Credit: Library and Archives Canada/PA-160708Copyright: Expired",
+  "url": "https://commons.wikimedia.org/wiki/File%3ANorman%20Bethune%20graduation%201922.jpg"
+ },
+ "kotoku": {
+  "figure": "幸德秋水",
+  "file": "KotokuShusui.jpg",
+  "license": "Public domain",
+  "artist": "",
+  "url": "https://commons.wikimedia.org/wiki/File%3AKotokuShusui.jpg"
+ },
+ "katayama": {
+  "figure": "片山潜",
+  "file": "Sen Katayama.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3ASen%20Katayama.jpg"
+ },
+ "allende": {
+  "figure": "阿连德",
+  "file": "Salvador Allende, President of Chile, gtfy.00154.jpg",
+  "license": "Public domain",
+  "artist": "Bernard Gotfryd",
+  "url": "https://commons.wikimedia.org/wiki/File%3ASalvador%20Allende%2C%20President%20of%20Chile%2C%20gtfy.00154.jpg"
+ },
+ "chenduxiu": {
+  "figure": "陈独秀",
+  "file": "Chen Duxiu4.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AChen%20Duxiu4.jpg"
+ },
+ "zhouenlai": {
+  "figure": "周恩来",
+  "file": "國共內戰時期周恩來.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3A%E5%9C%8B%E5%85%B1%E5%85%A7%E6%88%B0%E6%99%82%E6%9C%9F%E5%91%A8%E6%81%A9%E4%BE%86.jpg"
+ },
+ "liushaoqi": {
+  "figure": "刘少奇",
+  "file": "Liu Shaoqi (cropped).jpg",
+  "license": "Public domain",
+  "artist": "unknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3ALiu%20Shaoqi%20(cropped).jpg"
+ },
+ "zhude": {
+  "figure": "朱德",
+  "file": "Zhu De, Commander of PLA.jpg",
+  "license": "Public domain",
+  "artist": "anonymous (Gov)",
+  "url": "https://commons.wikimedia.org/wiki/File%3AZhu%20De%2C%20Commander%20of%20PLA.jpg"
+ },
+ "luxun": {
+  "figure": "鲁迅",
+  "file": "LuXun1930.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3ALuXun1930.jpg"
+ },
+ "pengpai": {
+  "figure": "彭湃",
+  "file": "Peng Pai.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3APeng%20Pai.jpg"
+ },
+ "xiangjingyu": {
+  "figure": "向警予",
+  "file": "向警予.jpg",
+  "license": "Public domain",
+  "artist": "The original uploader was Juansheng at Chinese Wikipedia.",
+  "url": "https://commons.wikimedia.org/wiki/File%3A%E5%90%91%E8%AD%A6%E4%BA%88.jpg"
+ },
+ "zhangtailei": {
+  "figure": "张太雷",
+  "file": "Zhang Tailei.jpg",
+  "license": "Public domain",
+  "artist": "不详",
+  "url": "https://commons.wikimedia.org/wiki/File%3AZhang%20Tailei.jpg"
+ },
+ "zhaoshiyan": {
+  "figure": "赵世炎",
+  "file": "Zhao Shiyan.jpg",
+  "license": "Public domain",
+  "artist": "不详",
+  "url": "https://commons.wikimedia.org/wiki/File%3AZhao%20Shiyan.jpg"
+ },
+ "dongbiwu": {
+  "figure": "董必武",
+  "file": "DONGBIWU.JPG",
+  "license": "Public domain",
+  "artist": "The original uploader was MY456L at Chinese Wikipedia.",
+  "url": "https://commons.wikimedia.org/wiki/File%3ADONGBIWU.JPG"
+ },
+ "pengdehuai": {
+  "figure": "彭德怀",
+  "file": "General Peng Dehuai.jpg",
+  "license": "Public domain",
+  "artist": "​《新华社》记者 郑景康",
+  "url": "https://commons.wikimedia.org/wiki/File%3AGeneral%20Peng%20Dehuai.jpg"
+ },
+ "songqingling": {
+  "figure": "宋庆龄",
+  "file": "Soong Ching-ling.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3ASoong%20Ching-ling.jpg"
+ },
+ "liuhulan": {
+  "figure": "刘胡兰",
+  "file": "195202 1952年 刘胡兰雕塑.png",
+  "license": "Public domain",
+  "artist": "《人民画报》",
+  "url": "https://commons.wikimedia.org/wiki/File%3A195202%201952%E5%B9%B4%20%E5%88%98%E8%83%A1%E5%85%B0%E9%9B%95%E5%A1%91.png"
+ },
+ "leifeng": {
+  "figure": "雷锋",
+  "file": "Lei Feng 13.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3ALei%20Feng%2013.jpg"
+ },
+ "jiaoyulu": {
+  "figure": "焦裕禄",
+  "file": "Jiaoyulu.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AJiaoyulu.jpg"
+ },
+ "wangjinxi": {
+  "figure": "王进喜",
+  "file": "1966-07 大庆铁人王进喜.jpg",
+  "license": "Public domain",
+  "artist": "《人民画报》",
+  "url": "https://commons.wikimedia.org/wiki/File%3A1966-07%20%E5%A4%A7%E5%BA%86%E9%93%81%E4%BA%BA%E7%8E%8B%E8%BF%9B%E5%96%9C.jpg"
+ },
+ "yuanlongping": {
+  "figure": "袁隆平",
+  "file": "Yuan Longping at news conference (cropped).png",
+  "license": "CC BY 3.0",
+  "artist": "China News Service",
+  "url": "https://commons.wikimedia.org/wiki/File%3AYuan%20Longping%20at%20news%20conference%20(cropped).png"
+ },
+ "qianxuesen": {
+  "figure": "钱学森",
+  "file": "歸國後的錢學森.png",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3A%E6%AD%B8%E5%9C%8B%E5%BE%8C%E7%9A%84%E9%8C%A2%E5%AD%B8%E6%A3%AE.png"
+ },
+ "guomoruo": {
+  "figure": "郭沫若",
+  "file": "郭开贞.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3A%E9%83%AD%E5%BC%80%E8%B4%9E.jpg"
+ },
+ "aiqing": {
+  "figure": "艾青",
+  "file": "Ai Qing 1929.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AAi%20Qing%201929.jpg"
+ },
+ "taoxingzhi": {
+  "figure": "陶行知",
+  "file": "Tao Xing-zhi.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3ATao%20Xing-zhi.jpg"
+ }
+}

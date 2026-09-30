@@ -1,16 +1,28 @@
-# tools/ —— 离线生成脚本与输入素材
+# tools/ —— 离线脚本与输入素材
 
-> 用途:说明三个脚本各产出什么、能不能重复跑、**哪些会覆盖已入库的文件**。
+> 用途:说明各脚本产出什么、能不能重复跑、**哪些会覆盖已入库的文件**。
 > 这里的东西不参与构建:`npm run build` 不会读 `tools/`,产物 `dist/` 里也没有它的任何文件。
 
-三条流水线把照片和党徽底图变成运行时用得上的东西:
+几条流水线把照片、党徽底图和语录批次变成运行时用得上的东西:
 `prepare-mask.mjs` 出掩膜图(给 `src/core/mask.js` 采样用)、`make-emblem.mjs` 出徽章点位
-(写进 `src/data/emblem.js`)、`make-banner.mjs` 出 README 横幅。
-四个已入库的产物在没有本目录的情况下也能正常构建运行 —— 本目录只在需要重算时上场。
+(写进 `src/data/emblem.js`)、`make-banner.mjs` 出 README 横幅、`fetch-portraits.mjs` +
+`make-portraits.mjs` 出侧栏小头像(写 `public/avatars/`、`public/portraits/` 与
+`src/data/portraits.js`)、`verify-data.mjs` 做数据契约校验(即 `npm run verify`),
+`gen/` 是语录扩充流水线(批次 ndjson → `selfcheck` 校验 → `merge` 合并进 quotes.js,
+流程见仓库根 `AGENTS.md` 的「数据扩充流水线」)。
+已入库的产物在没有本目录的情况下也能正常构建运行 —— 本目录只在需要重算时上场。
 
-三个脚本都用 `import.meta.url` 反推仓库根,所以**在任何目录下运行都行**,命令写成
+各脚本都用 `import.meta.url` 反推仓库根,所以**在任何目录下运行都行**,命令写成
 `node tools/<脚本名>` 即可,不需要先 `cd`。它们依赖 `jpeg-js` 与 `pngjs`(都在
 `devDependencies` 里),所以必须先 `npm install`。
+
+## 子目录
+
+- `gen/` —— 语录扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs`(批校验,支持 `--post`)+
+  `merge.mjs`(幂等合并进 `src/data/quotes.js`)+ `stats.mjs` / `coverage.mjs`(分布统计)。
+  流程见仓库根 `../AGENTS.md` 的「数据扩充流水线」。
+- `portrait-src/` —— `fetch-portraits.mjs` 从 Wikimedia 抓取的头像素材缓存(make-portraits
+  的输入之一)。
 
 ## 文件清单
 
@@ -21,11 +33,16 @@
 | `make-banner.mjs` | 掩膜 → README 横幅 | 可以,同样带未播种随机数 | **会覆盖 `docs/banner.svg`**(已入库,README 顶部在用) |
 | `marx-photo.jpg` 等 4 张 | `prepare-mask.mjs` 的输入照片 | — | 输入。4 张合计 3.19 MiB(复核:`node -e "const fs=require('fs');let t=0;for(const f of fs.readdirSync('tools'))if(/-photo\.jpg$/.test(f))t+=fs.statSync('tools/'+f).size;console.log(t)"`) |
 | `emblem-ref.png` | `make-emblem.mjs` 的底图,1280×1280,CC0 党徽标准图形 | — | 输入 |
+| `verify-data.mjs` | 数据契约校验(即 `npm run verify`):语录↔人物 id、每人物至少 1 条、分组 key、DOM id、无全角逗号、无重复(f+t)、肖像清单文件存在 | 可以,只读 | 只读不写,退出码 0=通过 |
+| `fetch-portraits.mjs` | 按 `src/data/figures.js` 的 WIKI 字段抓取 Wikimedia 头像到 `portrait-src/` | 可以,需联网 | 写 `portrait-src/`(素材缓存,入库) |
+| `make-portraits.mjs` | 头像裁剪压缩 → `public/avatars/*.jpg`、`src/data/portraits.js` 清单、`public/portraits/` 与 `CREDITS.md` | 可以 | **会覆盖 `public/avatars/`、`src/data/portraits.js`**(已入库) |
+| `gen/` | 语录扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs` 批校验 + `merge.mjs` 合并 + `stats.mjs` 每人物统计 | 可以 | **`merge.mjs` 追加写 `src/data/quotes.js`**(以行内容幂等,重复跳过) |
 
-一句话记法:**唯一会写进 `src/data/` 的是 `make-emblem.mjs`**,它覆盖的是应用真正 import 的文件。
-没有换照片、没有换底图就别重跑后两个脚本,那只会产出一堆与上一版无关的 diff。
+一句话记法:**会写 `src/data/` 的有三个**——`make-emblem.mjs`(覆盖 emblem.js)、
+`make-portraits.mjs`(覆盖 portraits.js)、`gen/merge.mjs`(追加 quotes.js),覆盖的都是应用真正
+import 的文件。没有换照片、没有换底图就别重跑 make-banner,那只会产出一堆与上一版无关的 diff。
 
-## 三个脚本的用法
+## 主要脚本的用法
 
 ### `prepare-mask.mjs` —— 重算肖像掩膜
 

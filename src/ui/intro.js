@@ -1,7 +1,7 @@
 /**
  * 开场引导(1/3 三页,致敬《诗云》)。
  */
-export function initIntro(container, { onEnter, immediate = false }) {
+export function initIntro(container, { onEnter, immediate = false, stats = '两百年来,一代代思想家写下无数经典' } = {}) {
   const slides = [
     {
       cls: 's1',
@@ -15,7 +15,7 @@ export function initIntro(container, { onEnter, immediate = false }) {
     {
       cls: 's2',
       html: `
-        <p class="intro-line">两百年来,一代代思想家写下无数经典。</p>
+        <p class="intro-line">${stats}。</p>
         <p class="intro-line">它们不是散落的碎片,<em>而是一团云</em>。</p>
       `
     },

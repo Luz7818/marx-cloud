@@ -83,12 +83,12 @@ npm run build
 
 vite v5.4.21 building for production...
 transforming...
-✓ 16 modules transformed.
+✓ 18 modules transformed.
 rendering chunks...
 computing gzip size...
-dist/index.html                   2.03 kB │ gzip:   1.30 kB
-dist/assets/index-Cj5y267Y.css   12.65 kB │ gzip:   3.25 kB
-dist/assets/index-BC7DdfnK.js   628.56 kB │ gzip: 211.60 kB
+dist/index.html                   2.17 kB │ gzip:   1.38 kB
+dist/assets/index-*.css        15.99 kB │ gzip:   3.86 kB
+dist/assets/index-*.js     780.51 kB │ gzip: 306.09 kB
 ✓ built in 1.04s
 ```
 
@@ -346,7 +346,7 @@ npm run build
 for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" || echo "FAIL $f"; done
 ```
 
-通过标准:`build` 退出码 0 且输出 `16 modules transformed`;`node --check` 一条 `FAIL` 都不打。
+通过标准:`build` 退出码 0 且输出 `18 modules transformed`;`node --check` 一条 `FAIL` 都不打。
 然后 `npm run preview`,把改过的东西在浏览器里实际操作一遍 —— 这个仓库没有自动化测试,
 这一步就是回归。每条命令各自拦什么、哪些文件是生成物,写在仓库根的
 [`AGENTS.md`](../AGENTS.md)。

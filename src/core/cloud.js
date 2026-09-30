@@ -21,6 +21,7 @@ uniform float uEmScale;
 uniform float uHaloR;
 uniform float uPx;
 uniform float uSize;
+uniform float uFocusDim;
 uniform float uW0;
 uniform float uW1;
 uniform float uW2;
@@ -74,8 +75,9 @@ void main() {
 
   float focusOn = step(0.0, uFocus);
   float isFocus = (uFocus < 0.0) ? 0.0 : step(abs(aFig - uFocus), 0.5);
-  // 点亮某人时,其余人的星完全隐去(不是压暗)
-  float dim = (uFocus < 0.0) ? 1.0 : isFocus;
+  // 点亮语义由 uFocusDim 二选一:1=其余人的星完全隐去(无肖像人物,原行为);
+  // 0=只做上色强调(被点亮者有肖像换装时,保住整幅由全员星尘组成的肖像)
+  float dim = (uFocus < 0.0) ? 1.0 : mix(1.0, isFocus, uFocusDim);
 
   // 标志视图:非当前组既推远又压暗,免得外晕把标志轮廓淹掉
   float gdim = 1.0 - 0.93 * uView * (
@@ -220,6 +222,7 @@ export function createCloud(o) {
     uHaloR: { value: GROUP_HALO_R },
     uPx: { value: Math.min(window.devicePixelRatio || 1, 2) },
     uSize: { value: 0.195 },
+    uFocusDim: { value: 1 },
     uOpacity: { value: 0 },
     uW0: { value: 1 },
     uW1: { value: 0 },
@@ -242,7 +245,8 @@ export function createCloud(o) {
   return {
     points, uniforms, count: n,
     positions: position, planePositions,
-    cloudPos: aCloudPos, seeds: aSeed, groupIdx: aGroup, emblem: aEmblem
+    cloudPos: aCloudPos, seeds: aSeed, groupIdx: aGroup, emblem: aEmblem,
+    brights: aBright
   };
 }
 

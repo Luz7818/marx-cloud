@@ -1,15 +1,17 @@
 import './style.css';
-import { samplePortraits } from './core/mask.js';
+import { samplePortrait, samplePortraits } from './core/mask.js';
 import { createCloud, createBackdrop } from './core/cloud.js';
 import { createScene } from './core/scene.js';
 import { figures, figureMap, groups } from './data/figures.js';
 import { quotes } from './data/quotes.js';
+import { portraits } from './data/portraits.js';
 import { emblemPoints } from './data/emblem.js';
 import { buildPanel } from './ui/panel.js';
 import { initQuoteCard } from './ui/quoteCard.js';
 import { initIntro } from './ui/intro.js';
 import { initFavorites } from './ui/favorites.js';
 import { savePostcard } from './ui/postcard.js';
+import { avaHTML, hydrateAvas } from './ui/avatar.js';
 
 // ---------- DOM ----------
 const canvas = document.getElementById('scene');
@@ -18,6 +20,7 @@ const loading = document.getElementById('loading');
 const hint = document.getElementById('hint');
 const panelEl = document.getElementById('panel');
 const captionEl = document.getElementById('figure-caption');
+const capAvaSlot = document.getElementById('cap-ava');
 const body = document.body;
 
 let intro = null;
@@ -66,17 +69,18 @@ function detectSoftwareGL() {
 }
 const FORCE_LITE = new URLSearchParams(location.search).has('lite');
 const SOFT_GL = detectSoftwareGL();
-const COUNT = FORCE_LITE ? 9000 : SOFT_GL ? 14000 : isMobile ? 20000 : 28000;
+const COUNT = FORCE_LITE ? 9000 : SOFT_GL ? 14000 : isMobile ? 20000 : 34000;
 const PORTRAIT_H = 6.4;
+const HALF = Math.PI / 2;
 
-// 四块肖像平面:每 90° 一位,按生卒年排序(起点为初始视角)
+// 四块肖像平面:每 90° 一位,初始为四位旗舰;其余人物被选中时换装到最近的槽(见 ensurePortrait)
 const PORTRAIT_PLANES = [
   { id: 'marx', v: 7 },
   { id: 'engels', v: 3 },
   { id: 'lenin', v: 3 },
   { id: 'luxemburg', v: 3 }
 ];
-const planeFigures = PORTRAIT_PLANES.map(p => figureMap[p.id]);
+const planeFigs = PORTRAIT_PLANES.map(p => figureMap[p.id]);
 
 // 按语录数量加权,给每颗粒子分配人物与语录
 const figCum = [];
@@ -95,6 +99,7 @@ const boot = async () => {
     PORTRAIT_PLANES.map(p => `${import.meta.env.BASE_URL}${p.id}-mask.png?v=${p.v}`),
     COUNT
   );
+  const planeBrights = planes.map(p => p.bright);
 
   for (let i = 0; i < COUNT; i++) {
     const r = Math.random() * acc;
@@ -121,19 +126,81 @@ const boot = async () => {
   });
   if (isMobile || SOFT_GL) cloud.uniforms.uSize.value = 0.26; // 小屏/软渲染下加大光点
   const backdrop = createBackdrop(isMobile ? 900 : 1500);
-  const scene = createScene(canvas, cloud, backdrop, {
-    planes: planes.map(p => ({ w: PORTRAIT_H * p.aspect, h: PORTRAIT_H }))
-  });
+  const scenePlanes = planes.map(p => ({ w: PORTRAIT_H * p.aspect, h: PORTRAIT_H }));
+  const scene = createScene(canvas, cloud, backdrop, { planes: scenePlanes });
+  const attrFor = (slot) => cloud.points.geometry.attributes[slot === 0 ? 'position' : 'aP' + slot];
+
+  // ---------- 肖像换装:把选中的思想家装进离相机最近的像位槽 ----------
+  const morphCache = new Map();   // id → 采样结果(归一化点位/亮度/纵横比)
+  let morphAnim = null;           // {attr, from, to, t0, dur} 位置渐变
+
+  function nearestSlot() {
+    return ((Math.round(scene.getTheta() / HALF) % 4) + 4) % 4;
+  }
+
+  function installSlot(slot, smp, fig) {
+    const H = PORTRAIT_H, W = H * smp.aspect;
+    const attr = attrFor(slot);
+    const from = attr.array.slice();
+    const to = new Float32Array(COUNT * 3);
+    const th = slot * HALF, cos = Math.cos(th), sin = Math.sin(th);
+    for (let i = 0; i < COUNT; i++) {
+      const lx = smp.pts[i * 2] * W, ly = smp.pts[i * 2 + 1] * H;
+      const lz = (Math.random() + Math.random() + Math.random() - 1.5) * 0.24; // 云层厚度,与 createCloud 同式
+      to[i * 3] = lx * cos + lz * sin;
+      to[i * 3 + 1] = ly;
+      to[i * 3 + 2] = -lx * sin + lz * cos;
+    }
+    morphAnim = { attr, from, to, t0: performance.now(), dur: 950 };
+
+    // 亮度均值重算(换上来的掩膜参与四块均值,保持星点闪烁与新肖像一致)
+    planeBrights[slot] = smp.bright;
+    const brights = cloud.brights;
+    for (let i = 0; i < COUNT; i++) {
+      brights[i] = (planeBrights[0][i] + planeBrights[1][i] + planeBrights[2][i] + planeBrights[3][i]) / 4 * 0.7 + Math.random() * 0.3;
+    }
+    cloud.points.geometry.attributes.aBright.needsUpdate = true;
+
+    planeFigs[slot] = fig;
+    scenePlanes[slot] = { w: W, h: H };
+    scene.refit();
+  }
+
+  async function ensurePortrait(id) {
+    const p = portraits[id];
+    if (!p || !p.mask) return false;
+    const already = planeFigs.findIndex(pf => pf && pf.id === id);
+    if (already >= 0) { scene.flyTo(already * HALF); return true; }
+    let smp = morphCache.get(id);
+    if (!smp) {
+      const url = `${import.meta.env.BASE_URL}${p.mask}${p.v ? `?v=${p.v}` : ''}`;
+      try { smp = await samplePortrait(url, COUNT); } catch { return false; }
+      morphCache.set(id, smp);
+    }
+    const slot = nearestSlot();
+    installSlot(slot, smp, figureMap[id]);
+    scene.flyTo(slot * HALF);
+    return true;
+  }
 
   // ---------- UI ----------
   // ---------- 搜索/点选 → 点亮星群并飞抵 ----------
   let viewMode = 'portrait';   // 'portrait' | 'group'
-  function flyToFigure(id) {
-    const f = figureMap[id];
-    const slot = viewMode === 'group'
-      ? groupKeys.indexOf(f.group)
-      : PORTRAIT_PLANES.findIndex(p => p.id === id);
-    if (slot >= 0) scene.flyTo((slot * Math.PI) / 2);
+  async function flyToFigure(id) {
+    if (viewMode === 'group') {
+      scene.flyTo(groupKeys.indexOf(figureMap[id].group) * HALF);
+      return;
+    }
+    const ok = await ensurePortrait(id);
+    if (!ok) scene.flyTo(nearestSlot() * HALF);
+  }
+
+  // 点亮语义:有肖像可换装的人物 → 保留全员星尘只强调其色(uFocusDim=0);
+  // 无肖像的人物 → 其余人的星完全隐去(uFocusDim=1,原行为)
+  function applyFocus(id) {
+    cloud.uniforms.uFocus.value = id == null ? -1 : figureIndex[id];
+    cloud.uniforms.uFocusDim.value = id != null && !(portraits[id] && portraits[id].mask) ? 1 : 0;
+    if (id == null) scene.armAuto(); else scene.disarmAuto();
   }
 
   const card = initQuoteCard(document.getElementById('quote-card'));
@@ -141,9 +208,10 @@ const boot = async () => {
     counts,
     quotes,
     favs,
-    onFilter: (id) => { cloud.uniforms.uFocus.value = id == null ? -1 : figureIndex[id]; },
+    onFilter: applyFocus,
     onSelect: flyToFigure,
-    onPickQuote: (i) => { panel.select(quotes[i].f); showQuote(i); }
+    onPickQuote: (i) => { panel.select(quotes[i].f); showQuote(i); },
+    openPanel: () => body.classList.add('panel-open')
   });
 
   // ---------- 顶栏控制:画质 / 巡游速度 / 随机拾句 ----------
@@ -196,6 +264,9 @@ const boot = async () => {
       onNext: (quotesByFigure[q.f] || []).length > 1
         ? () => showQuote(nextSameFigure(q.f, globalIdx))
         : null,
+      onFigure: (quotesByFigure[q.f] || []).length > 1
+        ? () => panel.openFigure(q.f)
+        : null,
       onCopy: () => navigator.clipboard.writeText(
         `“${q.t}” —— ${f.name},${q.w}${q.y ? `(${q.y})` : ''}`
       ).then(() => true, () => false),
@@ -225,10 +296,24 @@ const boot = async () => {
     else showQuote((Math.random() * TOTAL) | 0, { fished: true });
   }
 
+  // ---------- 每日一句:按日期确定性取一句 ----------
+  function dailyIdx() {
+    const d = new Date();
+    const seed = d.getFullYear() * 372 + (d.getMonth() + 1) * 31 + d.getDate();
+    const r = (seed * 2654435761 % 4294967296 + 4294967296) % 4294967296;
+    return Math.floor(r / 4294967296 * TOTAL) % TOTAL;
+  }
+  document.getElementById('btn-daily').addEventListener('click', () => showQuote(dailyIdx()));
+
   // ---------- 点击:星尘 → 该星语录;真空 → 捞起 ----------
+  // 点亮某人物时只拾取该人物的星(其余星已隐去或属于肖像背景)
+  function pickAllowed(idx) {
+    const f = cloud.uniforms.uFocus.value;
+    return f < 0 || figIndexByParticle[idx] === f;
+  }
   scene.onClick((x, y) => {
     const idx = scene.pickStar(x, y, 18);
-    if (idx >= 0) showQuote(quoteIdxByParticle[idx]);
+    if (idx >= 0 && pickAllowed(idx)) showQuote(quoteIdxByParticle[idx]);
     else if (voidFishOn) fishFromVoid();
   });
 
@@ -243,7 +328,7 @@ const boot = async () => {
       if (now - lastHover < 40) return;
       lastHover = now;
       const idx = scene.pickStar(e.clientX, e.clientY, 14, 2);
-      if (idx < 0) { hideTip(); return; }
+      if (idx < 0 || !pickAllowed(idx)) { hideTip(); return; }
       const q = quotes[quoteIdxByParticle[idx]];
       const f = figureMap[q.f];
       tooltip.innerHTML = `
@@ -266,22 +351,30 @@ const boot = async () => {
   }
 
   // ---------- 当前人物字幕(肖像成形时浮现) ----------
-  let capShown = -2;
+  let capShown = '';
   function updateCaption(orient) {
     const show = orient.maxW > 0.55 ? orient.active : -1;
-    if (show === capShown) return;
-    capShown = show;
+    const capKey = show < 0
+      ? '-1'
+      : viewMode === 'group'
+        ? `group:${show}`
+        : `figure:${show}:${planeFigs[show]?.id || ''}`;
+    if (capKey === capShown) return;
+    capShown = capKey;
     if (show < 0) {
       captionEl.classList.remove('show');
     } else {
       if (viewMode === 'group') {
         const g = groups[show];
+        capAvaSlot.innerHTML = '';
         captionEl.querySelector('.cap-name').textContent = g.label;
         captionEl.querySelector('.cap-sub').textContent =
           `${groupStats[show].figs} 位思想家 · ${groupStats[show].quotes} 句经典`;
         captionEl.style.setProperty('--c', '#e5484d');
       } else {
-        const f = planeFigures[show];
+        const f = planeFigs[show];
+        capAvaSlot.innerHTML = avaHTML(f.id, f.name, f.color, 'ava-cap');
+        hydrateAvas(capAvaSlot);
         captionEl.querySelector('.cap-name').textContent = f.name;
         captionEl.querySelector('.cap-sub').textContent = `${f.years} · ${f.role}`;
         captionEl.style.setProperty('--c', f.color);
@@ -295,7 +388,8 @@ const boot = async () => {
   const deepIdx = deepM ? Math.min(TOTAL - 1, parseInt(deepM[1], 10) || 0) : -1;
   intro = initIntro(document.getElementById('intro'), {
     onEnter: () => scene.armAuto(),
-    immediate: deepIdx >= 0
+    immediate: deepIdx >= 0,
+    stats: `${figures.length} 位思想家,${TOTAL} 句经典`
   });
   if (deepIdx >= 0) showQuote(deepIdx);
   if (!isMobile) body.classList.add('panel-open');
@@ -318,6 +412,17 @@ const boot = async () => {
     const u = cloud.uniforms.uOpacity;
     u.value = Math.min(1, u.value + realFadeDt * 0.55);
 
+    // 换装渐变:槽位粒子从旧肖像流向新肖像
+    if (morphAnim) {
+      const a = morphAnim;
+      const mu = Math.min(1, (now - a.t0) / a.dur);
+      const me = mu < 0.5 ? 4 * mu * mu * mu : 1 - Math.pow(-2 * mu + 2, 3) / 2;
+      const arr = a.attr.array;
+      for (let i = 0; i < arr.length; i++) arr[i] = a.from[i] + (a.to[i] - a.from[i]) * me;
+      a.attr.needsUpdate = true;
+      if (mu >= 1) morphAnim = null;
+    }
+
     updateCaption(scene.getOrientation());
     const uV = cloud.uniforms.uView;
     uV.value += (viewTarget - uV.value) * Math.min(1, dt * 3);
@@ -337,7 +442,7 @@ const boot = async () => {
     }
   });
 
-  // Esc 关闭语录卡;H 隐藏全部界面(截图);F 全屏
+  // Esc 关闭语录卡;H 隐藏全部界面(截图);F 全屏;R 每日一句
   window.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
     const k = e.key.toLowerCase();
@@ -346,11 +451,11 @@ const boot = async () => {
     else if (k === 'f') {
       if (document.fullscreenElement) document.exitFullscreen();
       else document.documentElement.requestFullscreen?.();
-    }
+    } else if (k === 'r') showQuote(dailyIdx());
   });
 
   // 调试句柄(生产无副作用)
-  window.__dbg = { scene, cloud, camera: scene.camera, quoteIdxByParticle, planeFigures };
+  window.__dbg = { scene, cloud, camera: scene.camera, quoteIdxByParticle, planeFigs };
 };
 
 boot().catch(err => {

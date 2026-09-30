@@ -370,6 +370,7 @@ export function createScene(canvas, cloud, backdrop, { planes }) {
     onTick(fn) { tickFns.push(fn); },
     pickStar,
     armAuto() { state.autoArmed = true; },
+    disarmAuto() { state.autoArmed = false; state.autoT = 0; state.traveling = false; },
     setSpeed(v) { state.speed = v; },
     renderNow() { frame(performance.now(), true); },
     flyTo(theta, dur = 1.6) {
@@ -378,6 +379,17 @@ export function createScene(canvas, cloud, backdrop, { planes }) {
       state.fly = { from: state.theta, to, t: 0, dur };
       state.autoT = 0;
       state.traveling = false;
+    },
+    // 当前相机方位角(换装取最近像位槽用)
+    getTheta() { return state.theta; },
+    // 平面尺寸被换装改动后重算取景(不动渲染器状态)
+    refit() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      if (!w || !h) return;
+      const fit = computeFit(w / h);
+      if (!Number.isFinite(fit)) return;
+      state.fit = fit;
+      state.radius = clamp(state.radius, fit * 0.42, fit * 3.4);
     },
     // 正对的像位:main.js 用它决定底部字幕
     getOrientation() { return { active: state.activePlane, maxW: state.maxW }; },
