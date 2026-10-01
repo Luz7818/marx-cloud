@@ -40,7 +40,8 @@ const FLAGSHIP = {
 const AUTO = {
   crop: { x0: 0.02, x1: 0.98, y0: 0.01, y1: 0.96 },
   face: [0.5, 0.42], faceR: [0.34, 0.38],
-  bgTol: 0.14, gradTol: 0.07, cutY: 1.0, detailGain: 1.7, gamma: 1.15, ped: 0.30
+  bgTol: 0.14, gradTol: 0.07, cutY: 1.0,
+  detailGain: 1.7, detailGainTex: 1.05, gamma: 1.0, ped: 0.12
 };
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -102,13 +103,70 @@ function gradient(lum, w, h) {
   return g;
 }
 
+/** 边缘环带的直方图众数(抗深色扫描边框拖偏中位数)。lum 为 0..1 归一化值 */
+function bgBorderMode(lum, w, h) {
+  const bins = new Float64Array(64);
+  const ring = [];
+  for (let x = 0; x < w; x++) ring.push(lum[x], lum[(h - 1) * w + x]);
+  for (let y = 0; y < h; y++) ring.push(lum[y * w], lum[y * w + w - 1]);
+  for (const v of ring) bins[Math.min(63, Math.floor(v * 64))]++;
+  let best = 0, bi = 0;
+  for (let k = 0; k < 64; k++) if (bins[k] > best) { best = bins[k]; bi = k; }
+  return (bi + 0.5) / 64;
+}
+
+/** 3×3 形态学(腐蚀 k<0 / 膨胀 k>0),iters 次,确定性 */
+function morph(bin, w, h, k, iters) {
+  let cur = bin.slice();
+  for (let t = 0; t < iters; t++) {
+    const src = cur, out = new Uint8Array(w * h);
+    if (k < 0) {
+      for (let y = 1; y < h - 1; y++)
+        for (let x = 1; x < w - 1; x++) {
+          const i = y * w + x;
+          if (!src[i]) continue;
+          if (src[i - 1] && src[i + 1] && src[i - w] && src[i + w] &&
+              src[i - w - 1] && src[i - w + 1] && src[i + w - 1] && src[i + w + 1]) out[i] = 1;
+        }
+    } else {
+      for (let y = 1; y < h - 1; y++)
+        for (let x = 1; x < w - 1; x++) {
+          const i = y * w + x;
+          if (src[i] || src[i - 1] || src[i + 1] || src[i - w] || src[i + w]) out[i] = 1;
+        }
+    }
+    cur = out;
+  }
+  return cur;
+}
+
+function largestComponent(bin, w, h) {
+  const seen = new Uint8Array(w * h);
+  let best = null, bestN = 0;
+  const queue = new Int32Array(w * h);
+  for (let s = 0; s < w * h; s++) {
+    if (!bin[s] || seen[s]) continue;
+    let qh = 0, qt = 0, n = 0;
+    seen[s] = 1; queue[qt++] = s;
+    const comp = [];
+    while (qh < qt) {
+      const i = queue[qh++]; n++; comp.push(i);
+      const x = i % w, y = (i / w) | 0;
+      if (x > 0 && bin[i - 1] && !seen[i - 1]) { seen[i - 1] = 1; queue[qt++] = i - 1; }
+      if (x < w - 1 && bin[i + 1] && !seen[i + 1]) { seen[i + 1] = 1; queue[qt++] = i + 1; }
+      if (y > 0 && bin[i - w] && !seen[i - w]) { seen[i - w] = 1; queue[qt++] = i - w; }
+      if (y < h - 1 && bin[i + w] && !seen[i + w]) { seen[i + w] = 1; queue[qt++] = i + w; }
+    }
+    if (n > bestN) { bestN = n; best = comp; }
+  }
+  const out = new Uint8Array(w * h);
+  if (best) for (const i of best) out[i] = 1;
+  return out;
+}
+
 function segmentBackground(lum, w, h, { bgTol, gradTol, face, faceR }) {
   const grad = boxBlur(gradient(lum, w, h), w, h, 3);
-  const ring = [];
-  for (let x = 0; x < w; x++) ring.push(lum[x]);
-  for (let y = 0; y < Math.floor(h * 0.35); y++) ring.push(lum[y * w], lum[y * w + w - 1]);
-  ring.sort((a, b) => a - b);
-  const bgMed = ring[ring.length >> 1];
+  const bgMed = bgBorderMode(lum, w, h);
   const fx = face[0] * w, fy = face[1] * h, rx = faceR[0] * w, ry = faceR[1] * h;
 
   const isBg = new Uint8Array(w * h);
@@ -130,6 +188,14 @@ function segmentBackground(lum, w, h, { bgTol, gradTol, face, faceR }) {
     if (x < w - 1 && accept(i + 1)) { isBg[i + 1] = 1; queue[qt++] = i + 1; }
     if (y > 0 && accept(i - w)) { isBg[i - w] = 1; queue[qt++] = i - w; }
     if (y < h - 1 && accept(i + w)) { isBg[i + w] = 1; queue[qt++] = i + w; }
+  }
+  // 全局背景投票:与边缘众数同调、低梯度的像素一律视为背景,
+  // 修复泛洪被环带/暗边挡住时的整图误判(素描纸面/白墙等)
+  for (let i = 0; i < w * h; i++) {
+    if (isBg[i]) continue;
+    const x = i % w, y = (i / w) | 0;
+    const u = (x - fx) / rx, v = (y - fy) / ry;
+    if (u * u + v * v > 1 && grad[i] < gradTol * 1.25 && Math.abs(lum[i] - bgMed) < bgTol * 1.1) isBg[i] = 1;
   }
   return { isBg, bgMed };
 }
@@ -214,42 +280,47 @@ function smoothPass(mask, w, h) {
     }
 }
 
-/** 主体行轮廓 → 自动定位头肩窗口(头带 = 顶部行宽明显小于主体的区域) */
-function headWindow(subj, w, h) {
-  const rows = [];
+/** 头肩窗口:从面部种子列的走廊向上/下行走(环带、旁团不再牵引取景) */
+function headWindow(subj, w, h, face) {
+  const seedX = clamp(Math.round(face[0] * w), 0, w - 1);
+  const seedY = clamp(Math.round(face[1] * h), 0, h - 1);
+  const corridorN = new Int32Array(h);
   for (let y = 0; y < h; y++) {
-    let x0 = -1, x1 = -1, n = 0;
-    for (let x = 0; x < w; x++) if (subj[y * w + x]) { if (x0 < 0) x0 = x; x1 = x; n++; }
-    rows.push({ x0, x1, n });
+    let n = 0;
+    for (let x = Math.max(0, seedX - Math.round(w * 0.2)); x <= Math.min(w - 1, seedX + Math.round(w * 0.2)); x++)
+      if (subj[y * w + x]) n++;
+    corridorN[y] = n;
   }
-  let top = -1;
-  for (let y = 0; y < h; y++) if (rows[y].n >= w * 0.02) { top = y; break; }
-  if (top < 0) return null;
-  const widths = rows.slice(top).map(r => r.n).sort((a, b) => a - b);
-  const maxW = widths[Math.floor(widths.length * 0.9)] || 1;
-  // 头带:自顶向下直到行宽持续达到主体的 72%
-  let bandEnd = top;
-  let runWide = 0;
-  for (let y = top; y < h; y++) {
-    runWide = rows[y].n >= maxW * 0.72 ? runWide + 1 : 0;
-    if (runWide >= 4) { bandEnd = Math.max(top + 3, y - 3); break; }
-    bandEnd = y;
-  }
-  if (bandEnd - top < 4) bandEnd = Math.min(h - 1, top + Math.round(h * 0.18));
-  const headH = bandEnd - top;
-  const bottom = Math.min(h - 1, bandEnd + Math.round(headH * 1.7));
-  // 头带内按行像素数加权求水平质心(杂团行像素少,权重自然低)
+  const minN = 3;
+  const walk = (dir) => {
+    let y = seedY, last = seedY, miss = 0;
+    while (y >= 1 && y < h - 1) {
+      y += dir;
+      if (corridorN[y] >= minN) { last = y; miss = 0; }
+      else if (++miss > 2) break;
+    }
+    return last;
+  };
+  const top = walk(-1), bandEnd = walk(1);
+  if (bandEnd - top < 4) return null;
+  const bottom = Math.min(h - 1, bandEnd + Math.round((bandEnd - top) * 1.15));
+  // 头带内按走廊行像素数加权求水平质心
   let sx = 0, sn = 0;
   for (let y = top; y <= bandEnd; y++) {
-    if (rows[y].n <= 0) continue;
-    sx += (rows[y].x0 + rows[y].x1) / 2 * rows[y].n;
-    sn += rows[y].n;
+    if (corridorN[y] <= 0) continue;
+    let x0 = w, x1 = -1;
+    for (let x = Math.max(0, seedX - Math.round(w * 0.34)); x <= Math.min(w - 1, seedX + Math.round(w * 0.34)); x++)
+      if (subj[y * w + x]) { if (x < x0) x0 = x; if (x > x1) x1 = x; }
+    if (x1 < x0) continue;
+    sx += (x0 + x1) / 2 * corridorN[y];
+    sn += corridorN[y];
   }
-  const cx = sn ? sx / sn : w / 2;
+  const cx = sn ? sx / sn : seedX;
   let hx0 = 1e9, hx1 = -1e9;
-  for (let y = top; y <= Math.min(bottom, h - 1); y++) {
-    if (rows[y].n < w * 0.02) continue;
-    hx0 = Math.min(hx0, rows[y].x0); hx1 = Math.max(hx1, rows[y].x1);
+  for (let y = top; y <= bottom; y++) {
+    if (corridorN[y] < minN) continue;
+    for (let x = Math.max(0, seedX - Math.round(w * 0.34)); x <= Math.min(w - 1, seedX + Math.round(w * 0.34)); x++)
+      if (subj[y * w + x]) { if (x < hx0) hx0 = x; if (x > hx1) hx1 = x; }
   }
   if (hx1 < hx0) return null;
   return { top, bandEnd, bottom, cx, hx0, hx1 };
@@ -259,37 +330,60 @@ function headWindow(subj, w, h) {
 function buildAutoMask(img, cfg) {
   const lum0 = toGray(img);
   const { lum, w, h } = downsample(lum0, img.w, img.h, cfg.crop);
-  const { isBg } = segmentBackground(lum, w, h, cfg);
-  const subj = faceComponent(isBg, w, h, cfg.face);
+  const { isBg, bgMed } = segmentBackground(lum, w, h, cfg);
+  let subj = faceComponent(isBg, w, h, cfg.face);
+  // 形态学清理:腐蚀断开细环/排线/细桥 → 取最大连通块 → 膨胀回复
+  subj = morph(morph(largestComponent(morph(subj, w, h, -1, 2), w, h), w, h, 1, 2), w, h, -1, 1);
   let n = 0;
   for (let i = 0; i < w * h; i++) n += subj[i];
   const coverage = n / (w * h);
-  if (coverage < 0.05) return { subj, w, h, ok: false, coverage };
+  if (coverage < 0.04) return { subj, w, h, ok: false, coverage };
+  if (coverage < 0.04) return { subj, w, h, ok: false, coverage };
 
+  // 拉伸基准取自面部椭圆区:让面部影调横跨 0..1,五官才有密度差
+  const fx = cfg.face[0] * w, fy = cfg.face[1] * h, frx = cfg.faceR[0] * w, fry = cfg.faceR[1] * h;
   const vals = [];
-  for (let i = 0; i < w * h; i++) if (subj[i]) vals.push(lum[i]);
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      const u = (x - fx) / frx, v = (y - fy) / fry;
+      if (u * u + v * v <= 1 && subj[y * w + x]) vals.push(lum[y * w + x]);
+    }
+  if (vals.length < 32) {
+    for (let i = 0; i < w * h; i++) if (subj[i]) vals.push(lum[i]);
+  }
   vals.sort((a, b) => a - b);
-  const pLo = vals[Math.floor(vals.length * 0.10)];
-  const pHi = vals[Math.floor(vals.length * 0.90)];
-  const low = boxBlur(lum, w, h, 9);
+  const pLo = vals[Math.floor(vals.length * 0.08)];
+  const pHi = vals[Math.floor(vals.length * 0.92)];
   const lumS = boxBlur(lum, w, h, 1);
+  // 纹理优势(版画排线/点刻)判定:高通能量高 → 加大低通半径压纹理、收高通增益
+  let texE = 0;
+  {
+    const low0 = boxBlur(lum, w, h, 9);
+    let cnt = 0;
+    for (let i = 0; i < w * h; i++)
+      if (subj[i]) { texE += Math.abs(lumS[i] - low0[i]); cnt++; }
+    texE = cnt ? texE / cnt : 0;
+  }
+  const textured = texE > 0.045;
+  const low = boxBlur(lum, w, h, textured ? 16 : 9);
+  const gain = textured ? cfg.detailGainTex : cfg.detailGain;
   const feather = boxBlur(boxBlur(subj, w, h, 2), w, h, 2);
 
-  const win = headWindow(subj, w, h);
+  const win = headWindow(subj, w, h, cfg.face);
   const mask = new Float32Array(w * h);
   const cutPix = (cfg.cutY ?? 1) * h;
   // 头肩窗口的横向衰减:以头带质心为中心,把旁侧误并入的背景团块淡出
   let halfW = 0, softR = 0;
   if (win) {
     halfW = Math.max((win.hx1 - win.hx0) / 2, 6);
-    softR = halfW * 2.1;
+    softR = halfW * 2.6;
   }
   for (let i = 0; i < w * h; i++) {
     const edge = smooth(feather[i] * 2.2) * smooth((cutPix - (i / w | 0)) / (0.06 * h));
     if (edge <= 0.002) continue;
     const base = smooth((lumS[i] - pLo) / Math.max(1e-4, pHi - pLo));
-    const hp = (lumS[i] - low[i]) * cfg.detailGain;
-    const t = clamp(base + hp, 0, 1);
+    const hp = (lumS[i] - low[i]) * gain;
+    const t = smooth(clamp(base + hp, 0, 1));   // smooth = 软膝,压黑洞与过曝
     let v = (cfg.ped + (1 - cfg.ped) * Math.pow(t, cfg.gamma)) * edge;
     if (win) {
       const dx = Math.abs((i % w) - win.cx);
@@ -403,7 +497,7 @@ for (const f of figures) {
     if (m.ok) {
       writeFileSync(join(root, 'public/portraits', `${f.id}.png`), PNG.sync.write(to45Png(m)));
       entry.mask = `portraits/${f.id}.png`;
-      entry.v = 2; // 重生成掩膜后递增,否则 Pages CDN 会继续发旧图
+      entry.v = 3; // 重生成掩膜后递增,否则 Pages CDN 会继续发旧图
     } else {
       console.log(`⚠ ${f.id} 主体分割覆盖 ${(m.coverage * 100).toFixed(1)}%,跳过掩膜(仅头像)`);
     }

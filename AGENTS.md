@@ -16,7 +16,7 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:5897 句语录渲染
 | 产物 JS | 1,020.46 kB / gzip 467.71 kB | `npm run build` 末三行 |
 | 产物 CSS | 16.39 kB / gzip 3.95 kB | `npm run build` 末三行 |
 | 产物 HTML | 2.17 kB / gzip 1.39 kB | `npm run build` 末三行 |
-| dist 全量 | 约 8.80 MB = `assets/` 1,528,049(JS 1020k + CSS 16k)+ `index.html` 2,660 + 4 张固定肖像掩膜 909,306 + `portraits/` 换装掩膜 5,983,531(80 张,按需加载)+ `avatars/` 372,121 + `README.md`(随文档改动而变,不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
+| dist 全量 | 约 9.26 MB = `assets/` 1,528,049(JS 1020k + CSS 16k)+ `index.html` 2,660 + 4 张固定肖像掩膜 909,306 + `portraits/` 换装掩膜 6,893,067(79 张,按需加载)+ `avatars/` 372,134 + `README.md`(随文档改动而变,不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
 | 语法检查 | 21 个源码文件(`src` 14 + `tools` 6 + `vite.config.js`)全部通过 | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` |
 | 数据契约校验 | `npm run verify`(`tools/verify-data.mjs`,零依赖):语录↔人物 id、每人物至少 1 条、分组 key、DOM id、无全角逗号、无重复(f+t)、肖像清单文件存在 | 退出码 0,结尾打印「数据契约校验通过:91 位人物 / N 条语录 / 4 个分组 / 肖像平面 4 块」 |
 | lint / 类型检查 / 格式化 | 无配置也无依赖 | `git ls-files` 里没有 `eslint*`、`tsconfig*`、`prettier*` |
@@ -56,7 +56,7 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:5897 句语录渲染
 | `src/data/portraits.js` | 头像清单(人物 id → `public/avatars/*.jpg`) | `tools/fetch-portraits.mjs` + `tools/make-portraits.mjs` 生成,缺失的人物侧栏回退姓氏徽记 |
 | `src/style.css` | 全部界面样式,单个 media query 管移动端 | 见「关键约定 8」的未定义类 |
 | `public/*-mask.png` | 4 张亮度掩膜,运行时按 `./<id>-mask.png?v=<n>` 拉取 | 会被 Vite 原样拷进 `dist/` |
-| `public/avatars/*.jpg`、`public/portraits/*.png` | 83 张侧栏小头像 + 80 张人物星尘掩膜(点亮换装用,按需加载) | `public/portraits/CREDITS.md` 记录来源(Wikimedia Commons 等)与授权;清单在 `src/data/portraits.js` |
+| `public/avatars/*.jpg`、`public/portraits/*.png` | 83 张侧栏小头像 + 79 张人物星尘掩膜(点亮换装用,按需加载) | `public/portraits/CREDITS.md` 记录来源(Wikimedia Commons 等)与授权;清单在 `src/data/portraits.js` |
 | `tools/*.mjs` | 离线脚本:`verify-data`(契约校验)、`prepare-mask`、`make-emblem`、`make-banner`、`fetch-portraits`、`make-portraits` | 只有 `make-emblem.mjs` 会写 `src/data/`,见「改动后的验证」;`fetch/make-portraits` 写 `public/` 与 `src/data/portraits.js` |
 | `tools/gen/` | 数据扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs`(批校验)+ `merge.mjs`(合并进 quotes.js)+ `stats.mjs`(分布统计) | 批次文件合并后仍留在仓库供追溯;新增语录走「数据扩充流水线」,见下节 |
 | `tools/*-photo.jpg`、`tools/emblem-ref.png` | 生成脚本的输入素材,合计 3.20 MiB | 不进构建、不被 `src/` 引用 |
