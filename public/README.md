@@ -9,7 +9,7 @@
 链接在 `dist/` 与作为子页面的副本里都会断)。
 
 另外两个子目录:`avatars/`(83 张侧栏小头像,`tools/make-portraits.mjs` 生成,清单在
-`src/data/portraits.js`,缺失的人物侧栏回退姓氏徽记)与 `portraits/`(80 张人物星尘掩膜,
+`src/data/portraits.js`,缺失的人物侧栏回退姓氏徽记)与 `portraits/`(79 张人物星尘掩膜,
 4:5 归一化,点亮某位人物时运行时按清单里的 `portraits/<id>.png` 按需加载换装;同目录
 `CREDITS.md` 记录来源与许可)。
 
@@ -20,7 +20,7 @@ URL 就是文件名本身,唯一的缓存控制手段是查询串里的 `?v=`。
 
 - `avatars/` —— 83 张侧栏小头像(JPG,`tools/make-portraits.mjs` 生成);清单在
   `../src/data/portraits.js`,按 `figures[].id` 查找,缺失的人物在侧栏回退姓氏徽记。
-- `portraits/` —— 80 张人物星尘掩膜(PNG,4:5 归一化)+ `CREDITS.md` 来源署名。
+- `portraits/` —— 79 张人物星尘掩膜(PNG,4:5 归一化)+ `CREDITS.md` 来源署名。
   点亮某位人物时,运行时按清单里的 `portraits/<id>.png` 按需加载并换装;
   固定四位(马恩列卢)不用它,他们走根下的 `*-mask.png`。
 
