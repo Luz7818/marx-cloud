@@ -5,7 +5,7 @@
 
 ## 一句话
 
-Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:2629 句语录渲染成星尘,相机每转过 90°
+Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:5897 句语录渲染成星尘,相机每转过 90°
 聚合成一位思想家的肖像(91 位人物,点亮可换装)。构建产物是纯静态文件,没有后端、没有运行时服务、没有数据库。
 
 ## 当前真实状态
@@ -13,16 +13,16 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:2629 句语录渲染
 | 项 | 值 | 复核命令 |
 |---|---|---|
 | 构建 | 通过,`18 modules transformed`(这个数字跟源码模块数绑定,加一个 `.js` 就会变),约 1 秒 | `npm run build` |
-| 产物 JS | 780.51 kB / gzip 306.09 kB | `npm run build` 末三行 |
-| 产物 CSS | 15.99 kB / gzip 3.86 kB | `npm run build` 末三行 |
-| 产物 HTML | 2.17 kB / gzip 1.38 kB | `npm run build` 末三行 |
-| dist 全量 | 约 9.82 MB = `assets/` 1,001,807(JS 785k + CSS 16k)+ `index.html` + 4 张固定肖像掩膜 909,306 + `portraits/` 换装掩膜 7,533,726(80 张,按需加载)+ `avatars/` 372,121 + `README.md`(随文档改动而变,不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
+| 产物 JS | 1,020.46 kB / gzip 467.71 kB | `npm run build` 末三行 |
+| 产物 CSS | 16.39 kB / gzip 3.95 kB | `npm run build` 末三行 |
+| 产物 HTML | 2.17 kB / gzip 1.39 kB | `npm run build` 末三行 |
+| dist 全量 | 约 8.80 MB = `assets/` 1,528,049(JS 1020k + CSS 16k)+ `index.html` 2,660 + 4 张固定肖像掩膜 909,306 + `portraits/` 换装掩膜 5,983,531(80 张,按需加载)+ `avatars/` 372,121 + `README.md`(随文档改动而变,不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
 | 语法检查 | 21 个源码文件(`src` 14 + `tools` 6 + `vite.config.js`)全部通过 | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` |
 | 数据契约校验 | `npm run verify`(`tools/verify-data.mjs`,零依赖):语录↔人物 id、每人物至少 1 条、分组 key、DOM id、无全角逗号、无重复(f+t)、肖像清单文件存在 | 退出码 0,结尾打印「数据契约校验通过:91 位人物 / N 条语录 / 4 个分组 / 肖像平面 4 块」 |
 | lint / 类型检查 / 格式化 | 无配置也无依赖 | `git ls-files` 里没有 `eslint*`、`tsconfig*`、`prettier*` |
 | 运行时依赖 | 只有 `three@0.169.0` | `npm ls --depth=0` |
 | 安装期包数 | 61 个(lock 展开,含 devDependencies) | `node -e "console.log(Object.keys(require('./package-lock.json').packages).length-1)"` |
-| 数据规模 | 2629 句语录 / 91 位人物 / 4 个分组 / 3400 个徽章点位 | `node --input-type=module -e "const q=(await import('./src/data/quotes.js')).quotes,{figures:f,groups:g}=(await import('./src/data/figures.js')),e=(await import('./src/data/emblem.js')).emblemPoints;console.log(q.length,f.length,g.length,e.length)"` |
+| 数据规模 | 5897 句语录 / 91 位人物 / 4 个分组 / 3400 个徽章点位 | `node --input-type=module -e "const q=(await import('./src/data/quotes.js')).quotes,{figures:f,groups:g}=(await import('./src/data/figures.js')),e=(await import('./src/data/emblem.js')).emblemPoints;console.log(q.length,f.length,g.length,e.length)"` |
 | 代码规模 | `src/` 下 14 个 `.js` 共 4035 行,另有 `style.css` | `git ls-files 'src/*.js' \| wc -l`;`cat $(git ls-files 'src/*.js') \| wc -l` |
 | 粒子数分档 | 桌面 28000 / 触屏或窄屏 20000 / 软件渲染 14000 / 带 `?lite` 9000 | `grep -n "const COUNT" src/main.js` |
 | 自动巡游节拍 | 停留 9 秒 + 转场 8 秒,空闲 4 秒后恢复 | `grep -n "DWELL = 9" src/core/scene.js` |
@@ -51,7 +51,7 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:2629 句语录渲染
 | `src/ui/favorites.js` | 拾遗读写 localStorage | 键 `marxcloud.favs.v1`,存的是语录下标 |
 | `src/ui/postcard.js` | 「留影」导出 1200×1500 PNG | 依赖 `scene.renderNow()` 与 `<a download>` |
 | `src/data/figures.js` | 91 位人物元数据 + 4 个分组 + 搜索别名 | 手工维护,`weight` 由语录数自动推导 |
-| `src/data/quotes.js` | 约 1 万条语录数组(准确数见「当前真实状态」) | 末尾约 9 千条由 `tools/gen/merge.mjs` 从批次生成,顺序即编号,只在末尾追加 |
+| `src/data/quotes.js` | 5897 条语录数组 | 末尾 4856 条由 `tools/gen/merge.mjs` 从批次生成,顺序即编号,只在末尾追加 |
 | `src/data/emblem.js` | 3400 个徽章点位 | `tools/make-emblem.mjs` 生成,勿手改 |
 | `src/data/portraits.js` | 头像清单(人物 id → `public/avatars/*.jpg`) | `tools/fetch-portraits.mjs` + `tools/make-portraits.mjs` 生成,缺失的人物侧栏回退姓氏徽记 |
 | `src/style.css` | 全部界面样式,单个 media query 管移动端 | 见「关键约定 8」的未定义类 |
@@ -139,7 +139,7 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:2629 句语录渲染
 
 ## 数据扩充流水线(tools/gen/)
 
-语录扩到约 1 万条走的是「批次 ndjson → 批校验 → 合并」三步,产物可追溯:
+语录扩充走的是「批次 ndjson → 批校验 → 合并」三步,产物可追溯:
 
 1. **批次生成**:`tools/gen/quotes-<组名>-<人物id>-<序号>.ndjson`,每行一个 JSON 对象
    `{"f":"人物id","w":"《著作》","y":年份或null,"t":"原文"}`。t 必须是真实可查的经典原文
