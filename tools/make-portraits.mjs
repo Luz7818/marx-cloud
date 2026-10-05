@@ -20,6 +20,9 @@ import { PNG } from 'pngjs';
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  clamp, smooth, toGray, downsample, boxBlur, gradient, smoothPass, faceComponent, floodSegment
+} from './lib/image-pipeline.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(root, 'tools', 'portrait-src');
@@ -44,64 +47,9 @@ const AUTO = {
   detailGain: 1.7, detailGainTex: 1.05, gamma: 1.0, ped: 0.12
 };
 
-const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const smooth = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
-
-// ---------- 与 prepare-mask.mjs 同源的管线(确定性,无随机) ----------
-function downsample(lum, W, H, crop) {
-  const cx0 = Math.floor(W * crop.x0), cx1 = Math.ceil(W * crop.x1);
-  const cy0 = Math.floor(H * crop.y0), cy1 = Math.ceil(H * crop.y1);
-  const cw = cx1 - cx0, ch = cy1 - cy0;
-  const outH = Math.round((ch / cw) * MASK_W);
-  const out = new Float32Array(MASK_W * outH);
-  for (let y = 0; y < outH; y++) {
-    const sy0 = cy0 + Math.floor((y * ch) / outH);
-    const sy1 = Math.min(cy1, Math.max(sy0 + 1, cy0 + Math.floor(((y + 1) * ch) / outH)));
-    for (let x = 0; x < MASK_W; x++) {
-      const sx0 = cx0 + Math.floor((x * cw) / MASK_W);
-      const sx1 = Math.min(cx1, Math.max(sx0 + 1, cx0 + Math.floor(((x + 1) * cw) / MASK_W)));
-      let s = 0, n = 0;
-      for (let sy = sy0; sy < sy1; sy++)
-        for (let sx = sx0; sx < sx1; sx++) { s += lum[sy * W + sx]; n++; }
-      out[y * MASK_W + x] = s / n / 255;
-    }
-  }
-  return { lum: out, w: MASK_W, h: outH };
-}
-
-function boxBlur(src, w, h, r) {
-  const tmp = new Float32Array(w * h), out = new Float32Array(w * h);
-  for (let y = 0; y < h; y++) {
-    const row = y * w;
-    let acc = 0;
-    for (let x = -r; x <= r; x++) acc += src[row + clamp(x, 0, w - 1)];
-    for (let x = 0; x < w; x++) {
-      tmp[row + x] = acc / (2 * r + 1);
-      acc += src[row + clamp(x + r + 1, 0, w - 1)] - src[row + clamp(x - r, 0, w - 1)];
-    }
-  }
-  for (let x = 0; x < w; x++) {
-    let acc = 0;
-    for (let y = -r; y <= r; y++) acc += tmp[clamp(y, 0, h - 1) * w + x];
-    for (let y = 0; y < w && y < h; y++) {
-      out[y * w + x] = acc / (2 * r + 1);
-      acc += tmp[clamp(y + r + 1, 0, h - 1) * w + x] - tmp[clamp(y - r, 0, w - 1) * w + x];
-    }
-  }
-  return out;
-}
-
-function gradient(lum, w, h) {
-  const g = new Float32Array(w * h);
-  for (let y = 1; y < h - 1; y++)
-    for (let x = 1; x < w - 1; x++) {
-      const i = y * w + x;
-      const gx = (lum[i + 1] - lum[i - 1]) + (lum[i + w + 1] - lum[i + w - 1]) + (lum[i - w + 1] - lum[i - w - 1]);
-      const gy = (lum[i + w] - lum[i - w]) + (lum[i + w + 1] - lum[i + w - 1]) + (lum[i + w - 1] - lum[i - w + 1]);
-      g[i] = Math.hypot(gx, gy) / 4;
-    }
-  return g;
-}
+// 本脚本的 boxBlur 历史口径:纵向只写到 min(w,h)、`y-r` 的 clamp 上界是 w-1
+// (`y+r+1` 仍是 h-1)——已被入库掩膜字节级固化(见 lib/image-pipeline.mjs 文件头)。
+const blur = (src, w, h, r) => boxBlur(src, w, h, r, { yTop: Math.min(w, h), yLo: w - 1 });
 
 /** 边缘环带的直方图众数(抗深色扫描边框拖偏中位数)。lum 为 0..1 归一化值 */
 function bgBorderMode(lum, w, h) {
@@ -164,79 +112,11 @@ function largestComponent(bin, w, h) {
   return out;
 }
 
-function segmentBackground(lum, w, h, { bgTol, gradTol, face, faceR }) {
-  const grad = boxBlur(gradient(lum, w, h), w, h, 3);
+function segmentBackground(lum, w, h, cfg) {
+  const grad = blur(gradient(lum, w, h), w, h, 3);
   const bgMed = bgBorderMode(lum, w, h);
-  const fx = face[0] * w, fy = face[1] * h, rx = faceR[0] * w, ry = faceR[1] * h;
-
-  const isBg = new Uint8Array(w * h);
-  const queue = new Int32Array(w * h);
-  let qh = 0, qt = 0;
-  const accept = (i) => {
-    if (isBg[i] || grad[i] >= gradTol || Math.abs(lum[i] - bgMed) >= bgTol) return false;
-    const x = i % w, y = (i / w) | 0;
-    const u = (x - fx) / rx, v = (y - fy) / ry;
-    return u * u + v * v > 1;
-  };
-  const seed = (i) => { if (accept(i)) { isBg[i] = 1; queue[qt++] = i; } };
-  for (let x = 0; x < w; x++) { seed(x); seed((h - 1) * w + x); }
-  for (let y = 0; y < h; y++) { seed(y * w); seed(y * w + w - 1); }
-  while (qh < qt) {
-    const i = queue[qh++];
-    const x = i % w, y = (i / w) | 0;
-    if (x > 0 && accept(i - 1)) { isBg[i - 1] = 1; queue[qt++] = i - 1; }
-    if (x < w - 1 && accept(i + 1)) { isBg[i + 1] = 1; queue[qt++] = i + 1; }
-    if (y > 0 && accept(i - w)) { isBg[i - w] = 1; queue[qt++] = i - w; }
-    if (y < h - 1 && accept(i + w)) { isBg[i + w] = 1; queue[qt++] = i + w; }
-  }
-  // 全局背景投票:与边缘众数同调、低梯度的像素一律视为背景,
-  // 修复泛洪被环带/暗边挡住时的整图误判(素描纸面/白墙等)
-  for (let i = 0; i < w * h; i++) {
-    if (isBg[i]) continue;
-    const x = i % w, y = (i / w) | 0;
-    const u = (x - fx) / rx, v = (y - fy) / ry;
-    if (u * u + v * v > 1 && grad[i] < gradTol * 1.25 && Math.abs(lum[i] - bgMed) < bgTol * 1.1) isBg[i] = 1;
-  }
-  return { isBg, bgMed };
-}
-
-function faceComponent(isBg, w, h, face) {
-  let sx = clamp(Math.round(face[0] * w), 0, w - 1);
-  let sy = clamp(Math.round(face[1] * h), 0, h - 1);
-  let seed = -1;
-  for (let r = 0; r < 20 && seed < 0; r++) {
-    for (let dy = -r; dy <= r && seed < 0; dy++)
-      for (let dx = -r; dx <= r && seed < 0; dx++) {
-        const x = sx + dx, y = sy + dy;
-        if (x < 0 || y < 0 || x >= w || y >= h) continue;
-        if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
-        if (!isBg[y * w + x]) seed = y * w + x;
-      }
-  }
-  const main = new Uint8Array(w * h);
-  if (seed < 0) return main;
-  const queue = new Int32Array(w * h);
-  let qh = 0, qt = 0;
-  main[seed] = 1; queue[qt++] = seed;
-  while (qh < qt) {
-    const i = queue[qh++];
-    const x = i % w, y = (i / w) | 0;
-    if (x > 0 && !isBg[i - 1] && !main[i - 1]) { main[i - 1] = 1; queue[qt++] = i - 1; }
-    if (x < w - 1 && !isBg[i + 1] && !main[i + 1]) { main[i + 1] = 1; queue[qt++] = i + 1; }
-    if (y > 0 && !isBg[i - w] && !main[i - w]) { main[i - w] = 1; queue[qt++] = i - w; }
-    if (y < h - 1 && !isBg[i + w] && !main[i + w]) { main[i + w] = 1; queue[qt++] = i + w; }
-  }
-  for (let pass = 0; pass < 3; pass++) {
-    const add = [];
-    for (let y = 1; y < h - 1; y++)
-      for (let x = 1; x < w - 1; x++) {
-        const i = y * w + x;
-        if (main[i] || isBg[i]) continue;
-        if (main[i - 1] || main[i + 1] || main[i - w] || main[i + w]) add.push(i);
-      }
-    for (const i of add) main[i] = 1;
-  }
-  return main;
+  // vote=true:泛洪之后追加全局背景投票(与边缘众数同调、低梯度一律视为背景)
+  return floodSegment(lum, w, h, cfg, grad, bgMed, true);
 }
 
 // ---------- 通用编解码 ----------
@@ -250,24 +130,6 @@ function decodeImage(buf) {
     return { w: p.width, h: p.height, data: p.data };
   }
   throw new Error('不支持的图像格式(需 JPEG/PNG)');
-}
-
-function toGray(img) {
-  const { w, h, data } = img;
-  const lum = new Float32Array(w * h);
-  for (let i = 0; i < w * h; i++)
-    lum[i] = 0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2];
-  return lum;
-}
-
-function smoothPass(mask, w, h) {
-  const copy = mask.slice();
-  for (let y = 1; y < h - 1; y++)
-    for (let x = 1; x < w - 1; x++) {
-      const i = y * w + x;
-      mask[i] = (copy[i] * 4 + copy[i - 1] + copy[i + 1] + copy[i - w] + copy[i + w] +
-        (copy[i - w - 1] + copy[i - w + 1] + copy[i + w - 1] + copy[i + w + 1]) * 0.5) / 8;
-    }
 }
 
 /** 头肩窗口:从面部种子列的走廊向上/下行走(环带、旁团不再牵引取景) */
@@ -318,8 +180,8 @@ function headWindow(subj, w, h, face) {
 
 /** 生成掩膜(裁剪空间)。返回 {mask,w,h,subj,ok,win} */
 function buildAutoMask(img, cfg) {
-  const lum0 = toGray(img);
-  const { lum, w, h } = downsample(lum0, img.w, img.h, cfg.crop);
+  const lum0 = toGray(img.w, img.h, img.data);
+  const { lum, w, h } = downsample(lum0, img.w, img.h, cfg.crop, MASK_W);
   const { isBg, bgMed } = segmentBackground(lum, w, h, cfg);
   let subj = faceComponent(isBg, w, h, cfg.face);
   // 形态学清理:腐蚀断开细环/排线/细桥 → 取最大连通块 → 膨胀回复
@@ -343,20 +205,20 @@ function buildAutoMask(img, cfg) {
   vals.sort((a, b) => a - b);
   const pLo = vals[Math.floor(vals.length * 0.08)];
   const pHi = vals[Math.floor(vals.length * 0.92)];
-  const lumS = boxBlur(lum, w, h, 1);
+  const lumS = blur(lum, w, h, 1);
   // 纹理优势(版画排线/点刻)判定:高通能量高 → 加大低通半径压纹理、收高通增益
   let texE = 0;
   {
-    const low0 = boxBlur(lum, w, h, 9);
+    const low0 = blur(lum, w, h, 9);
     let cnt = 0;
     for (let i = 0; i < w * h; i++)
       if (subj[i]) { texE += Math.abs(lumS[i] - low0[i]); cnt++; }
     texE = cnt ? texE / cnt : 0;
   }
   const textured = texE > 0.045;
-  const low = boxBlur(lum, w, h, textured ? 16 : 9);
+  const low = blur(lum, w, h, textured ? 16 : 9);
   const gain = textured ? cfg.detailGainTex : cfg.detailGain;
-  const feather = boxBlur(boxBlur(subj, w, h, 2), w, h, 2);
+  const feather = blur(blur(subj, w, h, 2), w, h, 2);
 
   const win = headWindow(subj, w, h, cfg.face);
   const mask = new Float32Array(w * h);
@@ -411,7 +273,7 @@ function normalize45(m) {
 
 /** 头像:主体外接框定位(裁剪空间),回退到通用中心 */
 function buildAvatar(img, cfg, subj, subjW, subjH, ok) {
-  const lum0 = toGray(img);
+  const lum0 = toGray(img.w, img.h, img.data);
   const cx0 = Math.floor(img.w * cfg.crop.x0), cx1 = Math.ceil(img.w * cfg.crop.x1);
   const cy0 = Math.floor(img.h * cfg.crop.y0), cy1 = Math.ceil(img.h * cfg.crop.y1);
   const cw = cx1 - cx0, ch = cy1 - cy0;

@@ -17,7 +17,7 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:5897 句语录渲染
 | 产物 CSS | 16.39 kB / gzip 3.95 kB | `npm run build` 末三行 |
 | 产物 HTML | 2.17 kB / gzip 1.39 kB | `npm run build` 末三行 |
 | dist 全量 | 约 9.26 MB = `assets/` 1,528,049(JS 1020k + CSS 16k)+ `index.html` 2,660 + 4 张固定肖像掩膜 909,306 + `portraits/` 换装掩膜 6,893,067(79 张,按需加载)+ `avatars/` 372,134 + `README.md`(随文档改动而变,不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
-| 语法检查 | 21 个源码文件(`src` 14 + `tools` 6 + `vite.config.js`)全部通过 | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` |
+| 语法检查 | 25 个源码文件(`src` 14 + `tools` 10 含 gen/lib 子目录 + `vite.config.js`)全部通过 | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` |
 | 数据契约校验 | `npm run verify`(`tools/verify-data.mjs`,零依赖):语录↔人物 id、每人物至少 1 条、分组 key、DOM id、无全角逗号、无重复(f+t)、肖像清单文件存在 | 退出码 0,结尾打印「数据契约校验通过:91 位人物 / N 条语录 / 4 个分组 / 肖像平面 4 块」 |
 | lint / 类型检查 / 格式化 | 无配置也无依赖 | `git ls-files` 里没有 `eslint*`、`tsconfig*`、`prettier*` |
 | 运行时依赖 | 只有 `three@0.169.0` | `npm ls --depth=0` |

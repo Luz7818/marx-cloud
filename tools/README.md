@@ -37,6 +37,7 @@
 | `fetch-portraits.mjs` | 按 `src/data/figures.js` 的 WIKI 字段抓取 Wikimedia 头像到 `portrait-src/` | 可以,需联网 | 写 `portrait-src/`(素材缓存,入库) |
 | `make-portraits.mjs` | 头像裁剪压缩 → `public/avatars/*.jpg`、`src/data/portraits.js` 清单、`public/portraits/` 与 `CREDITS.md` | 可以 | **会覆盖 `public/avatars/`、`src/data/portraits.js`**(已入库) |
 | `gen/` | 语录扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs` 批校验 + `merge.mjs` 合并 + `coverage.mjs` 分布统计 | 可以 | **`merge.mjs` 追加写 `src/data/quotes.js`**(以行内容幂等,重复跳过) |
+| `lib/` | `image-pipeline.mjs`:prepare-mask 与 make-portraits 共用的图像管线原语(下采样/盒式模糊/梯度/形态学前处理/泛洪分割核),两套历史口径差异用参数显式表达 | 可以 | **改任何函数都必须重跑两个生成脚本并核对 `git status` 零改动**(产物逐字节回归) |
 
 一句话记法:**会写 `src/data/` 的有三个**——`make-emblem.mjs`(覆盖 emblem.js)、
 `make-portraits.mjs`(覆盖 portraits.js)、`gen/merge.mjs`(追加 quotes.js),覆盖的都是应用真正

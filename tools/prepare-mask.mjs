@@ -20,6 +20,9 @@ import { PNG } from 'pngjs';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  clamp, smooth, toGray, downsample, boxBlur, gradient, smoothPass, faceComponent, floodSegment
+} from './lib/image-pipeline.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_WIDTH = 500;
@@ -57,137 +60,16 @@ const PREVIEW = args.includes('--preview');
 const onlyArg = args.find(a => a.startsWith('--only='));
 const ONLY = onlyArg ? onlyArg.split('=')[1] : null;
 
-const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-const smooth = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
-
-/** 区域平均下采样到 OUT_WIDTH 宽 */
-function downsample(lum, W, H, crop) {
-  const cx0 = Math.floor(W * crop.x0), cx1 = Math.ceil(W * crop.x1);
-  const cy0 = Math.floor(H * crop.y0), cy1 = Math.ceil(H * crop.y1);
-  const cw = cx1 - cx0, ch = cy1 - cy0;
-  const outH = Math.round((ch / cw) * OUT_WIDTH);
-  const out = new Float32Array(OUT_WIDTH * outH);
-  for (let y = 0; y < outH; y++) {
-    const sy0 = cy0 + Math.floor((y * ch) / outH);
-    const sy1 = Math.min(cy1, Math.max(sy0 + 1, cy0 + Math.floor(((y + 1) * ch) / outH)));
-    for (let x = 0; x < OUT_WIDTH; x++) {
-      const sx0 = cx0 + Math.floor((x * cw) / OUT_WIDTH);
-      const sx1 = Math.min(cx1, Math.max(sx0 + 1, cx0 + Math.floor(((x + 1) * cw) / OUT_WIDTH)));
-      let s = 0, n = 0;
-      for (let sy = sy0; sy < sy1; sy++)
-        for (let sx = sx0; sx < sx1; sx++) { s += lum[sy * W + sx]; n++; }
-      out[y * OUT_WIDTH + x] = s / n / 255;
-    }
-  }
-  return { lum: out, w: OUT_WIDTH, h: outH };
-}
-
-function boxBlur(src, w, h, r) {
-  const tmp = new Float32Array(w * h), out = new Float32Array(w * h);
-  for (let y = 0; y < h; y++) {
-    const row = y * w;
-    let acc = 0;
-    for (let x = -r; x <= r; x++) acc += src[row + clamp(x, 0, w - 1)];
-    for (let x = 0; x < w; x++) {
-      tmp[row + x] = acc / (2 * r + 1);
-      acc += src[row + clamp(x + r + 1, 0, w - 1)] - src[row + clamp(x - r, 0, w - 1)];
-    }
-  }
-  for (let x = 0; x < w; x++) {
-    let acc = 0;
-    for (let y = -r; y <= r; y++) acc += tmp[clamp(y, 0, h - 1) * w + x];
-    for (let y = 0; y < h; y++) {
-      out[y * w + x] = acc / (2 * r + 1);
-      acc += tmp[clamp(y + r + 1, 0, h - 1) * w + x] - tmp[clamp(y - r, 0, h - 1) * w + x];
-    }
-  }
-  return out;
-}
-
-function gradient(lum, w, h) {
-  const g = new Float32Array(w * h);
-  for (let y = 1; y < h - 1; y++)
-    for (let x = 1; x < w - 1; x++) {
-      const i = y * w + x;
-      const gx = (lum[i + 1] - lum[i - 1]) + (lum[i + w + 1] - lum[i + w - 1]) + (lum[i - w + 1] - lum[i - w - 1]);
-      const gy = (lum[i + w] - lum[i - w]) + (lum[i + w + 1] - lum[i + w - 1]) + (lum[i + w - 1] - lum[i - w + 1]);
-      g[i] = Math.hypot(gx, gy) / 4;
-    }
-  return g;
-}
-
 /** 边界泛洪:穿过「低梯度 且 亮度落在背景带内」的像素;背景带由上边界估计(避开衣领)。
  *  面部椭圆内永不为背景 —— 保护与背景同亮度的阴影面颊。 */
-function segmentBackground(lum, w, h, { bgTol, gradTol, face, faceR }) {
+function segmentBackground(lum, w, h, cfg) {
   const grad = boxBlur(gradient(lum, w, h), w, h, 3);
   const ring = [];
   for (let x = 0; x < w; x++) ring.push(lum[x]);
   for (let y = 0; y < Math.floor(h * 0.35); y++) ring.push(lum[y * w], lum[y * w + w - 1]);
   ring.sort((a, b) => a - b);
   const bgMed = ring[ring.length >> 1];
-  const fx = face[0] * w, fy = face[1] * h, rx = faceR[0] * w, ry = faceR[1] * h;
-
-  const isBg = new Uint8Array(w * h);
-  const queue = new Int32Array(w * h);
-  let qh = 0, qt = 0;
-  const accept = (i) => {
-    if (isBg[i] || grad[i] >= gradTol || Math.abs(lum[i] - bgMed) >= bgTol) return false;
-    const x = i % w, y = (i / w) | 0;
-    const u = (x - fx) / rx, v = (y - fy) / ry;
-    return u * u + v * v > 1;
-  };
-  const seed = (i) => { if (accept(i)) { isBg[i] = 1; queue[qt++] = i; } };
-  for (let x = 0; x < w; x++) { seed(x); seed((h - 1) * w + x); }
-  for (let y = 0; y < h; y++) { seed(y * w); seed(y * w + w - 1); }
-  while (qh < qt) {
-    const i = queue[qh++];
-    const x = i % w, y = (i / w) | 0;
-    if (x > 0 && accept(i - 1)) { isBg[i - 1] = 1; queue[qt++] = i - 1; }
-    if (x < w - 1 && accept(i + 1)) { isBg[i + 1] = 1; queue[qt++] = i + 1; }
-    if (y > 0 && accept(i - w)) { isBg[i - w] = 1; queue[qt++] = i - w; }
-    if (y < h - 1 && accept(i + w)) { isBg[i + w] = 1; queue[qt++] = i + w; }
-  }
-  return { isBg, bgMed };
-}
-
-/** 主体 = 含面部种子的非背景连通块;再闭运算接回被漏分割切断的须发 */
-function faceComponent(isBg, w, h, face) {
-  let sx = clamp(Math.round(face[0] * w), 0, w - 1);
-  let sy = clamp(Math.round(face[1] * h), 0, h - 1);
-  let seed = -1;
-  for (let r = 0; r < 20 && seed < 0; r++) {
-    for (let dy = -r; dy <= r && seed < 0; dy++)
-      for (let dx = -r; dx <= r && seed < 0; dx++) {
-        const x = sx + dx, y = sy + dy;
-        if (x < 0 || y < 0 || x >= w || y >= h) continue;
-        if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
-        if (!isBg[y * w + x]) seed = y * w + x;
-      }
-  }
-  const main = new Uint8Array(w * h);
-  if (seed < 0) return main;
-  const queue = new Int32Array(w * h);
-  let qh = 0, qt = 0;
-  main[seed] = 1; queue[qt++] = seed;
-  while (qh < qt) {
-    const i = queue[qh++];
-    const x = i % w, y = (i / w) | 0;
-    if (x > 0 && !isBg[i - 1] && !main[i - 1]) { main[i - 1] = 1; queue[qt++] = i - 1; }
-    if (x < w - 1 && !isBg[i + 1] && !main[i + 1]) { main[i + 1] = 1; queue[qt++] = i + 1; }
-    if (y > 0 && !isBg[i - w] && !main[i - w]) { main[i - w] = 1; queue[qt++] = i - w; }
-    if (y < h - 1 && !isBg[i + w] && !main[i + w]) { main[i + w] = 1; queue[qt++] = i + w; }
-  }
-  for (let pass = 0; pass < 3; pass++) {
-    const add = [];
-    for (let y = 1; y < h - 1; y++)
-      for (let x = 1; x < w - 1; x++) {
-        const i = y * w + x;
-        if (main[i] || isBg[i]) continue;
-        if (main[i - 1] || main[i + 1] || main[i - w] || main[i + w]) add.push(i);
-      }
-    for (const i of add) main[i] = 1;
-  }
-  return main;
+  return floodSegment(lum, w, h, cfg, grad, bgMed, false);
 }
 
 function buildMask(cfg) {
@@ -195,11 +77,8 @@ function buildMask(cfg) {
     useTArray: true, maxMemoryUsageInMB: 2048
   });
   const { width: W, height: H } = jpeg;
-  const lum0 = new Float32Array(W * H);
-  for (let i = 0; i < W * H; i++) {
-    lum0[i] = 0.299 * jpeg.data[i * 4] + 0.587 * jpeg.data[i * 4 + 1] + 0.114 * jpeg.data[i * 4 + 2];
-  }
-  const { lum, w, h } = downsample(lum0, W, H, cfg.crop);
+  const lum0 = toGray(W, H, jpeg.data);
+  const { lum, w, h } = downsample(lum0, W, H, cfg.crop, OUT_WIDTH);
   const { isBg, bgMed } = segmentBackground(lum, w, h, cfg);
   const subj0 = faceComponent(isBg, w, h, cfg.face);
   if (args.includes('--debug')) {
@@ -232,13 +111,7 @@ function buildMask(cfg) {
     mask[i] = (ped + (1 - ped) * Math.pow(t, cfg.gamma)) * edge;
   }
 
-  const copy = mask.slice();
-  for (let y = 1; y < h - 1; y++)
-    for (let x = 1; x < w - 1; x++) {
-      const i = y * w + x;
-      mask[i] = (copy[i] * 4 + copy[i - 1] + copy[i + 1] + copy[i - w] + copy[i + w] +
-        (copy[i - w - 1] + copy[i - w + 1] + copy[i + w - 1] + copy[i + w + 1]) * 0.5) / 8;
-    }
+  smoothPass(mask, w, h);
   return { mask, outW: w, outH: h, subj: subj0 };
 }
 
