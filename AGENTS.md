@@ -58,7 +58,7 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:5897 句语录渲染
 | `public/*-mask.png` | 4 张亮度掩膜,运行时按 `./<id>-mask.png?v=<n>` 拉取 | 会被 Vite 原样拷进 `dist/` |
 | `public/avatars/*.jpg`、`public/portraits/*.png` | 83 张侧栏小头像 + 79 张人物星尘掩膜(点亮换装用,按需加载) | `public/portraits/CREDITS.md` 记录来源(Wikimedia Commons 等)与授权;清单在 `src/data/portraits.js` |
 | `tools/*.mjs` | 离线脚本:`verify-data`(契约校验)、`prepare-mask`、`make-emblem`、`make-banner`、`fetch-portraits`、`make-portraits` | 只有 `make-emblem.mjs` 会写 `src/data/`,见「改动后的验证」;`fetch/make-portraits` 写 `public/` 与 `src/data/portraits.js` |
-| `tools/gen/` | 数据扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs`(批校验)+ `merge.mjs`(合并进 quotes.js)+ `stats.mjs`(分布统计) | 批次文件合并后仍留在仓库供追溯;新增语录走「数据扩充流水线」,见下节 |
+| `tools/gen/` | 数据扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs`(批校验)+ `merge.mjs`(合并进 quotes.js)+ `coverage.mjs`(分布统计,含 ndjson 批次口径) | 批次文件合并后仍留在仓库供追溯;新增语录走「数据扩充流水线」,见下节 |
 | `tools/*-photo.jpg`、`tools/emblem-ref.png` | 生成脚本的输入素材,合计 3.20 MiB | 不进构建、不被 `src/` 引用 |
 | `docs/banner.svg` | README 横幅 | `tools/make-banner.mjs` 生成 |
 | `package.json` | `dev` / `build` / `preview` / `verify` 四条 scripts | 依赖:`three` 一个 runtime,`vite`/`jpeg-js`/`pngjs` 三个 dev |
@@ -150,7 +150,7 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:5897 句语录渲染
    与半角双引号 / 批内不重复 / 与 quotes.js 现有库不重复。
 3. **合并**:`node tools/gen/merge.mjs`(加 `--dry` 只预览)把全部批次追加到 quotes.js
    末尾,重复行自动跳过。合并后必须 `npm run verify` + `npm run build`。
-4. `tools/gen/stats.mjs` 打印每人物条数分布,用于查覆盖缺口。
+4. `tools/gen/coverage.mjs` 打印每人物条数分布(含 ndjson 批次口径),用于查覆盖缺口。
 
 注意:merge.mjs 以「行内容」判定重复,所以批内/批间重复会在合并时静默跳过(控制台报出条数);
 先跑 `selfcheck --all` 清零问题再合并,才是干净流程。

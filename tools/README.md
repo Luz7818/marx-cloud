@@ -19,7 +19,7 @@
 ## 子目录
 
 - `gen/` —— 语录扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs`(批校验,支持 `--post`)+
-  `merge.mjs`(幂等合并进 `src/data/quotes.js`)+ `stats.mjs` / `coverage.mjs`(分布统计)。
+  `merge.mjs`(幂等合并进 `src/data/quotes.js`)+ `coverage.mjs`(分布统计,含批次口径)。
   流程见仓库根 `../AGENTS.md` 的「数据扩充流水线」。
 - `portrait-src/` —— `fetch-portraits.mjs` 从 Wikimedia 抓取的头像素材缓存(make-portraits
   的输入之一)。
@@ -36,7 +36,7 @@
 | `verify-data.mjs` | 数据契约校验(即 `npm run verify`):语录↔人物 id、每人物至少 1 条、分组 key、DOM id、无全角逗号、无重复(f+t)、肖像清单文件存在 | 可以,只读 | 只读不写,退出码 0=通过 |
 | `fetch-portraits.mjs` | 按 `src/data/figures.js` 的 WIKI 字段抓取 Wikimedia 头像到 `portrait-src/` | 可以,需联网 | 写 `portrait-src/`(素材缓存,入库) |
 | `make-portraits.mjs` | 头像裁剪压缩 → `public/avatars/*.jpg`、`src/data/portraits.js` 清单、`public/portraits/` 与 `CREDITS.md` | 可以 | **会覆盖 `public/avatars/`、`src/data/portraits.js`**(已入库) |
-| `gen/` | 语录扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs` 批校验 + `merge.mjs` 合并 + `stats.mjs` 每人物统计 | 可以 | **`merge.mjs` 追加写 `src/data/quotes.js`**(以行内容幂等,重复跳过) |
+| `gen/` | 语录扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs` 批校验 + `merge.mjs` 合并 + `coverage.mjs` 分布统计 | 可以 | **`merge.mjs` 追加写 `src/data/quotes.js`**(以行内容幂等,重复跳过) |
 
 一句话记法:**会写 `src/data/` 的有三个**——`make-emblem.mjs`(覆盖 emblem.js)、
 `make-portraits.mjs`(覆盖 portraits.js)、`gen/merge.mjs`(追加 quotes.js),覆盖的都是应用真正
