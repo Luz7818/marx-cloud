@@ -5,3 +5,6 @@ tools/preview-*.png
 .DS_Store
 *.log
 .zcodeignore
+
+.vercel
+.env*
