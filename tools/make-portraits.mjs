@@ -260,16 +260,6 @@ function toGray(img) {
   return lum;
 }
 
-function writeGrayPng(mask, w, h, file) {
-  const png = new PNG({ width: w, height: h });
-  for (let i = 0; i < w * h; i++) {
-    const b = Math.round(clamp(mask[i], 0, 1) * 255);
-    png.data[i * 4] = png.data[i * 4 + 1] = png.data[i * 4 + 2] = b;
-    png.data[i * 4 + 3] = 255;
-  }
-  writeFileSync(file, PNG.sync.write(png));
-}
-
 function smoothPass(mask, w, h) {
   const copy = mask.slice();
   for (let y = 1; y < h - 1; y++)
@@ -337,7 +327,6 @@ function buildAutoMask(img, cfg) {
   let n = 0;
   for (let i = 0; i < w * h; i++) n += subj[i];
   const coverage = n / (w * h);
-  if (coverage < 0.04) return { subj, w, h, ok: false, coverage };
   if (coverage < 0.04) return { subj, w, h, ok: false, coverage };
 
   // 拉伸基准取自面部椭圆区:让面部影调横跨 0..1,五官才有密度差
