@@ -80,7 +80,7 @@
 
 - `createScene()` 建 `WebGLRenderer`(不开抗锯齿)与 fov 50 的 `PerspectiveCamera`,
   相机始终看 `(0, 0.1, 0)`,位置由球坐标 `(theta, phi, radius)` 算出。
-- 输入:单指/左键拖拽转视角,双指捏合与滚轮缩放,`WASDQE` 飞行(见 `../docs/getting-started.md` 第 4.2 节),
+- 输入:单指/左键拖拽转视角,双指捏合与滚轮缩放,`WASDQE` 飞行(见 `../docs/GET-START.md` 第 4.2 节),
   `P` 暂停巡游。`fit` 是"四块平面都装得下"的距离,缩放被夹在它的 0.42–3.4 倍。
 - 每帧把相机朝向与四块平面法线的点积过一遍 smoothstep,得到 `uW0..uW3`,并用
   `1 - maxWeight` 当散开量传给 `uSpread`。这是"每 90° 聚成人像"的全部机制,没有骨骼动画。

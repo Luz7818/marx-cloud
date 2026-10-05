@@ -1,14 +1,93 @@
-# 给 AI 的项目说明
+# AGENTS.md —— 项目协作与代码开发规范（唯一权威入口）
 
-> 用途:给 AI 编码助手。这里是事实与约束,不含介绍性文字。改动本仓库前先读这份。
-> `README.md` 与 `docs/getting-started.md` 引用的规模数字以本文件为准,它们只链接不复述。
+> 用途:给 AI 编码助手与所有开发者。这里是规范入口与索引:目标、原则、流程、模块规则、
+> 维护矩阵、阅读清单都在这份文件里。细则一律链接到对应文件,冲突时以细则文件为准并回改本文件。
+> `README.md` 与 `docs/GET-START.md` 引用的规模数字以本文件的「当前状态」为准,它们只链接不复述。
 
-## 一句话
+## 项目目标
 
-Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:5897 句语录渲染成星尘,相机每转过 90°
-聚合成一位思想家的肖像(91 位人物,点亮可换装)。构建产物是纯静态文件,没有后端、没有运行时服务、没有数据库。
+- 定位:Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:5897 句语录渲染成星尘,相机每转过
+  90° 聚合成一位思想家的肖像(91 位人物,点亮可换装)。构建产物是纯静态文件,没有后端、没有
+  运行时服务、没有数据库。
+- 核心功能:星图漫游与拾星读句、四向肖像聚合、徽章视图、拾遗收藏、留影导出、语录扩充流水线。
+- 技术栈:Vite 5 + three.js 0.169(唯一 runtime 依赖),CI 用 node 20(复核:`npm ls --depth=0`)。
+- 详情:[README.md](README.md)、[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-## 当前真实状态
+## 开发原则
+
+1. 正确性优先。
+2. 可维护性优先。
+3. 代码简洁、项目简洁。
+4. 小步迭代。
+5. 单模块开发。
+6. 每个改动必须有明确设计与验收标准。
+7. 禁止一次生成整个项目。
+8. 禁止跳步开发。
+
+执行口径:先想后写(假设与歧义先挑明);最简优先(不加没要求的功能与抽象——本仓刻意不引入
+测试框架/lint/TypeScript);外科手术式改动(不动无关代码,每行改动可追溯到需求);目标驱动
+(先有可验证判据再动手,宣称完成前先跑通 [docs/TESTING.md](docs/TESTING.md) 的门禁)。
+
+## 开发流程
+
+**分析 → 设计 → 实现 → 测试 → 文档更新 → Git提交 → 等待确认**。不得跳过任何阶段。
+
+| 阶段 | 产出物 | 放行标准 |
+|---|---|---|
+| 分析 | 影响面清单(动哪一层:core/ui/data/tools,是否触及生成物) | 影响面说全 |
+| 设计 | 方案说明(公式/数据格式变化、回退方式) | 验收标准已定义;与更简方案比较过 |
+| 实现 | 代码 | 只含设计内改动,符合 [docs/CODE-STYLE.md](docs/CODE-STYLE.md) |
+| 测试 | 门禁结果 | [docs/TESTING.md](docs/TESTING.md) 三条命令 + 浏览器实测 |
+| 文档更新 | 受影响文档 diff | 维护矩阵逐项过完 |
+| Git提交 | 提交 | 符合 [docs/GIT.md](docs/GIT.md),一批一提交(生成物与源同批) |
+| 等待确认 | —— | 等人确认后推送;推送后 luzzz.me 侧需重跑同步 |
+
+## 模块开发规则
+
+- 一个智能体一次只开发一个模块;模块完成后才能进入下一模块。
+- 如需同时开发,使用多个子智能体,每个子智能体同样一次只开发一个模块。
+
+模块完成标准(全部满足才算完成):
+
+1. 功能完成:达到 [TODO.md](TODO.md) 中该任务的验收标准。
+2. 测试通过:符合 [docs/TESTING.md](docs/TESTING.md)。
+3. 最简原则:代码和项目架构都保持最简洁,无冗余抽象与重复实现。
+4. [TODO.md](TODO.md) 更新:勾选完成项、明确下一项。
+5. [HISTORY.md](HISTORY.md) 追加变更记录。
+6. 受影响的 docs 更新(按需)。
+7. [README.md](README.md) 更新(如有面向访客的变化)。
+8. Commit message 符合 [docs/GIT.md](docs/GIT.md)。
+
+## 文档维护规则
+
+| 事件 | 需更新 |
+|---|---|
+| 模块完成 | `TODO.md`、`HISTORY.md`、受影响 docs |
+| 架构决策(公式、数据格式、生成物约定、发布链路变化) | `docs/ARCHITECTURE.md` + `HISTORY.md` 记录缘由 |
+| 命令/入口/交互变化 | `README.md` / `docs/GET-START.md` / 对应子目录 README |
+| 增删一级或二级目录 | 仓根 `目录说明.md` + 本文件 |
+| 规模数字(句数/人物数/体积)变化 | 本文件「当前状态」 |
+| 新对话/新任务开始 | 按下方阅读清单阅读 |
+
+## 开发前阅读清单
+
+每个新对话/新任务,按顺序阅读:
+
+1. 本文件(`AGENTS.md`)
+2. [TODO.md](TODO.md)
+3. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)(30 行职责表、11 条关键约定、数据流水线在这里)
+4. [docs/GET-START.md](docs/GET-START.md)
+5. [HISTORY.md](HISTORY.md)
+6. 与任务相关的 [docs/CODE-STYLE.md](docs/CODE-STYLE.md)、[docs/TESTING.md](docs/TESTING.md)、[docs/GIT.md](docs/GIT.md)
+
+阅读完成后**不要写代码**:先做架构评审,输出——项目理解 / 核心模块 / 模块依赖关系 / 潜在风险 /
+建议优化项 / 推荐开发顺序 / 是否发现架构问题——然后等待确认。
+
+## Git 索引
+
+- Git 规范:[docs/GIT.md](docs/GIT.md)(dist 不入库、luzzz.me 跨仓同步义务、一批一提交)
+
+## 当前状态
 
 | 项 | 值 | 复核命令 |
 |---|---|---|
@@ -31,183 +110,25 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品:5897 句语录渲染
 | 本机环境 | node v24.19.0 / npm 11.17.0;CI 用 node 20 | `node --version && npm --version` |
 | `dist/` | gitignore 的本地产物,不是交付物,不要提交 | `git check-ignore -v dist/index.html` |
 
-## 仓库地图
+## 已知坑(省下一次的调查时间)
 
-目录树本身与"每个目录的入口在哪"见仓根 [目录说明.md](目录说明.md),本节只留职责与隐藏约束,两边不重复列目录。
-
-| 路径 | 职责 | 关键点 |
-|---|---|---|
-| `index.html` | 唯一页面骨架与 DOM 契约 | 18 个 `id`,其中 14 个被 `src/main.js` 用 `getElementById` 取走,改名片刻就 `null` 报错。计数:`grep -o 'id="[a-z-]*"' index.html \| wc -l` |
-| `vite.config.js` | 只有 `base: './'` 与 `chunkSizeWarningLimit: 900` | 相对 base 决定运行时请求掩膜的前缀,见「关键约定 3」 |
-| `vercel.json` | Vercel 侧构建参数(`npm ci` / `npm run build` / `dist`) | 不被 GitHub Pages 工作流读取;实测在线入口是 Pages(见状态表) |
-| `.github/workflows/deploy.yml` | 推 main → `npm ci` → `npm run verify` → `npm run build` → 发布 `dist` 到 Pages | 两个 job:`build` 上传产物,`deploy` 调 `deploy-pages@v4` |
-| `src/main.js` | 装配层:索引数据、生成粒子属性、接线 UI 与场景、按键与自适应 | 不导出任何东西;`window.__dbg` 见「关键约定 9」 |
-| `src/core/mask.js` | 从掩膜 PNG 反比例 CDF 采样星尘点位 | 导出 `samplePortrait` / `samplePortraits` |
-| `src/core/cloud.js` | GLSL 粒子几何与材质:四块平面 + 徽章位 + 星云位 | 导出 `createCloud` / `createBackdrop` |
-| `src/core/scene.js` | 渲染器、相机、指针/键盘、自动巡游、平面权重、CPU 拾取 | 导出 `createScene`,返回一个接口对象 |
-| `src/ui/panel.js` | 左栏:搜索、点亮、语录目录、拾遗列表 | DOM 结构被 CSS 与自身 `querySelectorAll` 双重依赖 |
-| `src/ui/quoteCard.js` | 语录卡的渲染与按钮回调 | 纯展示,不认识场景 |
-| `src/ui/intro.js` | 三页开场引导 | 导出 `initIntro`,返回 `{reopen}` |
-| `src/ui/favorites.js` | 拾遗读写 localStorage | 键 `marxcloud.favs.v1`,存的是语录下标 |
-| `src/ui/postcard.js` | 「留影」导出 1200×1500 PNG | 依赖 `scene.renderNow()` 与 `<a download>` |
-| `src/data/figures.js` | 91 位人物元数据 + 4 个分组 + 搜索别名 | 手工维护,`weight` 由语录数自动推导 |
-| `src/data/quotes.js` | 5897 条语录数组 | 末尾 4856 条由 `tools/gen/merge.mjs` 从批次生成,顺序即编号,只在末尾追加 |
-| `src/data/emblem.js` | 3400 个徽章点位 | `tools/make-emblem.mjs` 生成,勿手改 |
-| `src/data/portraits.js` | 头像清单(人物 id → `public/avatars/*.jpg`) | `tools/fetch-portraits.mjs` + `tools/make-portraits.mjs` 生成,缺失的人物侧栏回退姓氏徽记 |
-| `src/style.css` | 全部界面样式,单个 media query 管移动端 | 见「关键约定 8」的未定义类 |
-| `public/*-mask.png` | 4 张亮度掩膜,运行时按 `./<id>-mask.png?v=<n>` 拉取 | 会被 Vite 原样拷进 `dist/` |
-| `public/avatars/*.jpg`、`public/portraits/*.png` | 83 张侧栏小头像 + 79 张人物星尘掩膜(点亮换装用,按需加载) | `public/portraits/CREDITS.md` 记录来源(Wikimedia Commons 等)与授权;清单在 `src/data/portraits.js` |
-| `tools/*.mjs` | 离线脚本:`verify-data`(契约校验)、`prepare-mask`、`make-emblem`、`make-banner`、`fetch-portraits`、`make-portraits` | 只有 `make-emblem.mjs` 会写 `src/data/`,见「改动后的验证」;`fetch/make-portraits` 写 `public/` 与 `src/data/portraits.js` |
-| `tools/gen/` | 数据扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs`(批校验)+ `merge.mjs`(合并进 quotes.js)+ `coverage.mjs`(分布统计,含 ndjson 批次口径) | 批次文件合并后仍留在仓库供追溯;新增语录走「数据扩充流水线」,见下节 |
-| `tools/*-photo.jpg`、`tools/emblem-ref.png` | 生成脚本的输入素材,合计 3.20 MiB | 不进构建、不被 `src/` 引用 |
-| `docs/banner.svg` | README 横幅 | `tools/make-banner.mjs` 生成 |
-| `package.json` | `dev` / `build` / `preview` / `verify` 四条 scripts | 依赖:`three` 一个 runtime,`vite`/`jpeg-js`/`pngjs` 三个 dev |
-| `package-lock.json` | lockfileVersion 3,61 个包 | CI 用 `npm ci` 按它精确装 |
-| `.gitignore` | 挡掉 `node_modules/`、`dist/`、`tools/preview-*.png`、`.zcode/`、`*.log` | 掩膜与徽章点位**不在**这里,它们是入库的产物 |
-| `LICENSE` | MIT,版权行写 2026 Luz7818 | — |
-
-## 关键约定(违反会出问题的才写)
-
-1. **`quotes[].f` 必须是 `figures[].id`**。`npm run verify` 会逐条核对,并在某人物一条语录都没有时报错。
-   写错 id 的后果:该句在侧栏目录与"同人物下一条"里永远不出现,但 `#q=N` 仍能打开它。
-   反向同理:某人物若一条语录都没有,仍会按权重 1 分到星点,而它的 `quoteIdx` 兜底成 `0`,
-   于是那颗星涂的是新人物的颜色、点开却是第 1 句马克思。核对:
-   `npm run verify`(结束时打印人物数 / 语录数 / 分组数,有问题列出明细并以退出码 1 结束)。
-
-2. **语录数组的下标就是对外编号**。`#q=N`、拾遗收藏、留影文件名用的都是 `quotes` 的 0 起下标。
-   中间插入或删一条,会把已分享的深链、别人本机的收藏整体错位。所以只在文件末尾追加;
-   删除只允许发生在纠错时,且要接受旧链接失效。注意 `#q=N` 是 0 起,卡片显示的"第 NNN 句"
-   是 1 起,两者差 1。
-
-3. **掩膜链路是 `figures[].id` → `PORTRAIT_PLANES[].id` → `public/<id>-mask.png` → `?v=`**。
-   91 位人物里只有 4 位有掩膜(马克思、恩格斯、列宁、卢森堡),其余 87 位只有星群与色,
-   侧栏则另有 83 位配了 `public/avatars/` 小头像。不该去找其余人物的掩膜图。`src/main.js` 里 `{ id: 'marx', v: 7 }` 拼出请求 URL
-   `./marx-mask.png?v=7`:id 三处必须一致,`v` 只是缓存串。重画掩膜后不改 `v`,
-   Pages 的 CDN 与浏览器会继续发旧图,现象是"掩膜没生效"。
-   生成规则:`${import.meta.env.BASE_URL}${id}-mask.png?v=${v}`,构建期 `BASE_URL` 被替换成 `./`。
-
-4. **四向是写死的,不是配置**。`cloud.js` 用 `uW0..uW3` 四个 uniform、`scene.js` 用
-   `N = [0,1,2,3]` 四块法线、着色器里 `k * 1.5707963`(即 90°)与 `groupPos(0..3)`。
-   加第五块肖像平面要同时动 `src/core/cloud.js` 与 `src/core/scene.js`,只往数组里加一项没有用。
-   徽章视图同理要求分组恰好 4 个。
-
-5. **着色器和 CPU 拾取是同一套公式的两份实现**。`cloud.js` 的 GLSL `groupPos()` 与
-   `scene.js` 里 JS 版 `groupPos()` 必须逐项一致(含 `13.7`/`11.3`/`3.7`/`9.13`/`7.31` 这些
-   种子系数和 `0.18`、`0.82` 常数)。`pickStar()` 还直接读 `createCloud()` 返回的
-   `positions / planePositions / cloudPos / seeds / groupIdx / emblem` —— 改字段名不会报错,
-   只会让点击星尘静默失灵(散开态正常、徽章态点不中是典型信号)。
-
-6. **`group` 字段只能取 `groups` 里那 4 个 key 之一**。写错的值让 `groupKeys.indexOf()` 返回 -1,
-   `cloud.js` 里 `groupCursor[-1 % 4]` 取到 `undefined` → `ep[NaN]` 为 undefined → 读 `p[0]`
-   抛 TypeError → `boot()` 整体失败,页面停在"加载失败"。同时 `panel.js` 的人物过滤
-   (`figures.filter(f => f.group === g.key)`) 会让这个人从侧栏彻底消失。
-
-7. **生成物清单**:`src/data/emblem.js`(由 `tools/make-emblem.mjs` 写)、
-   `public/*-mask.png`(`tools/prepare-mask.mjs`)、`docs/banner.svg`(`tools/make-banner.mjs`)。
-   `prepare-mask.mjs` 无随机,同一张照片重跑逐字节一致;`make-emblem.mjs` 与 `make-banner.mjs`
-   用了未播种的 `Math.random()`,同一输入每次重跑都会产生 diff —— 没有真的换素材就别重跑。
-   核对:`grep -c "Math.random" tools/prepare-mask.mjs tools/make-emblem.mjs tools/make-banner.mjs`
-   (输出 0 / 2 / 5 行,即只有掩膜脚本没有随机)。
-
-8. **`src/style.css` 里根本没有这几个类,但它们不是冗余**:
-   - `.panel-row-wrap`:`panel.js` 用它做搜索过滤、回车首选、`.panel-row` 的 `parentElement.dataset.fig`
-     定位高亮。删掉或扁平化 DOM,搜索与点亮态一起坏。
-   - `.panel-group`:同一目录的 `querySelectorAll('.panel-group')` 靠它整组隐藏。
-   - `.filtering`:只标状态,当前无人读取,属可观察用的挂点。
-   核对:`grep -n "panel-row-wrap" src/style.css`(无输出)。样式在 `.panel-row` 上,和包装层重名
-   只差 4 个字符,极易被当成笔误删掉。
-
-9. **`window.__dbg` 是刻意保留的调试句柄**(`src/main.js` 末行,注释写明"生产无副作用")。
-   它暴露 `scene / cloud / camera / quoteIdxByParticle / planeFigures`,是手工验证与截图复现
-   的唯一入口,不要因为"生产环境不该挂全局变量"而删掉。
-
-10. **本页会被 luzzz.me 当子页面收录**:`#brand` 里的「返回主页」是相对路径 `../`,在 `luzzz.me/marx-cloud/` 下解析成主站、在 Pages 的 `/marx-cloud/` 下解析成用户主页;全站资源同样走相对路径(`base: "./"`、掩膜 `./<id>-mask.png`),所以换托管位置不用改代码,改成绝对路径则会让其中一种部署断掉。子页面副本由 `luzzz.me/tools/sync-showcases.mjs` 生成,本仓库的改动不会被它反向覆盖。
-    回链只在「确实有上一级」时保留:`src/main.js` 比较 `../` 解析出的路径与当前路径,相等(把 `dist/`
-    或开发服务器起在站点根)时把它从 DOM 里摘掉,否则点了等于刷新本页。
-    **相对路径还要求访问 URL 以 `/` 结尾**:落到 `/marx-cloud`(少斜杠)时基准变成站点根,
-    `./assets/…` 全部 404,表现是文字在、星图不动。GitHub Pages 与 `python -m http.server`
-    都会自动补这个斜杠;Vercel 的 Next 预设默认相反,会把带斜杠的路径 308 成不带斜杠的,
-    所以收录方 luzzz.me 用 `trailingSlash: true` 把方向反过来才跑得通。
-    复核: `mkdir -p /tmp/s && cp -r dist /tmp/s/marx-cloud && python -m http.server 8099 -d /tmp/s`,
-    访问 `http://127.0.0.1:8099/marx-cloud/` 看得到回链;把服务改起在 `dist/` 上、访问根路径则看不到。
-    注意双击 `dist/index.html` 打不开:产物是 `type="module"` 脚本,`file://` 下被 CORS 拦掉
-    (控制台首条即 `Access to script at 'file:///...index-*.js' from origin 'null' has been blocked by CORS policy`),
-    这一页只能用 HTTP 起服务看。
-11. **中文正文用半角逗号**。全仓库(源码、`index.html`、文档)不出现全角逗号 U+FF0C,新增
-     语录、注释与文档保持一致。核对(无输出即为 0;写成字节序列是为了不让命令本身命中):
-     `grep -rl "$(printf '\xef\xbc\x8c')" src/ index.html README.md AGENTS.md docs/`
-
-## 数据扩充流水线(tools/gen/)
-
-语录扩充走的是「批次 ndjson → 批校验 → 合并」三步,产物可追溯:
-
-1. **批次生成**:`tools/gen/quotes-<组名>-<人物id>-<序号>.ndjson`,每行一个 JSON 对象
-   `{"f":"人物id","w":"《著作》","y":年份或null,"t":"原文"}`。t 必须是真实可查的经典原文
-   (校验脚本管住格式与重复,管不住真伪,录入时宁少勿滥)。
-2. **批校验**:`node tools/gen/selfcheck.mjs <组名>` 校验指定组,`--all` 校验全部批次,
-   `--post` 在合并后自检(跳过「与现有语录库重复」检查,因为批次已在库内)。
-   检查:JSON 可解析 / f 合法 / w 以《》包裹 / y 合法 / t 长度 6~130 / t 无全角逗号 U+FF0C
-   与半角双引号 / 批内不重复 / 与 quotes.js 现有库不重复。
-3. **合并**:`node tools/gen/merge.mjs`(加 `--dry` 只预览)把全部批次追加到 quotes.js
-   末尾,重复行自动跳过。合并后必须 `npm run verify` + `npm run build`。
-4. `tools/gen/coverage.mjs` 打印每人物条数分布(含 ndjson 批次口径),用于查覆盖缺口。
-
-注意:merge.mjs 以「行内容」判定重复,所以批内/批间重复会在合并时静默跳过(控制台报出条数);
-先跑 `selfcheck --all` 清零问题再合并,才是干净流程。
-
-## 改动后的验证
-
-| 动了什么 | 必须跑 | 通过判据 |
-|---|---|---|
-| 任意 `.js` | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` | 无输出 |
-| 任意代码 | `npm run build` | 退出码 0,`16 modules transformed`,无 `chunk size` 警告 |
-| `src/data/quotes.js`、`src/data/figures.js` | `npm run verify` + 「数据规模」行的 node 命令 | verify 退出码 0;句数与预期一致 |
-| `tools/gen/` 批次文件 | `node tools/gen/selfcheck.mjs --all`,然后 `node tools/gen/merge.mjs` + `npm run verify` | selfcheck「问题 0 个」;verify 退出码 0 |
-| `public/*-mask.png` | 同时改 `src/main.js` 的 `v` → `npm run build` → `npm run preview` | 肖像轮廓对得上照片,转 90° 换人 |
-| `tools/emblem-ref.png` 或 `make-emblem.mjs` | `node tools/make-emblem.mjs`(会覆盖 `src/data/emblem.js`) | 控制台点位仍是 3400,徽章视图能认出镰刀锤头 |
-| `cloud.js` 或 `scene.js` 的位置公式 | `npm run dev` 后逐个姿态点星 | 成形/散开/徽章三种姿态都能点中,气泡与卡片同人同句 |
-| `index.html` 的 DOM | `npm run dev`,开控制台 | 无 `null` 相关报错;`getElementById` 用到的 14 个 id 都还在 |
-| 提交前 | `cd ../文档标准 && python check_docs.py Marx_Cloud` | 退出码 0,无阻断项 |
-
-`npm run build` 只要约 1 秒,`npm run dev` 起在 5173、`npm run preview` 起在 4173,
-真实输出与用法写在 [docs/getting-started.md](docs/getting-started.md)。
-
-## 已知坑
-
-- 粒子与语录的配对在每次加载时用 `Math.random()` 现算(`src/main.js` 的 boot 循环)。
-  所以"某一颗星固定对应某一句话"不成立,同一颗星刷新后可能换一句。要稳定得改
-  `quoteIdxByParticle` 的生成方式(播种随机),目前没有任何机制保证一致。
-- `pickStar()` 是 O(粒子数) 的 CPU 遍历:28000 点每次点击全量算一遍,悬停时以
-  `step = 2` 隔点采样并限流到 40 ms。别在 pointermove 里改成 `step = 1` 的密集拾取,
-  高 DPI 屏上会明显掉帧。
-- 没有 WebGL 就没有降级路径:`new THREE.WebGLRenderer()` 直接抛,`boot()` 的 catch 把
-  `#loading` 换成"加载失败:<message>",开场引导压根没初始化。`detectSoftwareGL()` 只降粒子
-  数,不解决"完全没有 GL"。
-- `复制原文` 与 `分享` 调 `navigator.clipboard.writeText`,而 Clipboard API 只在安全上下文存在。
-  用 `--host` 暴露成 http://局域网IP 时 `navigator.clipboard` 是 undefined,`onCopy()` 抛
-  同步 TypeError,按钮点了没反应(报错只在控制台)。localhost 与 https 不受影响。
-- 嵌入式 webview 冷启动时视口可能是 0×0,`resize()` 会跳过,靠 `frame()` 里逐帧的
-  clientWidth 比对自愈;`setInterval` 300 ms 的兜底驱动只在 rAF 停摆时接管。删掉这两处
-  会让"后台标签页/抓屏/自动化截图"里的画面冻住。
-- 帧率自适应只在 `auto` 档生效,阈值 22 fps,阶梯 `[1, 0.65, 0.45, 0.3, 0.2]`,**只降不升**:
-  掉下去之后即使帧率恢复也不会加回来,要恢复只能刷新或手动切画质档。
-- `uSize` 桌面 0.195,移动端与软件渲染改成 0.26,而"低"画质档又乘 1.35。三处叠乘,
-  单独调 `uSize` 默认值前先确认当前设备走的是哪条分支。
-- 单 chunk 打包(three.js + 全部数据 628 kB),`chunkSizeWarningLimit: 900` 是刻意抬的。
-  数据再加约 270 kB 才会重新出现体积警告 —— 想拆包要显式改 `build.rollupOptions`,别顺手"修"掉这个 900。
-- `tools/prepare-mask.mjs` 开头的注释说"主体亮度 p4..p96 映射到 0..1",实现取的是
-  **p10..p90**(`vals[floor(n*0.10)]` / `vals[floor(n*0.90)]`)。照注释去调自动曝光会调偏。
-- npm 11 在本机会打 `allow-scripts` 警告(esbuild postinstall)。构建实测正常,不要为此改依赖。
-
-## 不要做的事
-
-- 不要为了"补齐工程化"引入测试框架、lint、TypeScript 或打包优化插件。这个仓库的门禁就是
-  `node --check` + `npm run build` + 浏览器实测,加工具不等于有验证。
-- 不要在 README 或手册里另写一套规模数字。所有数字改到上面的「当前真实状态」,其他文档指过来。
-- 不要在没有换素材的前提下重跑 `tools/make-emblem.mjs` 或 `tools/make-banner.mjs`
-  (见「关键约定 7」),那会产出与上一版无关但字节不同的 diff,看起来像"改过"。
-- 不要把 `public/` 当纯静态资源目录:Vite 会整目录拷进 `dist/`,放进去的任何文件都会公开发布,
-  包括本目录的 `README.md`。
-- 不要动 `PORTRAIT_PLANES` 的数组长度(见「关键约定 4」),也不要"顺手"给 `figures` 重排序 ——
-  `aFig` 存的是人物在 `figures` 里的下标,重排会把已分享的 `#q=N` 与收藏打乱(见「关键约定 2」)。
-- 不要把 `dist/`、`tools/preview-*.png` 提交进来,它们是 gitignore 的本地产物。
+- 粒子与语录的配对每次加载用 `Math.random()` 现算,"某颗星固定某句"不成立;要稳定需播种
+  `quoteIdxByParticle` 的生成方式,目前无机制保证(评估项见 `TODO.md` 任务 2)。
+- `pickStar()` 是 O(粒子数) 的 CPU 遍历;悬停以 `step = 2` 隔点采样并限流 40 ms。别改成
+  `step = 1` 的密集拾取,高 DPI 屏会掉帧。
+- 没有 WebGL 就没有降级路径:`new THREE.WebGLRenderer()` 直接抛,`detectSoftwareGL()` 只降
+  粒子数不解决"完全没有 GL"。
+- 复制/分享依赖 Clipboard API,只在安全上下文存在;局域网 IP 打开时按钮点了没反应(报错只在
+  控制台)。
+- 嵌入式 webview 冷启动视口可能 0×0,靠逐帧 clientWidth 比对与 300 ms 兜底驱动自愈——
+  删掉这两处会让后台标签页/自动化截图里的画面冻住。
+- 帧率自适应只在 `auto` 档生效且**只降不升**(阈值 22 fps,阶梯 `[1, 0.65, 0.45, 0.3, 0.2]`)。
+- `uSize` 桌面 0.195、移动端与软件渲染 0.26、"低"画质档再乘 1.35,三处叠乘——调默认值前先
+  确认设备走哪条分支。
+- 单 chunk 打包是刻意的,`chunkSizeWarningLimit: 900` 别顺手"修"掉。
+- `tools/prepare-mask.mjs` 注释说 p4..p96,实现取 **p10..p90**——照注释调自动曝光会调偏。
+- npm 11 打 `allow-scripts` 警告(esbuild postinstall),构建实测正常,不要为此改依赖。
+- 不要为"补齐工程化"引入测试框架、lint、TypeScript 或打包优化插件;不要另写一套规模数字
+  (以本文件「当前状态」为准);没有换素材不要重跑 make-emblem/make-banner(未播种随机,
+  会产出无意义的字节 diff);不要把 `public/` 当纯静态目录(Vite 整目录拷进 `dist/` 公开);
+  不要动 `PORTRAIT_PLANES` 数组长度、不要重排 `figures`;不要提交 `dist/`。

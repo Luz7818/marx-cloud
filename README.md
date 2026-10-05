@@ -23,7 +23,7 @@
 又散作星雾,肖像只在你的视角正对时存在。
 
 同一份构建产物也被收录进个人站 `luzzz.me` 的 `/marx-cloud/` 子页面
-（那边只是拷贝本仓库的 `dist/`, 改动仍在本仓库提交, 见 `AGENTS.md` 关键约定 10）。
+（那边只是拷贝本仓库的 `dist/`, 改动仍在本仓库提交, 见 `docs/ARCHITECTURE.md` 关键约定 10）。
 
 **规模**:5897 句语录 · 91 位思想家 · 4 组徽章 · 桌面端 28000 颗粒子
 （复核:`AGENTS.md` 的「当前真实状态」表,里面有可直接粘贴的统计命令）
@@ -43,7 +43,7 @@ npm run dev
 看到 `VITE v5.4.21  ready in 319 ms`(毫秒数随机器变)与 `➜  Local:   http://localhost:5173/`
 就说明起来了,浏览器打开它即可(需要 WebGL)。国内网络装依赖慢时改用
 `npm install --registry=https://registry.npmmirror.com`。
-完整步骤、故障表与改内容的做法见 [上手手册](docs/getting-started.md)。
+完整步骤、故障表与改内容的做法见 [上手手册](docs/GET-START.md)。
 
 ## 怎么玩
 
@@ -68,7 +68,7 @@ npm run dev
 
 ## 目录怎么分
 
-不知道东西在哪个路径,先看 [目录说明.md](目录说明.md):整棵目录树、每个目录的入口都在里面,它只做导航。谁负责什么以 `AGENTS.md` 的"仓库地图"为准。
+不知道东西在哪个路径,先看 [目录说明.md](目录说明.md):整棵目录树、每个目录的入口都在里面,它只做导航。谁负责什么见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) 与各目录 README。
 
 | 目录 | 负责 |
 | :--- | :--- |
@@ -86,7 +86,7 @@ npm run dev
 - [`src/data/figures.js`](src/data/figures.js) —— 人物元数据与搜索别名
 
 肖像与徽章的图形由 `tools/` 下的脚本从照片和党徽标准图形重算,步骤与运行风险
-(哪些命令会覆盖已入库的文件)写在 [上手手册第 5 节](docs/getting-started.md)。
+(哪些命令会覆盖已入库的文件)写在 [上手手册第 5 节](docs/GET-START.md)。
 
 ## 已知做不到什么
 
@@ -118,7 +118,7 @@ npm run build
 第一条核对数据契约(语录↔人物、每人物至少 1 条、无全角逗号、无重复),退出码 0 即通过;
 第二条在全部源码文件上逐个查语法,无输出即通过;第三条要求退出码 0 且不打 `chunk size` 警告。
 之后 `npm run preview` 打开 `http://localhost:4173/`,把改动在四个方向各点一遍星。
-哪些文件是生成物、哪些命令会覆盖已入库文件,写在 [AGENTS.md](AGENTS.md)。
+哪些文件是生成物、哪些命令会覆盖已入库文件,写在 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
 
 ## 环境要求
 
