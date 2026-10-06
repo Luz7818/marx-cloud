@@ -14,7 +14,7 @@
 | 文件 | 干什么 | 对外的东西 |
 |---|---|---|
 | `main.js` | 装配层:建索引、按语录数加权分星、拼粒子属性、接线 UI 与场景、按键、帧率自适应 | 不导出任何东西。`window.__dbg` 是刻意留的调试句柄 |
-| `style.css` | 全部界面样式(827 行,复核:`wc -l src/style.css`),含一个 `@media (max-width: 720px)` 管移动端 | 由 `main.js` 第一行 `import './style.css'` 引入 |
+| `style.css` | 全部界面样式(835 行,复核:`wc -l src/style.css`),含一个 `@media (max-width: 720px)` 管移动端 | 由 `main.js` 第一行 `import './style.css'` 引入 |
 | `core/mask.js` | 把 `public/*-mask.png` 的亮度变成星尘点位 | `samplePortrait(url,count,opts)`、`samplePortraits(urls,count,opts)` |
 | `core/cloud.js` | 建粒子几何与 GLSL 材质;另建远景静态星 | `createCloud(o)`、`createBackdrop(count)` |
 | `core/scene.js` | 渲染器、相机、指针与键盘、自动巡游、四平面权重、CPU 拾取 | `createScene(canvas, cloud, backdrop, {planes})` |
@@ -24,7 +24,7 @@
 | `ui/intro.js` | 开场三页引导 | `initIntro(container, {onEnter, immediate})` → `{reopen}` |
 | `ui/favorites.js` | 拾遗读写 localStorage | `initFavorites()` → `{has, list, toggle, clear}` |
 | `ui/postcard.js` | 「留影」:当前画面 + 该句排成竖版图并下载 | `savePostcard({scene, quote, figure, index, total})` |
-| `data/quotes.js` | 语录数组(2439 句);零散增删直接编辑,批量新增走 `../tools/gen/` 流水线 | `quotes` |
+| `data/quotes.js` | 语录数组(5897 句);零散增删直接编辑,批量新增走 `../tools/gen/` 流水线 | `quotes` |
 | `data/figures.js` | 人物元数据、分组、搜索别名,手工维护 | `figures`、`figureMap`、`groups` |
 | `data/portraits.js` | 头像/换装掩膜清单,**生成物** | `portraits`,由 `../tools/make-portraits.mjs` 写出,勿手改 |
 | `data/emblem.js` | 徽章视图的采样点位,**生成物** | `emblemPoints`,由 `../tools/make-emblem.mjs` 写出,勿手改 |
@@ -40,7 +40,7 @@
 
 | 子目录 | 负责 | 关键文件 | 备注(哪些看着能改其实改不得) |
 |---|---|---|---|
-| `core/` | 渲染与拾取这条流水线:`mask.js` 把掩膜亮度变成点位 → `cloud.js` 把点位烘成几何与 GLSL 材质 → `scene.js` 出画面、吃输入、做 CPU 拾取 | 3 个文件:`mask.js`(61 行)、`cloud.js`(298 行)、`scene.js`(387 行) | 只有 `cloud.js` 与 `scene.js` import `three`,`mask.js` 走 canvas。它采样的那四张掩膜 PNG **不在 `src/` 的任何角落**,在仓库根的 `../public/*-mask.png`,运行时才按 URL 拉取:别在本目录找图,也别拷一份进来(那是一份永远不被读取的副本)。另外位置公式在这里有两份实现(GLSL 与 JS),只改一边点击就静默失灵 |
+| `core/` | 渲染与拾取这条流水线:`mask.js` 把掩膜亮度变成点位 → `cloud.js` 把点位烘成几何与 GLSL 材质 → `scene.js` 出画面、吃输入、做 CPU 拾取 | 3 个文件:`mask.js`(61 行)、`cloud.js`(302 行)、`scene.js`(399 行) | 只有 `cloud.js` 与 `scene.js` import `three`,`mask.js` 走 canvas。它采样的那四张掩膜 PNG **不在 `src/` 的任何角落**,在仓库根的 `../public/*-mask.png`,运行时才按 URL 拉取:别在本目录找图,也别拷一份进来(那是一份永远不被读取的副本)。另外位置公式在这里有两份实现(GLSL 与 JS),只改一边点击就静默失灵 |
 | `data/` | 语料与采样点位。四个文件都是纯 `export const`,不 import 任何东西;唯一的"逻辑"是 `figures.js` 里由 `figures` 派生 `figureMap` 与 `aka` | `quotes.js`(6036 行,5897 句)、`figures.js`(556 行,91 位人物 + 4 个分组 + 末尾 `ALIAS`)、`portraits.js`(505 行,`make-portraits.mjs` 生成)、`emblem.js`(3 行,3400 个点位) | 前两个手工维护,且下标即对外编号(`#q=N`、收藏、留影都用它),只在末尾追加。`portraits.js` 与 `emblem.js` 是生成物(文件头注释写明),手改会在下次重跑时被整体覆盖;`make-emblem.mjs` 用了未播种的 `Math.random()`,没换 `../tools/emblem-ref.png` 就别重跑,只会得到一份字节不同的无意义 diff |
 | `ui/` | 界面这一层:左栏、语录卡、开场引导、收藏、留影、小头像。六个文件都只碰 DOM | `panel.js`、`quoteCard.js`、`intro.js`、`postcard.js`、`favorites.js`、`avatar.js`(39 行) | 没有一个 import `three`(`postcard.js` 要的 `scene` 由参数传入)。`panel.js` 与 `avatar.js` import `../data/`;`panel.js` 造的 `.panel-row-wrap` 与 `.panel-group` 在 `style.css` 里查无规则,那是给 JS 定位 DOM 用的钩子,不是冗余样式名。`favorites.js` 存的是语录下标,与 `data/quotes.js` 的顺序绑死 |
 
@@ -109,7 +109,7 @@
 | 文件 | 结构 | 谁在读 |
 |---|---|---|
 | `quotes.js` | `{f, w, y, t}` 数组,一行一条 | `main.js` 建索引、`panel.js` 出目录、卡片与留影取文本 |
-| `figures.js` | `groups` 4 项、`figures` 35 项、`figureMap` 由 `figures` 派生 | `main.js` 配色与加权、`panel.js` 分组渲染与搜索 |
+| `figures.js` | `groups` 4 项、`figures` 91 项、`figureMap` 由 `figures` 派生 | `main.js` 配色与加权、`panel.js` 分组渲染与搜索 |
 | `emblem.js` | `[x, y]` 数组,归一化到 `[-1,1]` | 只有 `cloud.js` 把它写进 `aEmblem` |
 
 - **`f` 必须是 `figures` 里某个 `id`**,没有任何代码校验这件事;写错的表现见

@@ -86,11 +86,13 @@ transforming...
 ✓ 18 modules transformed.
 rendering chunks...
 computing gzip size...
-dist/index.html                   2.17 kB │ gzip:   1.38 kB
-dist/assets/index-*.css        15.99 kB │ gzip:   3.86 kB
-dist/assets/index-*.js     780.51 kB │ gzip: 306.09 kB
-✓ built in 1.04s
+dist/index.html                   2.17 kB │ gzip:   1.39 kB
+dist/assets/index-*.css        16.39 kB │ gzip:   3.95 kB
+dist/assets/index-*.js     1020.46 kB │ gzip: 467.71 kB
+✓ built in 1.23s
 ```
+
+体积行是构建器的字符数口径（中文语录落盘成 UTF-8 后字节更多，磁盘见 `wc -c dist/assets/*`）。
 
 通过标准:退出码 0、`✓ built in`,没有 `chunk size` 警告。
 产物在 `dist/`(已 gitignore,不要提交):一个 HTML、一个 CSS、一个 JS,外加 Vite 从
@@ -197,7 +199,7 @@ npm run preview
 |---|---|---|
 | `f` | 人物 id | 必须是 `figures.js` 里已有的 `id`,写错不报错但侧栏找不到(见 `AGENTS.md` 约定 1) |
 | `w` | 出处 | 任意字符串,不限书名号。写 `题词`、`《平等报》` 都有先例 |
-| `y` | 年份 | 整数;确实不详写 `null`(现有 7 条如此,复核:`grep -c "y: null" src/data/quotes.js`) |
+| `y` | 年份 | 整数;确实不详写 `null`(现有 491 条如此,复核:`grep -c "y: null" src/data/quotes.js`) |
 | `t` | 原文 | 中文正文,逗号用半角 `,` |
 
 **只在数组末尾追加**。文件里的 `// ---------- 马克思 ----------` 与
@@ -222,7 +224,7 @@ node --input-type=module -e "const{quotes}=await import('./src/data/quotes.js');
 - **不要给 `figures` 重排序**:粒子上存的是人物下标。
 
 当前四组分布(复核:`node --input-type=module -e "const{quotes}=await import('./src/data/quotes.js');const{figures,groups}=await import('./src/data/figures.js');const c={};quotes.forEach(q=>c[q.f]=(c[q.f]||0)+1);for(const g of groups){const fs=figures.filter(f=>f.group===g.key);console.log(g.label,fs.length+'人',fs.reduce((a,f)=>a+(c[f.id]||0),0)+'句')}"`):
-思想先驱 8 人 65 句、创始人 2 人 417 句、继承与发展 14 人 296 句、在中国 11 人 263 句。
+思想先驱 15 人 529 句、创始人 2 人 1137 句、继承与发展 39 人 1927 句、在中国 35 人 2304 句。
 
 ### 5.3 换一张肖像掩膜
 
@@ -279,7 +281,7 @@ node tools/make-banner.mjs     # 读 public/marx-mask.png,覆盖 docs/banner.svg
 
 1. `actions/checkout@v4` 取代码;
 2. `actions/setup-node@v4` 装 node 20 并缓存 npm;
-3. `npm ci` → `npm run build`;
+3. `npm ci` → `npm run verify` → `npm run build`;
 4. `actions/configure-pages@v5` + `actions/upload-pages-artifact@v3` 上传 `dist`;
 5. 另一个 job 调 `actions/deploy-pages@v4` 发布,权限是 `pages: write`。
 

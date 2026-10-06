@@ -21,6 +21,6 @@
 
 - `cloud.js` 的 GLSL `groupPos()` 与 `scene.js` 的 JS 版是同一公式的两份实现，逐项一致
   （含种子系数）；改一侧必须同步另一侧，否则点击拾取静默失灵。
-- DOM 是契约：`index.html` 的 18 个 `id` 中 14 个被 `getElementById` 引用，改名即 `null` 报错。
+- DOM 是契约：`index.html` 的 20 个 `id` 中 16 个被 `getElementById` 引用，改名即 `null` 报错。
 - `pickStar()` 是 O(粒子数) CPU 遍历（悬停限流 40 ms、隔点采样）——不要改成密集拾取。
 - 嵌入式 webview 的 0×0 视口自愈逻辑（逐帧比对 + 300 ms 兜底）不是冗余代码，删掉画面会冻住。

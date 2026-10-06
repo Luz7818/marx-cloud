@@ -39,5 +39,5 @@ npm run build
 | `public/*-mask.png` | 同时改 `src/main.js` 的 `v` → build → preview | 肖像轮廓对得上照片，转 90° 换人 |
 | `tools/emblem-ref.png` 或 make-emblem | `node tools/make-emblem.mjs` | 点位仍 3400，徽章能认出镰刀锤头 |
 | `cloud.js` / `scene.js` 位置公式 | `npm run dev` 逐姿态点星 | 成形/散开/徽章都能点中，气泡与卡片同人同句 |
-| `index.html` 的 DOM | `npm run dev` 开控制台 | 无 `null` 报错；14 个被引用 id 都在 |
+| `index.html` 的 DOM | `npm run dev` 开控制台 | 无 `null` 报错；16 个被引用 id 都在 |
 | 提交前 | `cd ../文档标准 && python check_docs.py Marx_Cloud` | 退出码 0，无阻断项 |

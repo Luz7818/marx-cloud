@@ -24,7 +24,7 @@ Marx_Cloud/
 
 | 路径 | 职责 | 关键点 |
 |---|---|---|
-| `index.html` | 唯一页面骨架与 DOM 契约 | 18 个 `id`，其中 14 个被 `src/main.js` 用 `getElementById` 取走，改名片刻就 `null` 报错 |
+| `index.html` | 唯一页面骨架与 DOM 契约 | 20 个 `id`，其中 16 个被 `src/main.js` 用 `getElementById` 取走，改名片刻就 `null` 报错 |
 | `vite.config.js` | 只有 `base: './'` 与 `chunkSizeWarningLimit: 900` | 相对 base 决定运行时请求掩膜的前缀，见关键约定 3 |
 | `vercel.json` | Vercel 侧构建参数 | 不被 GitHub Pages 工作流读取；实测在线入口是 Pages |
 | `.github/workflows/deploy.yml` | 推 main → `npm ci` → `verify` → `build` → 发布 `dist` 到 Pages | 两个 job：`build` 上传产物，`deploy` 调 `deploy-pages@v4` |
