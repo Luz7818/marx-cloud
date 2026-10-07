@@ -1,4 +1,4 @@
-/** 临时:批次+现有库 的每人物合并条数(最少的排前面) */
+/** 批次+现有库 的每人物合并条数(最少的排前面) */
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

@@ -17,7 +17,7 @@
  */
 import { decode as decodeJpeg, encode as encodeJpeg } from 'jpeg-js';
 import { PNG } from 'pngjs';
-import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -389,7 +389,6 @@ function to45Png(m) {
 }
 
 // ---------- 写清单与署名 ----------
-import { mkdirSync } from 'node:fs';
 mkdirSync(join(root, 'public/avatars'), { recursive: true });
 mkdirSync(join(root, 'public/portraits'), { recursive: true });
 

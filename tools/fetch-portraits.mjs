@@ -5,7 +5,7 @@
  * 幂等:已存在的 <id> 跳过(--force 重抓)。仅教育演示用途,署名见 public/portraits/CREDITS.md。
  * 用法:node tools/fetch-portraits.mjs [--force] [--only=id1,id2]
  */
-import { writeFileSync, existsSync, readFileSync } from 'node:fs';
+import { writeFileSync, existsSync, readFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,7 +23,6 @@ const FORCE = args.includes('--force');
 const onlyArg = args.find(a => a.startsWith('--only='));
 const ONLY = onlyArg ? onlyArg.split('=')[1].split(',') : null;
 
-import { mkdirSync } from 'node:fs';
 mkdirSync(OUT, { recursive: true });
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
