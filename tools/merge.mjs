@@ -1,7 +1,7 @@
 /**
  * 语录批次合并工具(数据扩充流水线专用,不进构建)。
- * 把 tools/gen/ 下全部 quotes-*.ndjson 追加到 src/data/quotes.js 末尾(在结尾的 ]; 之前插入)。
- * 用法:node tools/gen/merge.mjs [--dry]
+ * 把 data/quotes-src/ 下全部 quotes-*.ndjson 追加到 src/data/quotes.js 末尾(在结尾的 ]; 之前插入)。
+ * 用法:node tools/merge.mjs [--dry]
  *   --dry  只预览将追加的条数,不写文件。
  * 幂等性:以「文件行」为幂等键已由 selfcheck 保证(与库内不重复),本脚本只在
  * quotes.js 中找不到任何批内首条语录时执行插入,重复运行安全。
@@ -11,21 +11,22 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const root = join(here, '..', '..');
+const root = join(here, '..');
+const quotesSrc = join(root, 'data', 'quotes-src');
 const dry = process.argv.includes('--dry');
 
 const { quotes } = await import('file://' + join(root, 'src/data/quotes.js').replace(/\\/g, '/'));
 const { figures } = await import('file://' + join(root, 'src/data/figures.js').replace(/\\/g, '/'));
 const validIds = new Set(figures.map(f => f.id));
 
-const files = readdirSync(here).filter(f => f.endsWith('.ndjson')).sort();
+const files = readdirSync(quotesSrc).filter(f => f.endsWith('.ndjson')).sort();
 const existing = new Set(quotes.map(q => q.f + '|' + q.t.replace(/\s+/g, '')));
 const seen = new Set();
 const out = [];
 let skipped = 0;
 
 for (const file of files) {
-  const lines = readFileSync(join(here, file), 'utf8').split(/\r?\n/);
+    const lines = readFileSync(join(quotesSrc, file), 'utf8').split(/\r?\n/);
   for (let i = 0; i < lines.length; i++) {
     const raw = lines[i].trim();
     if (!raw) continue;

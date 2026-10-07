@@ -13,7 +13,7 @@
 
 - 离线脚本 `tools/*.mjs` 一脚本一件事；共用图像管线原语放 `tools/lib/`（两脚本约 200 行重复
   已于 2026-10-05 抽库归一，新增重复先抽库）。
-- 语录批次 `tools/gen/quotes-<组名>-<人物id>-<序号>.ndjson`；批次合并后仍留仓供追溯。
+- 语录批次 `data/quotes-src/quotes-<组名>-<人物id>-<序号>.ndjson`；批次合并后仍留仓供追溯。
 - 中文正文（源码注释、`index.html`、文档）一律半角逗号，全仓禁全角逗号 U+FF0C
   （核对命令见 `docs/ARCHITECTURE.md` 关键约定 11）。
 

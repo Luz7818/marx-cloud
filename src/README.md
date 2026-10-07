@@ -24,7 +24,7 @@
 | `ui/intro.js` | 开场三页引导 | `initIntro(container, {onEnter, immediate})` → `{reopen}` |
 | `ui/favorites.js` | 拾遗读写 localStorage | `initFavorites()` → `{has, list, toggle, clear}` |
 | `ui/postcard.js` | 「留影」:当前画面 + 该句排成竖版图并下载 | `savePostcard({scene, quote, figure, index, total})` |
-| `data/quotes.js` | 语录数组(5897 句);零散增删直接编辑,批量新增走 `../tools/gen/` 流水线 | `quotes` |
+| `data/quotes.js` | 语录数组(5897 句);零散增删直接编辑,批量新增走 `../tools/selfcheck.mjs` + `../tools/merge.mjs`(批次语料在 `../data/quotes-src/`) | `quotes` |
 | `data/figures.js` | 人物元数据、分组、搜索别名,手工维护 | `figures`、`figureMap`、`groups` |
 | `data/portraits.js` | 头像/换装掩膜清单,**生成物** | `portraits`,由 `../tools/make-portraits.mjs` 写出,勿手改 |
 | `data/emblem.js` | 徽章视图的采样点位,**生成物** | `emblemPoints`,由 `../tools/make-emblem.mjs` 写出,勿手改 |

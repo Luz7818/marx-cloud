@@ -26,8 +26,8 @@ npm run build
 
 ## 用例编写规范
 
-本仓不引入测试框架（有意）。数据扩充走 `tools/gen/` 流水线自带的批校验
-（`node tools/gen/selfcheck.mjs --all`）,新增数据必须先过它再合并；图像算法走
+本仓不引入测试框架（有意）。数据扩充走 `tools/selfcheck.mjs` 批校验
+（批次语料在 `data/quotes-src/`,跑 `node tools/selfcheck.mjs --all`）,新增数据必须先过它再合并；图像算法走
 `node tools/test-image-pipeline.mjs` 的 Node 内置断言回归。两者都是直接执行的零依赖测试文件,
 不要为"工程化"引入测试框架/lint/TypeScript。
 
@@ -50,7 +50,7 @@ npm run build
 | 任意 `.js` | `node --check` 全量循环 | 无输出 |
 | 任意代码 | `npm run build` | 退出码 0，无 chunk 警告 |
 | `src/data/quotes.js`、`figures.js` | `npm run verify` + 「数据规模」复核命令 | verify 退出码 0；句数与预期一致 |
-| `tools/gen/` 批次文件 | `selfcheck.mjs --all` → `merge.mjs` → `verify` | selfcheck 问题 0 个 |
+| `data/quotes-src/` 批次文件 | `node tools/selfcheck.mjs --all` → `node tools/merge.mjs` → `npm run verify` | selfcheck 问题 0 个 |
 | 图像管线或大型肖像掩膜 | 图像回归 → 两次完整生成并比 SHA-256 → build → preview | 回归通过；两轮逐字节一致；固定与按需肖像通过视觉验收 |
 | `tools/emblem-ref.png` 或 make-emblem | `node tools/make-emblem.mjs` | 点位仍 3400，徽章能认出镰刀锤头 |
 | `cloud.js` / `scene.js` 位置公式 | `npm run dev` 逐姿态点星 | 成形/散开/徽章都能点中，气泡与卡片同人同句 |

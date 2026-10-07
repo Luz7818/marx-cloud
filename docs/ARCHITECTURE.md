@@ -14,10 +14,12 @@ Vite 5 + 原生 ES Module + three.js 的单页 WebGL 作品：5897 句语录渲�
 
 ```
 Marx_Cloud/
+├── assets/                   入库素材:fetch-portraits.mjs 抓取的人物原图(portrait-src/)
+├── data/                     入库语料:语录扩充流水线的批次 ndjson(quotes-src/)
 ├── docs/                     文档目录（手册与专项规范 + README 横幅 banner.svg）
 ├── public/                   入库：4 张肖像掩膜 + 83 张侧栏头像 + 79 张换装掩膜（含署名）
 ├── src/                      全部前端代码：core/ 渲染与拾取、ui/ 界面、data/ 语料与点位
-├── tools/                    离线脚本 + tools/gen/ 语录扩充流水线 + lib/ 共用图像管线 + 照片素材
+├── tools/                    离线脚本 + lib/ 共用图像管线 + 照片素材
 ├── dist/                     Vite 构建产物（gitignore，不入库）
 └── index.html / vite.config.js / vercel.json / package*.json
 ```
@@ -35,14 +37,15 @@ Marx_Cloud/
 | `src/ui/panel.js` | 左栏：搜索、点亮、语录目录、拾遗列表 | DOM 结构被 CSS 与自身 `querySelectorAll` 双重依赖 |
 | `src/ui/quoteCard.js` / `intro.js` / `favorites.js` / `postcard.js` | 语录卡 / 开场引导 / 拾遗（localStorage）/ 留影导出 | favorites 键 `marxcloud.favs.v1`，存语录下标 |
 | `src/data/figures.js` | 91 位人物元数据 + 4 个分组 + 搜索别名 | 手工维护，`weight` 由语录数自动推导 |
-| `src/data/quotes.js` | 5897 条语录数组 | 末尾 4856 条由 `tools/gen/merge.mjs` 生成，顺序即编号，只在末尾追加 |
+| `src/data/quotes.js` | 5897 条语录数组 | 末尾 4856 条由 `tools/merge.mjs` 从 `data/quotes-src/` 批次生成，顺序即编号，只在末尾追加 |
 | `src/data/emblem.js` | 3400 个徽章点位 | `tools/make-emblem.mjs` 生成，勿手改 |
 | `src/data/portraits.js` | 运行时肖像清单（人物 id → 头像/掩膜路径与缓存版本） | `make-portraits.mjs` 生成；无条目的人物回退姓氏徽记 |
 | `src/style.css` | 全部界面样式，单个 media query 管移动端 | 见关键约定 8 的未定义类 |
 | `public/*-mask.png` | 4 张启动时加载的固定肖像掩膜,按 `./<id>-mask.png?v=<n>` 拉取 | `prepare-mask.mjs` 生成；Vite 原样拷进 `dist/` |
 | `public/avatars/`、`public/portraits/` | 83 张小头像 + 79 张换装掩膜（按需加载） | `make-portraits.mjs` 生成；`public/portraits/CREDITS.md` 记录来源与授权 |
-| `tools/*.mjs` | 离线脚本：verify-data / prepare-mask / make-emblem / make-banner / fetch-portraits / make-portraits | make-emblem 写徽章点位；make-portraits 写头像、换装掩膜、署名与肖像清单 |
-| `tools/gen/` | 数据扩充流水线：批次 ndjson + selfcheck + merge + coverage | 批次文件合并后仍留仓供追溯 |
+| `tools/*.mjs` | 离线脚本：verify-data / prepare-mask / make-emblem / make-banner / fetch-portraits / make-portraits / selfcheck / merge / coverage / test-image-pipeline | make-emblem 写徽章点位；make-portraits 写头像、换装掩膜、署名与肖像清单；merge 追加语录 |
+| `assets/portrait-src/` | 人物原图素材：83 张 Wikimedia 抓取的原图 + credits.json | `fetch-portraits.mjs` 产物、`make-portraits.mjs` 输入；不进构建 |
+| `data/quotes-src/` | 语录批次 ndjson（75 个 `quotes-<组名>-<人物id>-<序号>.ndjson`） | `selfcheck.mjs` 校验、`merge.mjs` 合并；合并后仍留仓供追溯 |
 | `tools/*-photo.jpg`、`emblem-ref.png` | 生成脚本的输入素材（3.20 MiB） | 不进构建、不被 `src/` 引用 |
 | `docs/banner.svg` | README 横幅 | `tools/make-banner.mjs` 生成 |
 | `package.json` / `package-lock.json` | 四条 scripts；runtime 依赖只有 `three@0.169.0` | CI 用 `npm ci` 按锁精确装 61 包 |
@@ -61,11 +64,11 @@ Marx_Cloud/
   `src/data/portraits.js`（make-portraits.mjs）、`docs/banner.svg`（make-banner.mjs）。两套肖像生成器
   共用 `tools/lib/image-pipeline.mjs` 的确定性面部细节恢复阶段；make-emblem 与 make-banner 使用
   未播种的 `Math.random()`——没有真换素材就别重跑。
-- **语录扩充流水线（`tools/gen/`）**：批次 ndjson（`quotes-<组名>-<人物id>-<序号>.ndjson`，
-  t 必须是真实可查的经典原文，宁少勿滥）→ `node tools/gen/selfcheck.mjs <组名>`（`--all`
-  全量、`--post` 合并后自检）→ `node tools/gen/merge.mjs`（`--dry` 预览）追加到 quotes.js
+- **语录扩充流水线**：批次 ndjson 存 `data/quotes-src/`（`quotes-<组名>-<人物id>-<序号>.ndjson`，
+  t 必须是真实可查的经典原文，宁少勿滥）→ `node tools/selfcheck.mjs <组名>`（`--all`
+  全量、`--post` 合并后自检）→ `node tools/merge.mjs`（`--dry` 预览）追加到 quotes.js
   末尾。merge 以「行内容」判重，批内/批间重复会静默跳过——先跑 `selfcheck --all` 清零再合并。
-  合并后必须 `npm run verify` + `npm run build`。`coverage.mjs` 打印每人物条数分布。
+  合并后必须 `npm run verify` + `npm run build`。`tools/coverage.mjs` 打印每人物条数分布。
 
 ## 模块依赖关系
 
@@ -76,7 +79,7 @@ index.html（DOM 契约）
          │      └── src/core/cloud.js（GLSL 几何与材质）← 同一套位置公式的两份实现，必须同步改
          ├── src/core/mask.js（掩膜采样）＋ src/data/*（语料与点位）
          └── src/ui/*（panel / quoteCard / intro / favorites / postcard，互不认识场景）
-tools/*.mjs（离线）→ 写 src/data/emblem.js、src/data/portraits.js、public/ 掩膜与头像、docs/banner.svg
+tools/*.mjs（离线）→ 写 src/data/emblem.js、src/data/portraits.js、src/data/quotes.js（merge 追加）、public/ 掩膜与头像、docs/banner.svg
 ```
 
 - `kv/gui` 式叶子不存在——`src/ui/*` 依赖 main.js 注入的回调，不反向 import core。
@@ -98,6 +101,8 @@ tools/*.mjs（离线）→ 写 src/data/emblem.js、src/data/portraits.js、publ
 |---|---|
 | `src/` | [src/README.md](../src/README.md)（core/data/ui 逐文件说明） |
 | `public/` | [public/README.md](../public/README.md)（掩膜/头像/署名） |
+| `assets/` | [assets/README.md](../assets/README.md)（人物原图素材） |
+| `data/` | [data/README.md](../data/README.md)（语录批次语料） |
 | `tools/` | [tools/README.md](../tools/README.md)（脚本与素材） |
 | `docs/` | 无（文档目录本身） |
 

@@ -7,10 +7,11 @@
 `prepare-mask.mjs` 出掩膜图(给 `src/core/mask.js` 采样用)、`make-emblem.mjs` 出徽章点位
 (写进 `src/data/emblem.js`)、`make-banner.mjs` 出 README 横幅、`fetch-portraits.mjs` +
 `make-portraits.mjs` 出侧栏小头像(写 `public/avatars/`、`public/portraits/` 与
-`src/data/portraits.js`)、`verify-data.mjs` 做数据契约校验(即 `npm run verify`),
-`test-image-pipeline.mjs` 对共享图像管线做零依赖行为回归,
-`gen/` 是语录扩充流水线(批次 ndjson → `selfcheck` 校验 → `merge` 合并进 quotes.js,
-流程见仓库根 `AGENTS.md` 的「数据扩充流水线」)。
+`src/data/portraits.js`,原料在 `../assets/portrait-src/`)、`verify-data.mjs` 做数据契约校验
+(即 `npm run verify`),`test-image-pipeline.mjs` 对共享图像管线做零依赖行为回归,
+`selfcheck.mjs` + `merge.mjs` + `coverage.mjs` 是语录扩充流水线的三步
+(批次 ndjson 在 `../data/quotes-src/`,校验 → 合并进 quotes.js → 分布统计,
+流程见 [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) 的「数据组织方式」)。
 已入库的产物在没有本目录的情况下也能正常构建运行 —— 本目录只在需要重算时上场。
 
 各脚本都用 `import.meta.url` 反推仓库根,所以**在任何目录下运行都行**,命令写成
@@ -20,11 +21,8 @@
 
 ## 子目录
 
-- `gen/` —— 语录扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs`(批校验,支持 `--post`)+
-  `merge.mjs`(幂等合并进 `src/data/quotes.js`)+ `coverage.mjs`(分布统计,含批次口径)。
-  流程见仓库根 `../AGENTS.md` 的「数据扩充流水线」。
-- `portrait-src/` —— `fetch-portraits.mjs` 从 Wikimedia 抓取的头像素材缓存(make-portraits
-  的输入之一)。
+- `lib/` —— `image-pipeline.mjs`:两套肖像生成器(prepare-mask / make-portraits)共用的
+  图像管线原语与面部细节恢复阶段,两套历史口径差异用参数显式表达。
 
 ## 文件清单
 
@@ -37,13 +35,15 @@
 | `emblem-ref.png` | `make-emblem.mjs` 的底图,1280×1280,CC0 党徽标准图形 | — | 输入 |
 | `verify-data.mjs` | 数据契约校验(即 `npm run verify`):语录↔人物 id、每人物至少 1 条、分组 key、DOM id、无全角逗号、无重复(f+t)、肖像清单文件存在 | 可以,只读 | 只读不写,退出码 0=通过 |
 | `test-image-pipeline.mjs` | 共享面部细节恢复的零依赖行为回归:影调、高光、两级暗部细节、边界、噪点与确定性 | 可以,只读 | 只读不写,打印「图像管线测试通过」即通过 |
-| `fetch-portraits.mjs` | 按 `src/data/figures.js` 的 WIKI 字段抓取 Wikimedia 头像到 `portrait-src/` | 可以,需联网 | 写 `portrait-src/`(素材缓存,入库) |
+| `selfcheck.mjs` | 语录批次校验(批次在 `../data/quotes-src/`):f/w/y/t 合法性、批内重复、与现有库重复;支持 `--post` 合并后自检 | 可以,只读 | 只读不写,退出码 0=问题 0 个 |
+| `merge.mjs` | 把 `../data/quotes-src/` 全部批次追加进 `src/data/quotes.js` 末尾(`--dry` 预览) | 可以,幂等(以行内容判重,重复跳过) | **会追加写 `src/data/quotes.js`**(已入库,且被 `src/main.js` import) |
+| `coverage.mjs` | 打印每人物条数分布(现有库 + 批次,最少的排前面) | 可以,只读 | 只读不写 |
+| `fetch-portraits.mjs` | 按 `src/data/figures.js` 的 WIKI 字段抓取 Wikimedia 头像到 `../assets/portrait-src/` | 可以,需联网 | 写 `../assets/portrait-src/`(素材缓存,入库) |
 | `make-portraits.mjs` | 头像裁剪压缩 → `public/avatars/*.jpg`、`src/data/portraits.js` 清单、`public/portraits/` 与 `CREDITS.md` | 可以;完整清单必须不带 `--only` 全量运行 | **会覆盖 `public/avatars/`、`public/portraits/`、`src/data/portraits.js` 与署名**(已入库) |
-| `gen/` | 语录扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs` 批校验 + `merge.mjs` 合并 + `coverage.mjs` 分布统计 | 可以 | **`merge.mjs` 追加写 `src/data/quotes.js`**(以行内容幂等,重复跳过) |
 | `lib/` | `image-pipeline.mjs`:两套肖像生成器共用的原语与面部细节恢复阶段,两套历史口径差异用参数显式表达 | 可以 | 算法有意变化后允许产物 diff;必须连续完整生成两次并确认第二轮与第一轮逐字节一致 |
 
 一句话记法:**会写 `src/data/` 的有三个**——`make-emblem.mjs`(覆盖 emblem.js)、
-`make-portraits.mjs`(覆盖 portraits.js)、`gen/merge.mjs`(追加 quotes.js),覆盖的都是应用真正
+`make-portraits.mjs`(覆盖 portraits.js)、`merge.mjs`(追加 quotes.js),覆盖的都是应用真正
 import 的文件。没有换照片、没有换底图就别重跑 make-banner,那只会产出一堆与上一版无关的 diff。
 
 ## 主要脚本的用法
@@ -87,6 +87,20 @@ node tools/test-image-pipeline.mjs
 
 测试直接使用 Node 内置 `assert`,覆盖面部外像素不变、百分位影调与高光软肩、细/中尺度暗部恢复、
 空样本与平坦面部 no-op、孤立噪点抑制及历史模糊口径的确定性。无需测试框架或图片夹具。
+
+### `selfcheck.mjs` + `merge.mjs` —— 语录批次校验与合并
+
+```bash
+node tools/selfcheck.mjs <批次名>   # 校验 data/quotes-src/ 里该批次的 ndjson
+node tools/selfcheck.mjs --all      # 全部批次(问题须为 0 才能合并)
+node tools/merge.mjs --dry          # 预览可追加条数,不写文件
+node tools/merge.mjs                # 追加进 src/data/quotes.js 末尾
+node tools/coverage.mjs             # 每人物条数分布(现有库 + 批次)
+```
+
+批次文件在 `../data/quotes-src/`,命名 `quotes-<组名>-<人物id>-<序号>.ndjson`。已合并的批次
+`selfcheck.mjs`(不带 `--post`)会全部报「与现有语录库重复」,这是预期:留仓批次本来就已在库内,
+合并前看 `--all` 清零,合并后自检用 `--post`。merge 以「行内容」判重,重复运行安全。
 
 ### `make-portraits.mjs` —— 重算头像、按需掩膜与清单
 
@@ -132,8 +146,11 @@ node tools/make-banner.mjs     # 读 public/marx-mask.png,覆盖 docs/banner.svg
 
 ## 和谁打交道
 
-- **上游**:照片与底图(人工挑选,来自 Wikimedia Commons 公有领域 / CC0 藏品)。
-- **下游**:`../public/*-mask.png`、`../src/data/emblem.js`、`../docs/banner.svg`。
+- **上游**:照片与底图(人工挑选,来自 Wikimedia Commons 公有领域 / CC0 藏品)、语录批次
+  (人工整编,在 `../data/quotes-src/`)。
+- **下游**:`../public/*-mask.png`、`../public/avatars/`、`../public/portraits/`、
+  `../src/data/emblem.js`、`../src/data/portraits.js`、`../src/data/quotes.js`(merge 追加)、
+  `../docs/banner.svg`,以及 `../assets/portrait-src/`(fetch-portraits 的素材缓存)。
 - **改这里之后要跑**:`npm run build`(确认还能构建),然后按上表去改对应的 `v` 与刷新文档数字。
   这三个脚本本身没有输出退出码约定,跑完 `node` 退出码 0 即成功。
 

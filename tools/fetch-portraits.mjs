@@ -1,7 +1,7 @@
 /**
  * 从维基共享资源抓取人物肖像(头像与星尘掩膜的原料)。
  * 数据源:Wikidata P18(人物主图)→ Commons 缩略图(width=640)。
- * 产物:tools/portrait-src/<id>.jpg|png + tools/portrait-src/credits.json(署名与许可)。
+ * 产物:assets/portrait-src/<id>.jpg|png + assets/portrait-src/credits.json(署名与许可)。
  * 幂等:已存在的 <id> 跳过(--force 重抓)。仅教育演示用途,署名见 public/portraits/CREDITS.md。
  * 用法:node tools/fetch-portraits.mjs [--force] [--only=id1,id2]
  */
@@ -10,7 +10,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = join(root, 'tools', 'portrait-src');
+const OUT = join(root, 'assets', 'portrait-src');
 const UA = 'MarxCloud-portrait-fetch/1.0 (educational demo; https://github.com/Luz7818/marx-cloud)';
 const WIDTH = 640;
 const DELAY = 130;

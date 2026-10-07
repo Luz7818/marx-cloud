@@ -75,7 +75,9 @@ npm run dev
 | :--- | :--- |
 | [`src/`](src/README.md) | 全部前端代码:`core/` 渲染与拾取、`ui/` 界面、`data/` 语料与点位 |
 | [`public/`](public/README.md) | 4 张启动固定掩膜、79 张按需换装掩膜与 83 张侧栏小头像,运行时按 URL 拉取,会被原样拷进产物 |
-| [`tools/`](tools/README.md) | 离线脚本:数据契约校验、掩膜/徽章/横幅生成、头像管线,`tools/gen/` 语录扩充流水线,以及照片素材 |
+| [`tools/`](tools/README.md) | 离线脚本:数据契约校验、掩膜/徽章/横幅生成、头像管线、语录批次校验与合并,以及照片素材 |
+| [`assets/`](assets/README.md) | 入库素材:fetch-portraits 抓取的人物原图缓存(头像与掩膜的原料) |
+| [`data/`](data/README.md) | 入库语料:语录扩充流水线的批次 ndjson,合并后留仓追溯 |
 | `docs/` | 上手手册与 README 横幅 |
 | `.github/workflows/` | 推 `main` 后构建 `dist/` 并发布到 GitHub Pages |
 
@@ -83,7 +85,7 @@ npm run dev
 
 内容集中在两个手工文件,改完刷新即生效,粒子分配与侧栏数字自动跟上:
 
-- [`src/data/quotes.js`](src/data/quotes.js) —— 语录数组 `{ f: 人物 id, w: 著作, y: 年份, t: 原文 }`;批量新增走 `tools/gen/` 流水线(批次校验 + 合并),零散增删直接编辑本文件
+- [`src/data/quotes.js`](src/data/quotes.js) —— 语录数组 `{ f: 人物 id, w: 著作, y: 年份, t: 原文 }`;批量新增走 `tools/selfcheck.mjs` + `tools/merge.mjs`(批次语料在 `data/quotes-src/`),零散增删直接编辑本文件
 - [`src/data/figures.js`](src/data/figures.js) —— 人物元数据与搜索别名
 
 肖像与徽章的图形由 `tools/` 下的脚本从照片和党徽标准图形重算,步骤与运行风险

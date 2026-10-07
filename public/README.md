@@ -64,7 +64,7 @@ URL 就是文件名本身,唯一的缓存控制手段是查询串里的 `?v=`。
 ## 和谁打交道
 
 - **上游**:四张固定掩膜来自 `tools/*-photo.jpg` + `tools/prepare-mask.mjs`;按需掩膜与头像来自
-  `tools/portrait-src/` + `tools/make-portraits.mjs`,后者同时写 `src/data/portraits.js`。
+  `assets/portrait-src/` + `tools/make-portraits.mjs`,后者同时写 `src/data/portraits.js`。
 - **下游**:`npm run build` 把它们原样拷进 `dist/`,随 GitHub Pages 一起发布;
   运行时由 `src/core/mask.js` 通过 `<img>` 读取(需要浏览器把图解码到 canvas 里取像素)。
 - **改了这里之后要跑**:改固定平面的 `../src/main.js` 缓存版本或按需掩膜清单的 `v` →

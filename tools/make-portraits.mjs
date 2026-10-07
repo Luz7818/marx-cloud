@@ -6,7 +6,7 @@
  *   4. 署名页 public/portraits/CREDITS.md。
  *
  * 四位旗舰人物(马克思/恩格斯/列宁/卢森堡)沿用 tools/ 里手工标定的照片与既有掩膜,
- * 这里只补生成头像;其余人物读 tools/portrait-src/<id>.*(fetch-portraits.mjs 的产物),
+ * 这里只补生成头像;其余人物读 assets/portrait-src/<id>.*(fetch-portraits.mjs 的产物),
  * 用与 prepare-mask.mjs 同源的自动分割 + 自动曝光管线生成掩膜。
  * 全程无 Math.random:同一批原料重跑逐字节一致。
  *
@@ -26,7 +26,7 @@ import {
 } from './lib/image-pipeline.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SRC = join(root, 'tools', 'portrait-src');
+const SRC = join(root, 'assets', 'portrait-src');
 const MASK_W = 360, MASK_H = 450;          // 归一化 4:5,前端换装按同一纵横比
 const AVA = 128;
 const PREVIEW = process.argv.includes('--preview');

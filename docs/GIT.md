@@ -14,7 +14,7 @@
 
 | 判定 | 规则 |
 |---|---|
-| 必须入库 | `src/`、`tools/`（含 `tools/gen/` 批次文件与照片素材）、`public/`（掩膜与头像是**入库的产物**，字节稳定）、`docs/`、全部文档与构建配置 |
+| 必须入库 | `src/`、`tools/`（脚本与照片素材）、`assets/`（人物原图素材）、`data/`（语录批次文件）、`public/`（掩膜与头像是**入库的产物**，字节稳定）、`docs/`、全部文档与构建配置 |
 | 禁止上传 | `dist/`（本地产物，交付走 Pages）、`node_modules/`、`tools/preview-*.png`、`.vercel`、`.env*`、`*.log`（`.gitignore` 已挡） |
 
 ## CI 与发布
