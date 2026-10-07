@@ -10,7 +10,7 @@
 | 语法检查 | 全部源码可解析 | `node --check` 逐文件，无输出即过 |
 | 数据契约 | 语录↔人物、分组、DOM id、无全角逗号、无重复 | `npm run verify`（`tools/verify-data.mjs`，零依赖） |
 | 图像管线回归 | 面部影调、细节、高光、边界与确定性 | `node tools/test-image-pipeline.mjs`（零依赖测试文件,使用 Node 内置断言） |
-| 构建 | 产物可生成、体积口径 | `npm run build`，退出码 0 且无 `chunk size` 警告 |
+| 构建 | 产物可生成、体积口径 | `npm run build`，退出码 0（单 chunk 超 900 kB 时会打印 `chunk size` 警告，属已知设计，见 `AGENTS.md`） |
 | 浏览器实测 | 交互与三种姿态 | `npm run preview` 开 `http://localhost:4173/`，四个方向各点一遍星 |
 
 ## 运行命令
@@ -48,7 +48,7 @@ npm run build
 | 动了什么 | 必须跑 | 通过判据 |
 |---|---|---|
 | 任意 `.js` | `node --check` 全量循环 | 无输出 |
-| 任意代码 | `npm run build` | 退出码 0，无 chunk 警告 |
+| 任意代码 | `npm run build` | 退出码 0（chunk 警告为已知设计，非失败） |
 | `src/data/quotes.js`、`figures.js` | `npm run verify` + 「数据规模」复核命令 | verify 退出码 0；句数与预期一致 |
 | `data/quotes-src/` 批次文件 | `node tools/selfcheck.mjs --all` → `node tools/merge.mjs` → `npm run verify` | selfcheck 问题 0 个 |
 | 图像管线或大型肖像掩膜 | 图像回归 → 两次完整生成并比 SHA-256 → build → preview | 回归通过；两轮逐字节一致；固定与按需肖像通过视觉验收 |

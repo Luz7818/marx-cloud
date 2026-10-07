@@ -94,7 +94,7 @@ dist/assets/index-*.js     1020.46 kB │ gzip: 467.71 kB
 
 体积行是构建器的字符数口径（中文语录落盘成 UTF-8 后字节更多，磁盘见 `wc -c dist/assets/*`）。
 
-通过标准:退出码 0、`✓ built in`,没有 `chunk size` 警告。
+通过标准:退出码 0、`✓ built in`。单 chunk 超 900 kB 时会打印 `chunk size` 警告——当前 JS 约 1,020 kB,警告必然出现,属已知设计(见 `AGENTS.md`),退出码 0 即通过。
 产物在 `dist/`(已 gitignore,不要提交):一个 HTML、一个 CSS、一个 JS,外加 Vite 从
 `public/` 原样拷过去的 4 张启动固定掩膜、79 张按需换装掩膜、83 张侧栏头像与两份说明文件。
 四张固定掩膜合计 1,056,817 字节,79 张按需掩膜合计 7,828,671 字节;当前 `dist/` 约
