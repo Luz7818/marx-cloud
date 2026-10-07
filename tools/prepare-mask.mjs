@@ -21,7 +21,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  clamp, smooth, toGray, downsample, boxBlur, gradient, smoothPass, faceComponent, floodSegment
+  clamp, smooth, toGray, downsample, boxBlur, gradient, smoothPass, enhanceFaceDetail,
+  faceComponent, floodSegment
 } from './lib/image-pipeline.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -112,6 +113,7 @@ function buildMask(cfg) {
   }
 
   smoothPass(mask, w, h);
+  enhanceFaceDetail(mask, lumS, w, h, cfg);
   return { mask, outW: w, outH: h, subj: subj0 };
 }
 

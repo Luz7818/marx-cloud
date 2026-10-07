@@ -21,7 +21,8 @@ import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  clamp, smooth, toGray, downsample, boxBlur, gradient, smoothPass, faceComponent, floodSegment
+  clamp, smooth, toGray, downsample, boxBlur, gradient, smoothPass, enhanceFaceDetail,
+  faceComponent, floodSegment
 } from './lib/image-pipeline.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -34,10 +35,10 @@ const ONLY = onlyArg ? onlyArg.split('=')[1].split(',') : null;
 
 // 旗舰四位:手工标定裁剪 + 面部位置(与 prepare-mask.mjs CONFIGS 一致),掩膜沿用 public/<id>-mask.png
 const FLAGSHIP = {
-  marx:      { photo: 'marx-photo.jpg',      crop: { x0: 0.05, x1: 0.995, y0: 0.00, y1: 0.70 }, face: [0.53, 0.42], v: 7 },
-  engels:    { photo: 'engels-photo.jpg',    crop: { x0: 0.10, x1: 0.80,  y0: 0.00, y1: 0.66 }, face: [0.54, 0.42], v: 3 },
-  lenin:     { photo: 'lenin-photo.jpg',     crop: { x0: 0.26, x1: 0.78,  y0: 0.01, y1: 0.43 }, face: [0.46, 0.50], v: 3 },
-  luxemburg: { photo: 'luxemburg-photo.jpg', crop: { x0: 0.24, x1: 0.86,  y0: 0.08, y1: 0.57 }, face: [0.38, 0.46], v: 3 }
+  marx:      { photo: 'marx-photo.jpg',      crop: { x0: 0.05, x1: 0.995, y0: 0.00, y1: 0.70 }, face: [0.53, 0.42], v: 8 },
+  engels:    { photo: 'engels-photo.jpg',    crop: { x0: 0.10, x1: 0.80,  y0: 0.00, y1: 0.66 }, face: [0.54, 0.42], v: 4 },
+  lenin:     { photo: 'lenin-photo.jpg',     crop: { x0: 0.26, x1: 0.78,  y0: 0.01, y1: 0.43 }, face: [0.46, 0.50], v: 4 },
+  luxemburg: { photo: 'luxemburg-photo.jpg', crop: { x0: 0.24, x1: 0.86,  y0: 0.08, y1: 0.57 }, face: [0.38, 0.46], v: 4 }
 };
 // 其余人物:自动参数(通用肖像的合理默认)
 const AUTO = {
@@ -243,6 +244,7 @@ function buildAutoMask(img, cfg) {
     mask[i] = v;
   }
   smoothPass(mask, w, h);
+  enhanceFaceDetail(mask, lumS, w, h, { ...cfg, blur });
   return { mask, subj, w, h, ok: true, coverage, win };
 }
 
@@ -348,7 +350,7 @@ for (const f of figures) {
     if (m.ok) {
       writeFileSync(join(root, 'public/portraits', `${f.id}.png`), PNG.sync.write(to45Png(m)));
       entry.mask = `portraits/${f.id}.png`;
-      entry.v = 3; // 重生成掩膜后递增,否则 Pages CDN 会继续发旧图
+      entry.v = 4; // 重生成掩膜后递增,否则 Pages CDN 会继续发旧图
     } else {
       console.log(`⚠ ${f.id} 主体分割覆盖 ${(m.coverage * 100).toFixed(1)}%,跳过掩膜(仅头像)`);
     }

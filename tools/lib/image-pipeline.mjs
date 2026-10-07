@@ -1,8 +1,8 @@
 /**
  * prepare-mask.mjs 与 make-portraits.mjs 共用的图像管线原语。
  *
- * 约定:全部确定性(无随机),同输入同输出。两个脚本的产物已入库,任何改动都必须跑
- * 「重跑两个生成脚本 → git status 零改动」的逐字节回归;做不到字节一致就是改了行为。
+ * 约定:全部确定性(无随机),同输入同输出。任何改动都必须完整运行两个生成脚本两次,
+ * 两轮全部产物逐字节一致才通过确定性回归;算法有意变化时相对 Git 出现差异是预期结果。
  *
  * 两套历史口径的差异用参数显式表达,不许静默统一:
  *   - downsample 的目标宽度由调用方给(旗舰掩膜 500 / 换装掩膜 360);
@@ -93,6 +93,63 @@ export function smoothPass(mask, w, h) {
       const i = y * w + x;
       mask[i] = (copy[i] * 4 + copy[i - 1] + copy[i + 1] + copy[i - w] + copy[i + w] +
         (copy[i - w - 1] + copy[i - w + 1] + copy[i + w - 1] + copy[i + w + 1]) * 0.5) / 8;
+    }
+}
+
+export function enhanceFaceDetail(mask, lum, w, h, {
+  face,
+  faceR,
+  fineGain = 0.9,
+  mediumGain = 0.4,
+  fineLimit = 0.08,
+  mediumLimit = 0.06,
+  highlightKnee = 0.82,
+  toneStrength = 0.72,
+  ped = 0.12,
+  gamma = 1,
+  blur = boxBlur
+}) {
+  const fx = face[0] * w, fy = face[1] * h;
+  const rx = faceR[0] * w, ry = faceR[1] * h;
+  const values = [];
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      const u = (x - fx) / rx, v = (y - fy) / ry;
+      const i = y * w + x;
+      if (u * u + v * v <= 1 && mask[i] > 0.03) values.push(lum[i]);
+    }
+  if (!values.length) return;
+  values.sort((a, b) => a - b);
+  const pLo = values[Math.floor(values.length * 0.08)];
+  const pHi = values[Math.floor(values.length * 0.92)];
+  if (pHi - pLo < 1 / 255) return;
+
+  const fineBase = blur(lum, w, h, 2);
+  const mediumBase = blur(lum, w, h, 8);
+  const fineFloor = 0.01, mediumFloor = 0.02;
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      const u = (x - fx) / rx, v = (y - fy) / ry;
+      const weight = 1 - smooth((Math.hypot(u, v) - 0.58) / 0.42);
+      if (weight <= 0) continue;
+      const i = y * w + x;
+      const tone = smooth((lum[i] - pLo) / (pHi - pLo));
+      const toneMask = ped + (highlightKnee - ped) * Math.pow(tone, gamma);
+      const fineResidual = lum[i] - fineBase[i];
+      const fineSupported = fineResidual < -fineFloor && (
+        (x > 0 && lum[i - 1] - fineBase[i - 1] < -fineFloor) ||
+        (x < w - 1 && lum[i + 1] - fineBase[i + 1] < -fineFloor) ||
+        (y > 0 && lum[i - w] - fineBase[i - w] < -fineFloor) ||
+        (y < h - 1 && lum[i + w] - fineBase[i + w] < -fineFloor)
+      );
+      const fineCorrection = fineSupported
+        ? clamp((fineResidual + fineFloor) * fineGain, -fineLimit, 0) : 0;
+      const mediumResidual = fineBase[i] - mediumBase[i];
+      const mediumCorrection = mediumResidual < -mediumFloor
+        ? clamp((mediumResidual + mediumFloor) * mediumGain, -mediumLimit, 0) : 0;
+      const toneTarget = Math.min(mask[i], toneMask);
+      const target = toneTarget + Math.max(-toneTarget, fineCorrection + mediumCorrection);
+      mask[i] = clamp(mask[i] + (target - mask[i]) * weight * toneStrength, 0, 1);
     }
 }
 

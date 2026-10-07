@@ -8,13 +8,15 @@
 (写进 `src/data/emblem.js`)、`make-banner.mjs` 出 README 横幅、`fetch-portraits.mjs` +
 `make-portraits.mjs` 出侧栏小头像(写 `public/avatars/`、`public/portraits/` 与
 `src/data/portraits.js`)、`verify-data.mjs` 做数据契约校验(即 `npm run verify`),
+`test-image-pipeline.mjs` 对共享图像管线做零依赖行为回归,
 `gen/` 是语录扩充流水线(批次 ndjson → `selfcheck` 校验 → `merge` 合并进 quotes.js,
 流程见仓库根 `AGENTS.md` 的「数据扩充流水线」)。
 已入库的产物在没有本目录的情况下也能正常构建运行 —— 本目录只在需要重算时上场。
 
 各脚本都用 `import.meta.url` 反推仓库根,所以**在任何目录下运行都行**,命令写成
-`node tools/<脚本名>` 即可,不需要先 `cd`。它们依赖 `jpeg-js` 与 `pngjs`(都在
-`devDependencies` 里),所以必须先 `npm install`。
+`node tools/<脚本名>` 即可,不需要先 `cd`。图像生成器依赖 `jpeg-js` 与 `pngjs`(都在
+`devDependencies` 里),所以运行生成器前必须先 `npm install`;`verify-data.mjs` 与
+`test-image-pipeline.mjs` 只用 Node 内置能力,无需第三方依赖。
 
 ## 子目录
 
@@ -34,10 +36,11 @@
 | `marx-photo.jpg` 等 4 张 | `prepare-mask.mjs` 的输入照片 | — | 输入。4 张合计 3.19 MiB(复核:`node -e "const fs=require('fs');let t=0;for(const f of fs.readdirSync('tools'))if(/-photo\.jpg$/.test(f))t+=fs.statSync('tools/'+f).size;console.log(t)"`) |
 | `emblem-ref.png` | `make-emblem.mjs` 的底图,1280×1280,CC0 党徽标准图形 | — | 输入 |
 | `verify-data.mjs` | 数据契约校验(即 `npm run verify`):语录↔人物 id、每人物至少 1 条、分组 key、DOM id、无全角逗号、无重复(f+t)、肖像清单文件存在 | 可以,只读 | 只读不写,退出码 0=通过 |
+| `test-image-pipeline.mjs` | 共享面部细节恢复的零依赖行为回归:影调、高光、两级暗部细节、边界、噪点与确定性 | 可以,只读 | 只读不写,打印「图像管线测试通过」即通过 |
 | `fetch-portraits.mjs` | 按 `src/data/figures.js` 的 WIKI 字段抓取 Wikimedia 头像到 `portrait-src/` | 可以,需联网 | 写 `portrait-src/`(素材缓存,入库) |
-| `make-portraits.mjs` | 头像裁剪压缩 → `public/avatars/*.jpg`、`src/data/portraits.js` 清单、`public/portraits/` 与 `CREDITS.md` | 可以 | **会覆盖 `public/avatars/`、`src/data/portraits.js`**(已入库) |
+| `make-portraits.mjs` | 头像裁剪压缩 → `public/avatars/*.jpg`、`src/data/portraits.js` 清单、`public/portraits/` 与 `CREDITS.md` | 可以;完整清单必须不带 `--only` 全量运行 | **会覆盖 `public/avatars/`、`public/portraits/`、`src/data/portraits.js` 与署名**(已入库) |
 | `gen/` | 语录扩充流水线:`quotes-*.ndjson` 批次 + `selfcheck.mjs` 批校验 + `merge.mjs` 合并 + `coverage.mjs` 分布统计 | 可以 | **`merge.mjs` 追加写 `src/data/quotes.js`**(以行内容幂等,重复跳过) |
-| `lib/` | `image-pipeline.mjs`:prepare-mask 与 make-portraits 共用的图像管线原语(下采样/盒式模糊/梯度/形态学前处理/泛洪分割核),两套历史口径差异用参数显式表达 | 可以 | **改任何函数都必须重跑两个生成脚本并核对 `git status` 零改动**(产物逐字节回归) |
+| `lib/` | `image-pipeline.mjs`:两套肖像生成器共用的原语与面部细节恢复阶段,两套历史口径差异用参数显式表达 | 可以 | 算法有意变化后允许产物 diff;必须连续完整生成两次并确认第二轮与第一轮逐字节一致 |
 
 一句话记法:**会写 `src/data/` 的有三个**——`make-emblem.mjs`(覆盖 emblem.js)、
 `make-portraits.mjs`(覆盖 portraits.js)、`gen/merge.mjs`(追加 quotes.js),覆盖的都是应用真正
@@ -61,18 +64,41 @@ node tools/prepare-mask.mjs                                # 四张全部重算
 
 管线:按 `crop` 裁剪并区域平均下采样到宽 500 → 从图像边界做梯度感知的背景泛洪
 (面部椭圆内永不为背景)→ 取含面部的连通块当主体 → 主体亮度 p10..p90 拉伸做自动曝光、
-减掉大尺度低频得高频细节、按 `ped` 给剪影托底 → 边缘羽化与轻模糊 → 写灰度 PNG。
+减掉大尺度低频得高频细节、按 `ped` 给剪影托底 → 边缘羽化与轻模糊 → 共享面部细节恢复 →
+写灰度 PNG。共享阶段仅在面部椭圆内工作,用 p8..p92 恢复宽域影调、软肩压缩高光、受限的
+细/中尺度负残差恢复眼鼻等暗部,并抑制孤立暗噪点;边缘权重羽化,全程无随机数。
 
 旋钮都在文件顶部的 `CONFIGS` 里:`crop` 归一化裁剪框、`face`/`faceR` 面部椭圆先验、
 `bgTol`/`gradTol` 背景泛洪松紧、`cutY` 下沿切断、`detailGain` 五官加强、`gamma` 明暗反差、
 `ped` 剪影托底。改完要跑,输出一行 `平均亮度 / 有效覆盖` 供比对
-(当前四张分别是 95.8/52.0%、113.3/61.1%、111.1/65.4%、83.6/61.5%)。
+(当前四张分别是 91.6/52.0%、108.3/61.1%、105.3/65.4%、79.2/61.5%)。
 
 **覆盖之后必须同步缓存串**:`src/main.js` 的 `PORTRAIT_PLANES` 里把对应那条的 `v` 加 1,
 否则浏览器与 Pages 的 CDN 会继续发旧掩膜。这一步漏掉的现象是"改了掩膜但肖像没变"。
 
 > 注意脚本开头的注释写着"p4..p96",与实现不符:代码取的是 10% 与 90% 百分位
 > (复核:`grep -n "0.10\|0.90" tools/prepare-mask.mjs`)。以代码为准,别照注释调参。
+
+### `test-image-pipeline.mjs` —— 面部细节行为回归
+
+```bash
+node tools/test-image-pipeline.mjs
+```
+
+测试直接使用 Node 内置 `assert`,覆盖面部外像素不变、百分位影调与高光软肩、细/中尺度暗部恢复、
+空样本与平坦面部 no-op、孤立噪点抑制及历史模糊口径的确定性。无需测试框架或图片夹具。
+
+### `make-portraits.mjs` —— 重算头像、按需掩膜与清单
+
+```bash
+node tools/make-portraits.mjs                # 生产完整的 83 项清单
+node tools/make-portraits.mjs --only=mao     # 仅调试单人,会写出不完整清单,不可作为最终生成结果
+```
+
+`--only` 会让最终 `src/data/portraits.js` 只含所选人物,所以正式生成必须不带该参数完整跑完。
+改动共享管线后,先完整运行 `prepare-mask.mjs` 和 `make-portraits.mjs`,记录 4 张固定掩膜、
+79 张按需掩膜与清单的 SHA-256;再以相同命令完整生成第二轮并比较摘要。算法有意变化时相对 Git
+出现资产 diff 是正常的,验收要求是第二轮与第一轮逐字节一致,不是要求 Git-clean。
 
 ### `make-emblem.mjs` —— 重算徽章点位
 

@@ -40,7 +40,7 @@
 
 | 子目录 | 负责 | 关键文件 | 备注(哪些看着能改其实改不得) |
 |---|---|---|---|
-| `core/` | 渲染与拾取这条流水线:`mask.js` 把掩膜亮度变成点位 → `cloud.js` 把点位烘成几何与 GLSL 材质 → `scene.js` 出画面、吃输入、做 CPU 拾取 | 3 个文件:`mask.js`(61 行)、`cloud.js`(302 行)、`scene.js`(399 行) | 只有 `cloud.js` 与 `scene.js` import `three`,`mask.js` 走 canvas。它采样的那四张掩膜 PNG **不在 `src/` 的任何角落**,在仓库根的 `../public/*-mask.png`,运行时才按 URL 拉取:别在本目录找图,也别拷一份进来(那是一份永远不被读取的副本)。另外位置公式在这里有两份实现(GLSL 与 JS),只改一边点击就静默失灵 |
+| `core/` | 渲染与拾取这条流水线:`mask.js` 把掩膜亮度变成点位 → `cloud.js` 把点位烘成几何与 GLSL 材质 → `scene.js` 出画面、吃输入、做 CPU 拾取 | 3 个文件:`mask.js`(61 行)、`cloud.js`(302 行)、`scene.js`(399 行) | 只有 `cloud.js` 与 `scene.js` import `three`,`mask.js` 走 canvas。启动时采样 `../public/*-mask.png` 的四张固定掩膜,点亮其他人物时按 `data/portraits.js` 采样 `../public/portraits/*.png` 并替换最近槽;这些图片都不在 `src/`,别拷副本进来。另外位置公式在这里有两份实现(GLSL 与 JS),只改一边点击就静默失灵 |
 | `data/` | 语料与采样点位。四个文件都是纯 `export const`,不 import 任何东西;唯一的"逻辑"是 `figures.js` 里由 `figures` 派生 `figureMap` 与 `aka` | `quotes.js`(6036 行,5897 句)、`figures.js`(556 行,91 位人物 + 4 个分组 + 末尾 `ALIAS`)、`portraits.js`(505 行,`make-portraits.mjs` 生成)、`emblem.js`(3 行,3400 个点位) | 前两个手工维护,且下标即对外编号(`#q=N`、收藏、留影都用它),只在末尾追加。`portraits.js` 与 `emblem.js` 是生成物(文件头注释写明),手改会在下次重跑时被整体覆盖;`make-emblem.mjs` 用了未播种的 `Math.random()`,没换 `../tools/emblem-ref.png` 就别重跑,只会得到一份字节不同的无意义 diff |
 | `ui/` | 界面这一层:左栏、语录卡、开场引导、收藏、留影、小头像。六个文件都只碰 DOM | `panel.js`、`quoteCard.js`、`intro.js`、`postcard.js`、`favorites.js`、`avatar.js`(39 行) | 没有一个 import `three`(`postcard.js` 要的 `scene` 由参数传入)。`panel.js` 与 `avatar.js` import `../data/`;`panel.js` 造的 `.panel-row-wrap` 与 `.panel-group` 在 `style.css` 里查无规则,那是给 JS 定位 DOM 用的钩子,不是冗余样式名。`favorites.js` 存的是语录下标,与 `data/quotes.js` 的顺序绑死 |
 
@@ -58,9 +58,10 @@
   累加成 CDF;然后随机取 CDF 上的位置反查像素。结果是"亮的地方星多",不是硬阈值切割。
 - 返回 `{pts, bright, aspect}`:`pts` 是 `count × 2` 的归一化坐标(`x∈[-0.5,0.5]`、`y` 向上为正),
   **不含世界尺寸**,由调用方按肖像高度换算;`aspect` 决定这块平面多宽。
-- `samplePortraits(urls, count)` 按 `urls` 顺序逐个采样(本项目一次传四张),返回数组的
-  下标就是"第几块平面"。
-- 图片取不到时抛 `掩膜图加载失败: <url>`,这条文本会原样出现在页面上。
+- `samplePortraits(urls, count)` 按 `urls` 顺序逐个采样(启动时一次传四张固定掩膜),返回数组的
+  下标就是"第几块平面";点亮其他有清单掩膜的人物时,`main.js` 单独调用 `samplePortrait()` 并替换最近槽。
+- 图片取不到时抛 `掩膜图加载失败: <url>`。启动固定掩膜失败会让 `boot()` 拒绝并显示该错误;
+  按需掩膜失败由 `ensurePortrait()` 捕获并返回 `false`,页面继续运行。
 
 ### `core/cloud.js`
 
@@ -110,6 +111,7 @@
 |---|---|---|
 | `quotes.js` | `{f, w, y, t}` 数组,一行一条 | `main.js` 建索引、`panel.js` 出目录、卡片与留影取文本 |
 | `figures.js` | `groups` 4 项、`figures` 91 项、`figureMap` 由 `figures` 派生 | `main.js` 配色与加权、`panel.js` 分组渲染与搜索 |
+| `portraits.js` | 83 项头像/大型掩膜路径与缓存版本清单 | `main.js` 按需换装、`ui/avatar.js` 显示头像 |
 | `emblem.js` | `[x, y]` 数组,归一化到 `[-1,1]` | 只有 `cloud.js` 把它写进 `aEmblem` |
 
 - **`f` 必须是 `figures` 里某个 `id`**,没有任何代码校验这件事;写错的表现见
@@ -124,11 +126,12 @@
 
 ## 和谁打交道
 
-- **上游**:`../public/*-mask.png`(运行时按 `./<id>-mask.png?v=<n>` 拉取)、
-  `../tools/` 生成的 `data/emblem.js`。
+- **上游**:`../public/*-mask.png`(四张启动固定掩膜)与 `../public/portraits/*.png`(79 张按需掩膜),
+  后者按 `data/portraits.js` 的 `mask` 与 `v` 拉取;`../tools/` 还生成 `data/emblem.js`。
 - **下游**:`npm run build` → `../dist/`(合并成一个 JS 加一个 CSS,`public/` 原样拷过去);
   GitHub Pages 工作流发布 `dist/`。
-- **改这里之后要跑**:`npm run build`,再 `npm run preview` 在浏览器里实际操作一遍(没有自动化测试)。
+- **改这里之后要跑**:`npm run verify`、`node tools/test-image-pipeline.mjs`、全量 `node --check`、
+  `npm run build`,再用 `npm run preview` 做浏览器实测;图像管线有自动行为回归,视觉与交互仍需人工验收。
 
 ## 别动
 

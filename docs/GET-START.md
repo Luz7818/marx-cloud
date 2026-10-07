@@ -96,10 +96,10 @@ dist/assets/index-*.js     1020.46 kB │ gzip: 467.71 kB
 
 通过标准:退出码 0、`✓ built in`,没有 `chunk size` 警告。
 产物在 `dist/`(已 gitignore,不要提交):一个 HTML、一个 CSS、一个 JS,外加 Vite 从
-`public/` 原样拷过去的 4 张掩膜 PNG 与那份 `README.md`。掩膜合计 909,306 字节
-(复核:`node -e "const fs=require('fs');let t=0;for(const f of fs.readdirSync('public'))if(f.endsWith('.png'))t+=fs.statSync('public/'+f).size;console.log(t)"`),
-`du -sb dist | cut -f1` 的总数还包含那份 `README.md`,它随文档改动而变,所以这里不写死总数。
-JS/CSS 文件名里的 hash 由内容决定,内容不变则 hash 不变。
+`public/` 原样拷过去的 4 张启动固定掩膜、79 张按需换装掩膜、83 张侧栏头像与两份说明文件。
+四张固定掩膜合计 1,056,817 字节,79 张按需掩膜合计 7,828,671 字节;当前 `dist/` 约
+10.31 MiB(复核分项与命令统一见 `AGENTS.md`「当前状态」)。`README.md` 与 `CREDITS.md` 会随
+文档改动而变,所以不把它们并入固定字节总数。JS/CSS 文件名里的 hash 由内容决定,内容不变则 hash 不变。
 
 `dist/` 是 gitignore 的本地产物,提交前不需要清理它。构建本身不跑类型检查,
 所以还要挨个过一遍语法(在仓库根执行,无输出即全部通过):
@@ -151,7 +151,7 @@ npm run preview
 | 悬停一颗星 | `main.js` 的 `pointermove` | 气泡:人名 + 该句前 30 字。拾取半径 14 px,隔一个点取一个 |
 | 点一颗星 | `scene.onClick` → `pickStar(x,y,18)` | 展开该句的语录卡。拾取半径 18 px |
 | 点虚空 | 同上,拾取失败分支 | 随机捞一句,顶栏「拾句·开/关」可关 |
-| 左栏点人名 | `panel.js` | 只留这个人的星(其余完全隐去,不是压暗)。会不会同时飞抵要看他/她有没有对应方位:肖像视图下只有那四位,徽章视图下按所属分组飞过去(`PORTRAIT_PLANES.findIndex` 返回 -1 时不动) |
+| 左栏点人名 | `panel.js` | 点亮该人物;肖像视图下 83 位有大型掩膜的人物会按清单加载并替换最近槽后飞抵,其余 8 位保持单人星群并飞向最近槽;徽章视图按所属分组飞过去 |
 | 左栏 `▸` | 同上 | 展开该人全部语录,点一句即定位(点亮 + 展开卡片) |
 | 搜索框输完按 `Enter` | 同上 | 等同于点当前筛选结果里的第一个人 |
 | 顶栏「视图·肖像/徽章」 | `main.js` | 在四向肖像与党徽两种星图之间切换 |
@@ -175,9 +175,10 @@ npm run preview
   一整圈约 68 秒(速度 1 倍)。任何拖拽或按键立即接管,停手 4 秒后恢复。
 - **底部字幕**:只有正对某位思想家时才出现,给出姓名、生卒与身份;徽章视图下给出组名与
   "X 位思想家 · Y 句经典"。
-- **两个视图**:肖像视图的四块平面对应马克思、恩格斯、列宁、卢森堡(按生卒年排序);
-  徽章视图把同一套权重交给四个分组 —— 思想先驱 / 创始人 / 继承与发展 / 在中国,
-  本组的星排成镰刀锤头加一颗五角星,其余三组被推到远处球壳上并压暗。
+- **两个视图**:肖像视图启动时四块平面对应马克思、恩格斯、列宁、卢森堡(按生卒年排序),
+  点亮其他有大型掩膜的人物时会替换最近槽;徽章视图把同一套权重交给四个分组 ——
+  思想先驱 / 创始人 / 继承与发展 / 在中国,本组的星排成镰刀锤头加一颗五角星,
+  其余三组被推到远处球壳上并压暗。
 - **留影**:语录卡上点「留影」,把当前画面连同这一句排成 1200×1500 的竖版 PNG 下载,
   文件名带人名与句号。
 - **拾遗**:语录卡「收进拾遗」写入本机 localStorage(键 `marxcloud.favs.v1`),左栏顶部出现列表,
@@ -246,8 +247,10 @@ node tools/prepare-mask.mjs --only=marx --preview --debug
 `face`/`faceR` 是保护面部不被当成背景的椭圆先验,`bgTol`/`gradTol` 控背景泛洪的松紧,
 `detailGain` 提五官,`ped` 给剪影托底,`gamma` 控明暗反差)。
 
-覆盖之后必须同时改缓存串:`src/main.js` 的 `PORTRAIT_PLANES` 里把对应那条的 `v` 加 1,
-否则浏览器与 Pages 的 CDN 会继续发旧图,看起来像"改了没生效"。
+覆盖固定掩膜后必须同时改缓存串:`src/main.js` 的 `PORTRAIT_PLANES` 里把对应那条的 `v` 加 1,
+否则浏览器与 Pages 的 CDN 会继续发旧图,看起来像"改了没生效"。79 张按需换装掩膜由
+`tools/make-portraits.mjs` 生成,缓存版本写在它同时生成的 `src/data/portraits.js` 清单中;
+需要完整清单时不能带 `--only`。
 
 ### 5.4 重算徽章点位
 
@@ -302,10 +305,10 @@ node tools/make-banner.mjs     # 读 public/marx-mask.png,覆盖 docs/banner.svg
 | 现象 / 报错原文 | 原因 | 怎么办 |
 |---|---|---|
 | 页面停在"加载失败:……",下面是转圈的加载框 | WebGL 上下文拿不到(`THREE.WebGLRenderer` 抛错),本作没有兜底版本 | 换浏览器或开硬件加速;虚拟机/远程桌面里常被禁用。`detectSoftwareGL()` 只降粒子数,不解决"完全没有 GL" |
-| `加载失败: 掩膜图加载失败: ./marx-mask.png?v=7` | `public/` 下没有对应文件,或 `PORTRAIT_PLANES` 的 id 与文件名不一致 | 文件名规律是 `<id>-mask.png`;改 id 要两处一起改 |
+| `加载失败: 掩膜图加载失败: ./marx-mask.png?v=8` | 四张启动固定掩膜之一缺失,或 `PORTRAIT_PLANES` 的 id 与文件名不一致 | 文件名规律是 `<id>-mask.png`;改 id 要两处一起改。按需掩膜失败会被捕获,不会终止页面 |
 | `加载失败:Cannot read properties of undefined (reading '0')` | 刚改过 `figures.js`,某人 `group` 写了 `groups` 里没有的值 | 改成四个 key 之一;机制见 `AGENTS.md` 约定 6 |
 | 左栏搜不到某个人 | 他的语录 `f` 写错 id,或 `group` 拼错导致整条不渲染 | 跑 `AGENTS.md` 约定 1 里的 id 核对命令,应输出 `0` |
-| 重画掩膜后肖像没变化 | `?v=` 没变,拿的是缓存 | 改 `src/main.js` 里 `PORTRAIT_PLANES` 的 `v`,再构建 |
+| 重画掩膜后肖像没变化 | `?v=` 没变,拿的是缓存 | 固定掩膜改 `src/main.js` 的 `PORTRAIT_PLANES[].v`;按需掩膜更新 `src/data/portraits.js` 清单里的 `v`,再构建 |
 | 点星没反应 / 徽章视图下点不中 | 改过着色器或 `pickStar()` 却没同步另一份实现 | CPU 拾取是着色器公式的第二份实现,见 `AGENTS.md` 约定 5 |
 | 点「复制原文」「分享」毫无反应,控制台有 TypeError | `navigator.clipboard` 只在 https 或 localhost 下存在 | 用 `http://localhost:5173/` 或线上 https 地址;手动复制原文文本 |
 | 转 90° 不散开 / 聚不成像 | 相机在过渡带外或画质档被锁在低档,粒子太少 | 检查顶栏画质档;`?lite` 也会锁低档 |
@@ -336,7 +339,7 @@ node tools/make-banner.mjs     # 读 public/marx-mask.png,覆盖 docs/banner.svg
 | 正交相机 | 无视距离、平行投影的相机,画出来像工程图。**本项目没有用它**,代码里只有透视相机 |
 | `requestAnimationFrame`(rAF) | 浏览器逐帧回调。后台标签页或抓屏时会被节流,所以本项目另有一条 300 ms 的兜底驱动 |
 | 深链 | 带 `#q=N` 的网址,别人打开就直接展开第 N+1 句。`N` 是 `quotes` 数组下标,从 0 起 |
-| 缓存串 | URL 后面那段 `?v=7`。数字本身没含义,改它纯粹为了让浏览器与 CDN 重新拉图 |
+| 缓存串 | URL 后面那段 `?v=8`。数字本身没含义,改它纯粹为了让浏览器与 CDN 重新拉图;固定掩膜与按需掩膜分别从 `PORTRAIT_PLANES` 和 `portraits.js` 取值 |
 | localStorage | 浏览器自带的本机键值存储,收藏写在这里,不上传、不跨设备 |
 | chunk | 构建后合并出的 JS 文件。本项目只有一个,包含 three.js 与全部数据 |
 | gzip | 服务器传输时压缩后的体积,比磁盘上的文件大小更接近用户实际下载量 |
@@ -344,11 +347,13 @@ node tools/make-banner.mjs     # 读 public/marx-mask.png,覆盖 docs/banner.svg
 ## 9. 改完之后跑什么
 
 ```bash
-npm run build
+npm run verify
+node tools/test-image-pipeline.mjs
 for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" || echo "FAIL $f"; done
+npm run build
 ```
 
-通过标准:`build` 退出码 0 且输出 `18 modules transformed`;`node --check` 一条 `FAIL` 都不打。
-然后 `npm run preview`,把改过的东西在浏览器里实际操作一遍 —— 这个仓库没有自动化测试,
-这一步就是回归。每条命令各自拦什么、哪些文件是生成物,写在仓库根的
-[`AGENTS.md`](../AGENTS.md)。
+通过标准:`verify` 与图像管线回归退出码 0,`node --check` 一条 `FAIL` 都不打,`build` 退出码 0
+且输出 `18 modules transformed`。然后 `npm run preview`,把改过的东西在浏览器里实际操作一遍;
+图像管线有自动行为回归,但浏览器视觉与交互仍需人工验收。每条命令各自拦什么、哪些文件是生成物,
+写在仓库根的 [`AGENTS.md`](../AGENTS.md)。

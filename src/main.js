@@ -75,10 +75,10 @@ const HALF = Math.PI / 2;
 
 // 四块肖像平面:每 90° 一位,初始为四位旗舰;其余人物被选中时换装到最近的槽(见 ensurePortrait)
 const PORTRAIT_PLANES = [
-  { id: 'marx', v: 7 },
-  { id: 'engels', v: 3 },
-  { id: 'lenin', v: 3 },
-  { id: 'luxemburg', v: 3 }
+  { id: 'marx', v: 8 },
+  { id: 'engels', v: 4 },
+  { id: 'lenin', v: 4 },
+  { id: 'luxemburg', v: 4 }
 ];
 const planeFigs = PORTRAIT_PLANES.map(p => figureMap[p.id]);
 

@@ -37,7 +37,7 @@
 | 分析 | 影响面清单(动哪一层:core/ui/data/tools,是否触及生成物) | 影响面说全 |
 | 设计 | 方案说明(公式/数据格式变化、回退方式) | 验收标准已定义;与更简方案比较过 |
 | 实现 | 代码 | 只含设计内改动,符合 [docs/CODE-STYLE.md](docs/CODE-STYLE.md) |
-| 测试 | 门禁结果 | [docs/TESTING.md](docs/TESTING.md) 三条命令 + 浏览器实测 |
+| 测试 | 门禁结果 | [docs/TESTING.md](docs/TESTING.md) 四条命令 + 浏览器实测 |
 | 文档更新 | 受影响文档 diff | 维护矩阵逐项过完 |
 | Git提交 | 提交 | 符合 [docs/GIT.md](docs/GIT.md),一批一提交(生成物与源同批) |
 | 等待确认 | —— | 等人确认后推送;推送后 luzzz.me 侧需重跑同步 |
@@ -95,8 +95,8 @@
 | 产物 JS | 磁盘文件 1,511,654 字节 / gzip 实测约 466 kB;`npm run build` 打印的 `1,020.46 kB` 是**字符数口径**(UTF-16 单元,中文语录按 1 计),落盘成 UTF-8 后中文按 3 字节展开,所以对账磁盘必须用 `wc -c`,别拿打印值对 | `wc -c dist/assets/*.js`;`gzip -c dist/assets/*.js \| wc -c` |
 | 产物 CSS | 16.39 kB / gzip 3.95 kB | `npm run build` 末三行 |
 | 产物 HTML | 2.17 kB / gzip 1.39 kB | `npm run build` 末三行 |
-| dist 全量 | 约 9.26 MB = `assets/` 1,528,049(JS 磁盘 1512k + CSS 16k)+ `index.html` 2,660 + 4 张固定肖像掩膜 909,306 + `portraits/` 换装掩膜 6,893,067(79 张,按需加载)+ `avatars/` 372,134 + `README.md`(随文档改动而变,不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
-| 语法检查 | 25 个源码文件(`src` 14 + `tools` 10 含 gen/lib 子目录 + `vite.config.js`)全部通过 | `for f in $(git ls-files 'src/*.js' 'tools/*.mjs' vite.config.js); do node --check "$f" \|\| echo "FAIL $f"; done` |
+| dist 全量 | 约 10.31 MiB = `assets/` 1,528,049(JS 磁盘 1512k + CSS 16k)+ `index.html` 2,660 + 4 张固定肖像掩膜 1,056,817 + `portraits/` 换装掩膜 7,828,671(79 张,按需加载)+ `avatars/` 372,134 + `README.md` 与 `CREDITS.md`(随文档改动而变,不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
+| 语法检查 | 26 个源码文件(`src` 14 + `tools` 11 含测试及 gen/lib 子目录 + `vite.config.js`)全部通过 | `files="$(find src tools -type f \( -name '*.js' -o -name '*.mjs' \) -print) vite.config.js";printf '%s\n' $files \| wc -l;for f in $files;do node --check "$f" \|\| echo "FAIL $f";done` |
 | 数据契约校验 | `npm run verify`(`tools/verify-data.mjs`,零依赖):语录↔人物 id、每人物至少 1 条、分组 key、DOM id、无全角逗号、无重复(f+t)、肖像清单文件存在 | 退出码 0,结尾打印「数据契约校验通过:91 位人物 / N 条语录 / 4 个分组 / 肖像平面 4 块」 |
 | lint / 类型检查 / 格式化 | 无配置也无依赖 | `git ls-files` 里没有 `eslint*`、`tsconfig*`、`prettier*` |
 | 运行时依赖 | 只有 `three@0.169.0` | `npm ls --depth=0` |

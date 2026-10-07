@@ -8,7 +8,7 @@
   deploy-pages；CI 用 node 20，本机 24 实测兼容）。
 - **一批一提交**：数据（quotes/figures）与由它重算的生成物（掩膜/徽章/横幅）必须同批提交；
   生成物单独变化而无源变化 = 反了。
-- 提交前门禁：[TESTING.md](TESTING.md) 三条命令 + `check_docs`。
+- 提交前门禁:[TESTING.md](TESTING.md) 四条命令 + `check_docs`。
 
 ## 必须入库 / 禁止上传
 

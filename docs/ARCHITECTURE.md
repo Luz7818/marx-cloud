@@ -37,11 +37,11 @@ Marx_Cloud/
 | `src/data/figures.js` | 91 位人物元数据 + 4 个分组 + 搜索别名 | 手工维护，`weight` 由语录数自动推导 |
 | `src/data/quotes.js` | 5897 条语录数组 | 末尾 4856 条由 `tools/gen/merge.mjs` 生成，顺序即编号，只在末尾追加 |
 | `src/data/emblem.js` | 3400 个徽章点位 | `tools/make-emblem.mjs` 生成，勿手改 |
-| `src/data/portraits.js` | 头像清单（人物 id → `public/avatars/*.jpg`） | 脚本生成；缺失的人物侧栏回退姓氏徽记 |
+| `src/data/portraits.js` | 运行时肖像清单（人物 id → 头像/掩膜路径与缓存版本） | `make-portraits.mjs` 生成；无条目的人物回退姓氏徽记 |
 | `src/style.css` | 全部界面样式，单个 media query 管移动端 | 见关键约定 8 的未定义类 |
-| `public/*-mask.png` | 4 张亮度掩膜，运行时按 `./<id>-mask.png?v=<n>` 拉取 | Vite 原样拷进 `dist/` |
-| `public/avatars/`、`public/portraits/` | 83 张小头像 + 79 张换装掩膜（按需加载） | `public/portraits/CREDITS.md` 记录来源与授权 |
-| `tools/*.mjs` | 离线脚本：verify-data / prepare-mask / make-emblem / make-banner / fetch-portraits / make-portraits | 只有 make-emblem 会写 `src/data/`；fetch/make-portraits 写 `public/` |
+| `public/*-mask.png` | 4 张启动时加载的固定肖像掩膜,按 `./<id>-mask.png?v=<n>` 拉取 | `prepare-mask.mjs` 生成；Vite 原样拷进 `dist/` |
+| `public/avatars/`、`public/portraits/` | 83 张小头像 + 79 张换装掩膜（按需加载） | `make-portraits.mjs` 生成；`public/portraits/CREDITS.md` 记录来源与授权 |
+| `tools/*.mjs` | 离线脚本：verify-data / prepare-mask / make-emblem / make-banner / fetch-portraits / make-portraits | make-emblem 写徽章点位；make-portraits 写头像、换装掩膜、署名与肖像清单 |
 | `tools/gen/` | 数据扩充流水线：批次 ndjson + selfcheck + merge + coverage | 批次文件合并后仍留仓供追溯 |
 | `tools/*-photo.jpg`、`emblem-ref.png` | 生成脚本的输入素材（3.20 MiB） | 不进构建、不被 `src/` 引用 |
 | `docs/banner.svg` | README 横幅 | `tools/make-banner.mjs` 生成 |
@@ -57,8 +57,10 @@ Marx_Cloud/
   `groups` 里 4 个 key 之一（写错的后果见关键约定 6）；不要重排 `figures`——`aFig` 存的是
   下标，重排会打乱已分享的 `#q=N` 与收藏。
 - **生成物清单**：`src/data/emblem.js`（make-emblem.mjs）、`public/*-mask.png`
-  （prepare-mask.mjs，无随机、重跑字节一致）、`docs/banner.svg`（make-banner.mjs）。
-  make-emblem 与 make-banner 用未播种的 `Math.random()`——没有真换素材就别重跑。
+  （prepare-mask.mjs）、`public/avatars/`、`public/portraits/`、`public/portraits/CREDITS.md` 与
+  `src/data/portraits.js`（make-portraits.mjs）、`docs/banner.svg`（make-banner.mjs）。两套肖像生成器
+  共用 `tools/lib/image-pipeline.mjs` 的确定性面部细节恢复阶段；make-emblem 与 make-banner 使用
+  未播种的 `Math.random()`——没有真换素材就别重跑。
 - **语录扩充流水线（`tools/gen/`）**：批次 ndjson（`quotes-<组名>-<人物id>-<序号>.ndjson`，
   t 必须是真实可查的经典原文，宁少勿滥）→ `node tools/gen/selfcheck.mjs <组名>`（`--all`
   全量、`--post` 合并后自检）→ `node tools/gen/merge.mjs`（`--dry` 预览）追加到 quotes.js
@@ -74,7 +76,7 @@ index.html（DOM 契约）
          │      └── src/core/cloud.js（GLSL 几何与材质）← 同一套位置公式的两份实现，必须同步改
          ├── src/core/mask.js（掩膜采样）＋ src/data/*（语料与点位）
          └── src/ui/*（panel / quoteCard / intro / favorites / postcard，互不认识场景）
-tools/*.mjs（离线）→ 写 src/data/emblem.js、public/ 掩膜与头像、docs/banner.svg
+tools/*.mjs（离线）→ 写 src/data/emblem.js、src/data/portraits.js、public/ 掩膜与头像、docs/banner.svg
 ```
 
 - `kv/gui` 式叶子不存在——`src/ui/*` 依赖 main.js 注入的回调，不反向 import core。
@@ -105,9 +107,12 @@ tools/*.mjs（离线）→ 写 src/data/emblem.js、public/ 掩膜与头像、do
    "同人物下一条"里永不出现，但 `#q=N` 仍能打开；某人物零语录时仍按权重分到星点，
    `quoteIdx` 兜底成 0，那颗星涂新人物的颜色、点开却是第 1 句马克思。
 2. **语录下标即对外编号**——见「数据组织方式」，只在末尾追加。
-3. **掩膜链路是 `figures[].id` → `PORTRAIT_PLANES[].id` → `public/<id>-mask.png` → `?v=`**：
-   91 位里只有 4 位有掩膜（马克思、恩格斯、列宁、卢森堡），其余 87 位只有星群与色，侧栏另
-   有 83 位配小头像。id 三处必须一致；重画掩膜不改 `v` 会让 CDN/浏览器继续发旧图。
+3. **运行时固定四块肖像平面,掩膜来源分两级**：启动时先把马克思、恩格斯、列宁、卢森堡的
+   `public/<id>-mask.png?v=<n>` 载入四个固定槽；点亮其他人物时,运行时经生成的
+   `src/data/portraits.js` 清单按需加载 79 张 `public/portraits/*.png?v=<n>`,并替换离当前视角
+   最近的槽。91 位人物中另有 8 位没有清单条目,继续使用姓氏徽记回退。固定掩膜由
+   `prepare-mask.mjs` 写入,按需掩膜、83 张小头像、署名与清单由完整运行的
+   `make-portraits.mjs` 写入；重画任一掩膜而不递增清单或固定平面的 `v` 会让 CDN/浏览器继续发旧图。
 4. **四向是写死的，不是配置**：`uW0..uW3`、`N=[0,1,2,3]`、着色器 `k*1.5707963`、
    `groupPos(0..3)`。加第五块肖像要同时动 `cloud.js` 与 `scene.js`；徽章视图要求分组恰好 4 个。
 5. **着色器与 CPU 拾取是同一套公式的两份实现**：GLSL `groupPos()` 与 JS 版必须逐项一致
