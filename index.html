@@ -19,17 +19,40 @@
 
     <nav id="toolbar">
       <button id="btn-panel" type="button" title="思想家列表">
-        <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M3 5h18v2H3zm0 6h12v2H3zm0 6h16v2H3z"/></svg>
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M3 5h18v2H3zm0 6h12v2H3zm0 6h16v2H3z"/></svg>
+        <span class="btn-t">思想家</span>
       </button>
-      <button id="btn-view" type="button" title="切换视图:四向肖像 / 镰刀锤头徽章">视图·肖像</button>
-      <button id="btn-daily" type="button" title="按日期取一句每日经典(R 键)">每日一句</button>
-      <button id="btn-quality" type="button" title="画质:自动=按帧率自适应;高=满粒子;低=弱显卡">画质·自动</button>
+      <button id="btn-view" type="button" title="切换视图:四向肖像 / 镰刀锤头徽章">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 4C6.5 4 2.7 8.9 1.3 11.4a1.2 1.2 0 0 0 0 1.2C2.7 15.1 6.5 20 12 20s9.3-4.9 10.7-7.4a1.2 1.2 0 0 0 0-1.2C21.3 8.9 17.5 4 12 4zm0 13a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
+        <span class="btn-t">视图·肖像</span>
+      </button>
+      <button id="btn-daily" type="button" title="按日期取一句每日经典(R 键)">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-6a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V2a1 1 0 0 1 1-1zm0 18a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1zM2 11h2a1 1 0 1 1 0 2H2a1 1 0 1 1 0-2zm18 0h2a1 1 0 1 1 0 2h-2a1 1 0 1 1 0-2zM4.9 3.5l1.4 1.4A1 1 0 1 1 4.9 6.3L3.5 4.9a1 1 0 0 1 1.4-1.4zm12.8 12.8l1.4 1.4a1 1 0 1 1-1.4 1.4l-1.4-1.4a1 1 0 0 1 1.4-1.4zm1.4-12.8a1 1 0 0 1 0 1.4l-1.4 1.4a1 1 0 1 1-1.4-1.4l1.4-1.4a1 1 0 0 1 1.4 0zM7 15.6a1 1 0 0 1 0 1.4l-1.4 1.4a1 1 0 1 1-1.4-1.4l1.4-1.4a1 1 0 0 1 1.4 0z"/></svg>
+        <span class="btn-t">每日一句</span>
+      </button>
+      <button id="btn-random" type="button" title="随机飞往一位思想家并读一句(X 键)">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 4h4v4M4 20L20 4M20 16v4h-4M14 14l6 6M4 4l5 5"/></svg>
+        <span class="btn-t">随机漫游</span>
+      </button>
+      <button id="btn-quality" type="button" title="画质:自动=按帧率自适应;高=满粒子;低=弱显卡">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2v16a8 8 0 0 0 0-16z"/></svg>
+        <span class="btn-t">画质·自动</span>
+      </button>
       <label id="speed-wrap" title="自动巡游速度">
-        <span>速度</span>
+        <span class="sp-label">速度</span>
         <input id="speed" type="range" min="0.4" max="2.4" step="0.2" value="1" />
       </label>
-      <button id="btn-void" type="button" title="点击虚空时是否随机拾起一句">拾句·开</button>
-      <button id="btn-about" type="button" title="关于">关于</button>
+      <button id="btn-void" type="button" title="点击虚空时是否随机拾起一句">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M11 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6zm8 11l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/></svg>
+        <span class="btn-t">拾句·开</span>
+      </button>
+      <button id="btn-about" type="button" title="关于">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <span class="btn-t">关于</span>
+      </button>
+      <button id="btn-help" type="button" title="快捷键帮助(? 键)">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M11.2 15h1.9v2h-1.9v-2zM12 5.2c2.1 0 3.8 1.5 3.8 3.5 0 1.3-.6 2.1-1.8 2.9-.9.6-1.2 1-1.2 1.8v.3h-1.9v-.5c0-1.2.5-2 1.7-2.8.8-.6 1.2-1 1.2-1.7 0-1-.8-1.7-1.8-1.7-1.1 0-1.8.7-1.8 1.9H9.3c0-2.1 1.2-3.7 2.7-3.7z"/></svg>
+      </button>
     </nav>
 
     <aside id="panel"></aside>
@@ -46,9 +69,28 @@
       </span>
     </div>
 
-    <footer id="hint">拖拽 / WASD 飞行 · 每 90° 换一位思想家 · 侧栏点亮任何人,星河为他/她重排头像 · 点星尘看语录 · 点虚空捞一句 · R 每日一句 · H 隐藏界面 · F 全屏 · P 暂停巡游</footer>
+    <footer id="hint">拖拽 / 滚轮漫游 · 每 <b>90°</b> 换一位思想家 · 侧栏点亮任何人,星河为其重排头像 · 点星尘读语录 · 点虚空捞一句 · <kbd>R</kbd> 每日一句 · <kbd>X</kbd> 随机漫游 · <kbd>H</kbd> 隐藏界面 · <kbd>F</kbd> 全屏 · <kbd>P</kbd> 暂停 · <kbd>?</kbd> 快捷键</footer>
 
     <div id="intro"></div>
+
+    <div id="kbd-help">
+      <div class="kb-card">
+        <div class="kb-title">快捷键</div>
+        <div class="kb-grid">
+          <kbd>拖拽</kbd><span>环绕星图</span>
+          <kbd>滚轮</kbd><span>推近 / 拉远</span>
+          <kbd>W A S D</kbd><span>俯仰 / 偏航飞行(Shift 加速)</span>
+          <kbd>Q E</kbd><span>进 / 退</span>
+          <kbd>R</kbd><span>每日一句</span>
+          <kbd>X</kbd><span>随机漫游:飞往一位思想家并读一句</span>
+          <kbd>P</kbd><span>暂停 / 恢复自动巡游</span>
+          <kbd>H</kbd><span>隐藏全部界面(截图)</span>
+          <kbd>F</kbd><span>全屏</span>
+          <kbd>Esc</kbd><span>关闭语录卡 / 本帮助</span>
+        </div>
+        <div class="kb-tip">点击任意处关闭</div>
+      </div>
+    </div>
 
     <div id="loading">
       <div class="load-ring"></div>

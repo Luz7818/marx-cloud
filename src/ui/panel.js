@@ -1,5 +1,7 @@
 import { figures, figureMap, groups } from '../data/figures.js';
 import { avaHTML, hydrateAvas } from './avatar.js';
+import { copyText } from './clipboard.js';
+import { toast } from './toast.js';
 
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const cut = (s, n = 26) => (s.length > n ? s.slice(0, n) + '……' : s);
@@ -7,7 +9,8 @@ const birthYear = (f) => parseInt(f.years, 10) || 9999;
 
 /**
  * 构建人物筛选侧栏:三个标签(思想家 / 著作 / 寻句)。
- * 思想家:搜索、点亮(头像 + 画像换装)、飞抵、语录目录、拾遗、按年代排序。
+ * 思想家:分组可折叠(默认收起,搜索/选中自动展开)、点亮(头像 + 画像换装)、
+ *          飞抵、语录目录、拾遗(可导出)、按年代排序。
  * 著作:全部出处按收录量排列,展开看该著作下的语录。
  * 寻句:全文检索语录正文。
  * @param {HTMLElement} container
@@ -71,7 +74,13 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
         <span class="pf-sub">${esc(f.years)} · ${esc(f.region)} · ${esc(f.role)}</span>
         <p class="pf-blurb">${esc(f.blurb)}</p>
         <span class="pf-meta">${counts[id] || 0} 句 · ${works} 部著作</span>
+        ${(byFigure[id] || []).length ? '<button class="pf-random" type="button" title="从这位思想家的语录里随机读一句">随机读一句</button>' : ''}
       </div>`;
+    const rnd = focusCard.querySelector('.pf-random');
+    if (rnd) rnd.addEventListener('click', () => {
+      const pool = byFigure[id] || [];
+      onPickQuote && pool.length && onPickQuote(pool[(Math.random() * pool.length) | 0]);
+    });
     focusCard.classList.add('show');
     hydrateAvas(focusCard);
   }
@@ -87,6 +96,7 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
     favBox.style.display = '';
     favBox.innerHTML = `
       <div class="panel-group-label">拾遗 <span class="fav-n">${ids.length}</span>
+        <button class="fav-export" type="button" title="把拾遗按人名导出为文本,复制到剪贴板">导出</button>
         <button class="fav-clear" type="button">清空</button>
       </div>
       ${ids.map(i => {
@@ -101,7 +111,18 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
     favBox.querySelectorAll('.fav-row').forEach(r => {
       r.addEventListener('click', () => onPickQuote && onPickQuote(+r.dataset.q));
     });
-    favBox.querySelector('.fav-clear').addEventListener('click', () => { favs.clear(); renderFavs(); });
+    favBox.querySelector('.fav-clear').addEventListener('click', () => {
+      favs.clear();
+      renderFavs();
+      toast('拾遗已清空');
+    });
+    favBox.querySelector('.fav-export').addEventListener('click', async () => {
+      const lines = favs.list().map((i, k) => {
+        const q = quotes[i]; const f = figureMap[q.f];
+        return `${k + 1}. 「${q.t}」—— ${f.name}《${q.w}》${q.y ? `(${q.y})` : ''}`;
+      });
+      await copyText(`【思想云 · 拾遗】\n${lines.join('\n')}`, { okMsg: `已复制 ${lines.length} 句拾遗` });
+    });
   }
   renderFavs();
 
@@ -131,18 +152,29 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
     box.classList.add('open');
   }
 
-  // ---------- 人物分组 ----------
+  // ---------- 人物分组(可折叠:默认收起,搜索/选中自动展开) ----------
   // 语录不足 MERGE_BELOW 的人物并入各组末尾的「拾遗」折叠行,不再单独列出
   const MERGE_BELOW = 6;
   const wraps = [];
   const minorWraps = [];
+  const groupSections = [];
   const wrapHome = new Map();
   for (const g of groups) {
     const figs = figures.filter(f => f.group === g.key);
     if (!figs.length) continue;
     const sec = document.createElement('div');
     sec.className = 'panel-group';
-    sec.innerHTML = `<div class="panel-group-label">${g.label}</div>`;
+    const gQuotes = figs.reduce((a, f) => a + (counts[f.id] || 0), 0);
+    sec.innerHTML = `
+      <button class="panel-group-head" type="button" title="展开 / 收起「${esc(g.label)}」">
+        <span class="gh-caret">▸</span>
+        <span class="gh-label">${esc(g.label)}</span>
+        <span class="gh-count">${figs.length} 位 · ${gQuotes} 句</span>
+      </button>
+      <div class="panel-group-body"></div>
+    `;
+    const body = sec.querySelector('.panel-group-body');
+    sec.querySelector('.panel-group-head').addEventListener('click', () => sec.classList.toggle('open'));
     const buildRow = (f, parent, minor) => {
       const row = document.createElement('div');
       row.className = 'panel-row-wrap' + (minor ? ' minor-row' : '');
@@ -182,12 +214,12 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
       }
       parent.appendChild(row);
       wraps.push(row);
-      wrapHome.set(row, minor ? parent : sec);
+      wrapHome.set(row, minor ? parent : body);
     };
 
     const minorFigs = figs.filter(f => (counts[f.id] || 0) < MERGE_BELOW);
     for (const f of figs) {
-      if ((counts[f.id] || 0) >= MERGE_BELOW) buildRow(f, sec, false);
+      if ((counts[f.id] || 0) >= MERGE_BELOW) buildRow(f, body, false);
     }
     if (minorFigs.length) {
       const minorQuotes = minorFigs.reduce((a, f) => a + (counts[f.id] || 0), 0);
@@ -211,11 +243,12 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
         const open = mw.classList.toggle('open');
         box.style.display = open ? 'block' : 'none';
       });
-      sec.appendChild(mw);
-      mw._home = sec;
+      body.appendChild(mw);
+      mw._home = body;
       minorWraps.push(mw);
     }
     panes.figures.appendChild(sec);
+    groupSections.push(sec);
   }
 
   // 按年代排序:把行挪进一个平铺容器(只动显示顺序,不改数据数组);
@@ -244,12 +277,17 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
       });
       flat.remove();
       container.classList.remove('yearmode');
+      groupSections.forEach(sec => { sec.style.display = ''; });
     }
   });
 
   const foot = document.createElement('div');
   foot.className = 'panel-foot';
-  foot.innerHTML = `<span>${figures.length} 位思想家</span><span>${total} 句经典</span>`;
+  const dotColor = { pioneer: '#a78bfa', founders: '#ff4d4d', inheritors: '#ffb830', china: '#ff6b8a' };
+  foot.innerHTML = `
+    <span>${figures.length} 位思想家 · ${total} 句</span>
+    <span class="foot-dots">${groups.map(g => `<span class="dot" style="--c:${dotColor[g.key] || '#e5484d'}" title="${esc(g.label)}"></span>`).join('')}</span>
+  `;
   container.appendChild(foot);
 
   function closeAllLists() {
@@ -262,6 +300,12 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
     });
     container.classList.toggle('filtering', !!id);
     renderFocus(id);
+    // 选中即展开所在分组;清选时不强行收起(保持用户的浏览状态)
+    if (id) {
+      const wrap = wraps.find(w => w.dataset.fig === id);
+      const sec = wrap && wrap.closest('.panel-group');
+      if (sec) sec.classList.add('open');
+    }
   }
 
   function select(id) {
@@ -293,7 +337,7 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
     }
   }
 
-  // ---------- 人物搜索(姓名/字号/国别) ----------
+  // ---------- 人物搜索(姓名/字号/国别);命中分组自动展开,清空后复位 ----------
   search.addEventListener('input', () => {
     const q = search.value.trim().toLowerCase();
     wraps.forEach(w => {
@@ -314,14 +358,23 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
         box.style.display = mw.classList.contains('open') ? 'block' : 'none';
       }
     });
-    container.querySelectorAll('.panel-group').forEach(g => {
-      const any = [...g.querySelectorAll(':scope > .panel-row-wrap, :scope > .panel-minor-wrap')]
+    if (yearMode) {
+      flat.style.display =
+        wraps.some(r => r.style.display !== 'none') || minorWraps.some(m => m.style.display !== 'none')
+          ? '' : 'none';
+      return;
+    }
+    groupSections.forEach(sec => {
+      const any = [...sec.querySelectorAll('.panel-row-wrap, .panel-minor-wrap')]
         .some(r => r.style.display !== 'none');
-      g.style.display = any ? '' : 'none';
+      sec.style.display = any ? '' : 'none';
+      if (q) sec.classList.toggle('open', !!any);
     });
-    if (yearMode) flat.style.display =
-      wraps.some(r => r.style.display !== 'none') || minorWraps.some(m => m.style.display !== 'none')
-        ? '' : 'none';
+    if (!q) {
+      const activeWrap = wraps.find(w => w.querySelector('.panel-row.active'));
+      const activeSec = activeWrap && activeWrap.closest('.panel-group');
+      groupSections.forEach(sec => sec.classList.toggle('open', sec === activeSec));
+    }
   });
   search.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;

@@ -2,7 +2,7 @@
 
 > 用途:说明这块目录里每个文件管哪一段、对外导出什么、改它之前要连带注意什么。
 
-这里放的是构建进产物的所有代码:14 个 `.js` 加 1 个 `style.css`。入口是仓库根的
+这里放的是构建进产物的所有代码:16 个 `.js` 加 1 个 `style.css`。入口是仓库根的
 `index.html`,它只引 `<script type="module" src="/src/main.js">` 这一条,其余都由
 `main.js` 串起来。没有框架、没有路由、没有打包外的运行时。
 
@@ -14,16 +14,18 @@
 | 文件 | 干什么 | 对外的东西 |
 |---|---|---|
 | `main.js` | 装配层:建索引、按语录数加权分星、拼粒子属性、接线 UI 与场景、按键、帧率自适应 | 不导出任何东西。`window.__dbg` 是刻意留的调试句柄 |
-| `style.css` | 全部界面样式(835 行,复核:`wc -l src/style.css`),含一个 `@media (max-width: 720px)` 管移动端 | 由 `main.js` 第一行 `import './style.css'` 引入 |
+| `style.css` | 全部界面样式(1206 行,复核:`wc -l src/style.css`),含一个 `@media (max-width: 720px)` 管移动端与一段 `prefers-reduced-motion` 降级 | 由 `main.js` 第一行 `import './style.css'` 引入 |
 | `core/mask.js` | 把 `public/*-mask.png` 的亮度变成星尘点位 | `samplePortrait(url,count,opts)`、`samplePortraits(urls,count,opts)` |
 | `core/cloud.js` | 建粒子几何与 GLSL 材质;另建远景静态星 | `createCloud(o)`、`createBackdrop(count)` |
 | `core/scene.js` | 渲染器、相机、指针与键盘、自动巡游、四平面权重、CPU 拾取 | `createScene(canvas, cloud, backdrop, {planes})` |
-| `ui/panel.js` | 左栏:搜索、点亮、语录目录、拾遗列表 | `buildPanel(container, opts)` → `{select, renderFavs}` |
-| `ui/avatar.js` | 侧栏小头像:按 `data/portraits.js` 出 `<img>`,缺头像回退姓氏徽记 | `avatarEl(figure)` 之类的小工具 |
-| `ui/quoteCard.js` | 语录卡片的渲染与按钮回调 | `initQuoteCard(container)` → `{show, hide}` |
+| `ui/panel.js` | 左栏:搜索、点亮、可折叠分组、语录目录、拾遗列表(可导出) | `buildPanel(container, opts)` → `{select, renderFavs, openFigure, setTab}` |
+| `ui/avatar.js` | 侧栏小头像:按 `data/portraits.js` 出 `<img>`(duotone 染人物色,`--h` 供 CSS 色相偏移),缺头像回退姓氏徽记 | `avaHTML(id, name, color, size)`、`avaSrc(id)`、`hydrateAvas(container)` |
+| `ui/quoteCard.js` | 语录卡片的渲染与按钮回调(含上一条/下一条) | `initQuoteCard(container)` → `{show, hide}` |
 | `ui/intro.js` | 开场三页引导 | `initIntro(container, {onEnter, immediate})` → `{reopen}` |
 | `ui/favorites.js` | 拾遗读写 localStorage | `initFavorites()` → `{has, list, toggle, clear}` |
 | `ui/postcard.js` | 「留影」:当前画面 + 该句排成竖版图并下载 | `savePostcard({scene, quote, figure, index, total})` |
+| `ui/toast.js` | 操作反馈浮层(自动建 `#toast` 宿主,最多同屏 3 条) | `toast(msg, {tone, dur})` |
+| `ui/clipboard.js` | 复制文本:Clipboard API 优先,降级 `execCommand`,结果一律 Toast | `copyText(text, {okMsg})` |
 | `data/quotes.js` | 语录数组(5897 句);零散增删直接编辑,批量新增走 `../tools/selfcheck.mjs` + `../tools/merge.mjs`(批次语料在 `../data/quotes-src/`) | `quotes` |
 | `data/figures.js` | 人物元数据、分组、搜索别名,手工维护 | `figures`、`figureMap`、`groups` |
 | `data/portraits.js` | 头像/换装掩膜清单,**生成物** | `portraits`,由 `../tools/make-portraits.mjs` 写出,勿手改 |
@@ -42,7 +44,7 @@
 |---|---|---|---|
 | `core/` | 渲染与拾取这条流水线:`mask.js` 把掩膜亮度变成点位 → `cloud.js` 把点位烘成几何与 GLSL 材质 → `scene.js` 出画面、吃输入、做 CPU 拾取 | 3 个文件:`mask.js`(61 行)、`cloud.js`(302 行)、`scene.js`(399 行) | 只有 `cloud.js` 与 `scene.js` import `three`,`mask.js` 走 canvas。启动时采样 `../public/*-mask.png` 的四张固定掩膜,点亮其他人物时按 `data/portraits.js` 采样 `../public/portraits/*.png` 并替换最近槽;这些图片都不在 `src/`,别拷副本进来。另外位置公式在这里有两份实现(GLSL 与 JS),只改一边点击就静默失灵 |
 | `data/` | 语料与采样点位。四个文件都是纯 `export const`,不 import 任何东西;唯一的"逻辑"是 `figures.js` 里由 `figures` 派生 `figureMap` 与 `aka` | `quotes.js`(6036 行,5897 句)、`figures.js`(556 行,91 位人物 + 4 个分组 + 末尾 `ALIAS`)、`portraits.js`(505 行,`make-portraits.mjs` 生成)、`emblem.js`(3 行,3400 个点位) | 前两个手工维护,且下标即对外编号(`#q=N`、收藏、留影都用它),只在末尾追加。`portraits.js` 与 `emblem.js` 是生成物(文件头注释写明),手改会在下次重跑时被整体覆盖;`make-emblem.mjs` 用了未播种的 `Math.random()`,没换 `../tools/emblem-ref.png` 就别重跑,只会得到一份字节不同的无意义 diff |
-| `ui/` | 界面这一层:左栏、语录卡、开场引导、收藏、留影、小头像。六个文件都只碰 DOM | `panel.js`、`quoteCard.js`、`intro.js`、`postcard.js`、`favorites.js`、`avatar.js`(39 行) | 没有一个 import `three`(`postcard.js` 要的 `scene` 由参数传入)。`panel.js` 与 `avatar.js` import `../data/`;`panel.js` 造的 `.panel-row-wrap` 与 `.panel-group` 在 `style.css` 里查无规则,那是给 JS 定位 DOM 用的钩子,不是冗余样式名。`favorites.js` 存的是语录下标,与 `data/quotes.js` 的顺序绑死 |
+| `ui/` | 界面这一层:左栏、语录卡、开场引导、收藏、留影、小头像、反馈浮层、剪贴板。八个文件都只碰 DOM | `panel.js`、`quoteCard.js`、`intro.js`、`postcard.js`、`favorites.js`、`avatar.js`(58 行)、`toast.js`(24 行)、`clipboard.js`(31 行) | 没有一个 import `three`(`postcard.js` 要的 `scene` 由参数传入)。`panel.js` 与 `avatar.js` import `../data/`;`panel.js` 造的 `.panel-row-wrap` 在 `style.css` 里查无规则,那是给 JS 定位 DOM 用的钩子,不是冗余样式名(`.panel-group` 有折叠样式,同时兼任 JS 钩子)。`favorites.js` 存的是语录下标,与 `data/quotes.js` 的顺序绑死 |
 
 三个目录之间的接线只有一处例外:`core/` 与 `ui/` 全部只被 `main.js` import,而 `data/figures.js`
 除了 `main.js` 还被 `ui/panel.js` 直接 import(侧栏要按分组渲染)。复核:
@@ -94,16 +96,20 @@
 
 ## src/ui —— 界面
 
-六个文件都只碰 DOM,不 import three.js;`postcard.js` 是唯一需要 `scene` 实例的,由参数传入。
+八个文件都只碰 DOM,不 import three.js;`postcard.js` 是唯一需要 `scene` 实例的,由参数传入。
 
 - `panel.js` 造出来的 DOM 有两条隐藏契约:`.panel-row-wrap` 必须是 `.panel-row` 的父节点
-  (高亮靠 `parentElement.dataset.fig`),`.panel-group` 是整组显隐的单位。
-  这两个类在 `style.css` 里根本没有规则 —— 它们是给 JS 用的钩子,不是冗余,别删。
-- `quoteCard.js` 只认回调,不认场景:下一条、复制、分享、收藏、留影全部由 `main.js` 传进来。
+  (高亮靠 `parentElement.dataset.fig`),`.panel-group` 是整组显隐与折叠的单位(分组头点击
+  切换 `.open`,搜索/选中自动展开)。
+  前者在 `style.css` 里没有规则 —— 它是给 JS 用的钩子,不是冗余,别删。
+- `quoteCard.js` 只认回调,不认场景:上一条/下一条、复制、分享、收藏、留影全部由 `main.js` 传进来。
 - `intro.js` 的 `immediate: true` 会立刻跳过引导(带 `#q=N` 进来时就是这个分支)。
 - `favorites.js` 存的是语录下标,键 `marxcloud.favs.v1`。隐私模式下写不进去,只影响持久化。
 - `postcard.js` 用 `canvas.toDataURL` + `<a download>`,尺寸 1200×1500,折行按字宽逐字量
   (中文没有空格可断),字号从 52 px 往下试到行高能装下为止。
+- `toast.js` 首次调用时自建 `#toast` 宿主并挂到 `body`,样式全在 `style.css`。
+- `clipboard.js` 是复制唯一入口:安全上下文走 Clipboard API,否则降级隐藏 textarea +
+  `execCommand('copy')`;两条路都失败时 Toast 报错,不再静默。
 
 ## src/data —— 语料与点位
 
@@ -138,6 +144,6 @@
 - `window.__dbg`(`main.js` 末行):手工验证与截图复现的唯一入口,注释里写明"生产无副作用"。
 - `PORTRAIT_PLANES` 的四个条目与 `v` 字段:前者定义四块平面读哪张掩膜、顺序即 90° 的次序,
   后者是缓存串,重画掩膜必须一起改。
-- `style.css` 里的 `.panel-row-wrap`、`.panel-group`:`src/ui/panel.js` 靠它们定位 DOM。
+- `style.css` 里的 `.panel-row-wrap`:`src/ui/panel.js` 靠它定位 DOM。
 - `vite.config.js` 的 `chunkSizeWarningLimit: 900`(在仓库根):单 chunk 打包是刻意的,
   那个数字是为了不报无意义的警告。

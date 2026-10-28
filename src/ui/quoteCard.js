@@ -1,10 +1,12 @@
 /**
  * 语录卡片:点击星尘或"从虚空捞起"时展示一条经典。
+ * 同人物语录多于一条时提供上一条/下一条导航。
  */
 import { avaHTML, hydrateAvas } from './avatar.js';
 
 export function initQuoteCard(container) {
   let nextFn = null;
+  let prevFn = null;
 
   function flash(btn, text) {
     const old = btn.textContent;
@@ -13,8 +15,9 @@ export function initQuoteCard(container) {
     setTimeout(() => { btn.textContent = old; btn.disabled = false; }, 1200);
   }
 
-  function show({ quote, figure, index, total, fished = false, onNext = null, onFigure = null, onCopy = null, onShare = null, onFav = null, isFav = false, onPostcard = null }) {
+  function show({ quote, figure, index, total, fished = false, onNext = null, onPrev = null, onFigure = null, onCopy = null, onShare = null, onFav = null, isFav = false, onPostcard = null }) {
     nextFn = onNext;
+    prevFn = onPrev;
     container.innerHTML = `
       ${fished ? '<div class="card-fished">◌ 从虚空捞起</div>' : ''}
       <header class="card-head">
@@ -31,23 +34,28 @@ export function initQuoteCard(container) {
         <span class="card-num">第 ${String(index + 1).padStart(3, '0')} 句 / 共 ${total} 句</span>
       </footer>
       <div class="card-actions">
-        ${onNext ? '<button class="card-next" type="button">同人物下一条 →</button>' : ''}
+        ${onPrev ? '<button class="card-next" type="button">‹ 上一条</button>' : ''}
+        ${onNext ? '<button class="card-next" type="button">下一条 ›</button>' : ''}
         ${onFigure ? '<button class="card-act" data-act="figure" type="button" title="在侧栏打开该人物的语录目录">人物全集</button>' : ''}
-        <button class="card-act" data-act="fav" type="button">${isFav ? '已在拾遗 ✓' : '收进拾遗'}</button>
+        <button class="card-act ${isFav ? 'primary' : ''}" data-act="fav" type="button">${isFav ? '已在拾遗 ✓' : '收进拾遗'}</button>
         <button class="card-act" data-act="postcard" type="button" title="连星图一起导出成图片">留影</button>
         <button class="card-act" data-act="copy" type="button">复制原文</button>
         <button class="card-act" data-act="share" type="button">分享</button>
       </div>
     `;
     container.querySelector('.card-close').addEventListener('click', hide);
-    const nx = container.querySelector('.card-next');
-    if (nx) nx.addEventListener('click', () => nextFn && nextFn());
+    const pv = container.querySelector('.card-next:nth-of-type(1)');
+    if (pv && prevFn) pv.addEventListener('click', () => prevFn());
+    const nx = container.querySelector('.card-next:nth-of-type(2)');
+    if (nx && nextFn) nx.addEventListener('click', () => nextFn());
+    else if (!prevFn && nextFn) pv && pv.addEventListener('click', () => nextFn());
     const fg = container.querySelector('[data-act="figure"]');
     if (fg) fg.addEventListener('click', () => onFigure && onFigure());
     container.querySelector('[data-act="fav"]').addEventListener('click', (e) => {
       if (!onFav) return;
       const on = onFav();
       e.currentTarget.textContent = on ? '已在拾遗 ✓' : '收进拾遗';
+      e.currentTarget.classList.toggle('primary', on);
     });
     container.querySelector('[data-act="postcard"]').addEventListener('click', () => {
       if (onPostcard) onPostcard();

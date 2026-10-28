@@ -26,7 +26,7 @@ Marx_Cloud/
 
 | 路径 | 职责 | 关键点 |
 |---|---|---|
-| `index.html` | 唯一页面骨架与 DOM 契约 | 20 个 `id`，其中 16 个被 `src/main.js` 用 `getElementById` 取走，改名片刻就 `null` 报错 |
+| `index.html` | 唯一页面骨架与 DOM 契约 | 23 个 `id`，其中 19 个被 `src/main.js` 用 `getElementById` 取走，改名片刻就 `null` 报错 |
 | `vite.config.js` | 只有 `base: './'` 与 `chunkSizeWarningLimit: 900` | 相对 base 决定运行时请求掩膜的前缀，见关键约定 3 |
 | `vercel.json` | Vercel 侧构建参数 | 不被 GitHub Pages 工作流读取；实测在线入口是 Pages |
 | `.github/workflows/deploy.yml` | 推 main → `npm ci` → `verify` → `build` → 发布 `dist` 到 Pages | 两个 job：`build` 上传产物，`deploy` 调 `deploy-pages@v4` |
@@ -34,8 +34,9 @@ Marx_Cloud/
 | `src/core/mask.js` | 从掩膜 PNG 反比例 CDF 采样星尘点位 | 导出 `samplePortrait` / `samplePortraits` |
 | `src/core/cloud.js` | GLSL 粒子几何与材质：四块平面 + 徽章位 + 星云位 | 导出 `createCloud` / `createBackdrop` |
 | `src/core/scene.js` | 渲染器、相机、指针/键盘、自动巡游、平面权重、CPU 拾取 | 导出 `createScene` |
-| `src/ui/panel.js` | 左栏：搜索、点亮、语录目录、拾遗列表 | DOM 结构被 CSS 与自身 `querySelectorAll` 双重依赖 |
+| `src/ui/panel.js` | 左栏：搜索、点亮、可折叠分组、语录目录、拾遗(含导出) | DOM 结构被 CSS 与自身 `querySelectorAll` 双重依赖 |
 | `src/ui/quoteCard.js` / `intro.js` / `favorites.js` / `postcard.js` | 语录卡 / 开场引导 / 拾遗（localStorage）/ 留影导出 | favorites 键 `marxcloud.favs.v1`，存语录下标 |
+| `src/ui/toast.js` / `clipboard.js` | 操作反馈浮层 / 复制文本(Clipboard API → execCommand 降级) | 都不 import `three`；复制结果一律 Toast 明示 |
 | `src/data/figures.js` | 91 位人物元数据 + 4 个分组 + 搜索别名 | 手工维护，`weight` 由语录数自动推导 |
 | `src/data/quotes.js` | 5897 条语录数组 | 末尾 4856 条由 `tools/merge.mjs` 从 `data/quotes-src/` 批次生成，顺序即编号，只在末尾追加 |
 | `src/data/emblem.js` | 3400 个徽章点位 | `tools/make-emblem.mjs` 生成，勿手改 |
@@ -126,9 +127,10 @@ tools/*.mjs（离线）→ 写 src/data/emblem.js、src/data/portraits.js、src/
    TypeError → `boot()` 失败，页面停在"加载失败"；该人物同时从侧栏消失。
 7. **生成物清单与随机性**：见「数据组织方式」；`grep -c "Math.random"` 在 prepare-mask /
    make-emblem / make-banner 应输出 0 / 2 / 5。
-8. **`style.css` 里没有 `.panel-row-wrap` / `.panel-group` / `.filtering`，但它们不是冗余**：
+8. **`style.css` 里没有 `.panel-row-wrap` / `.filtering`，但它们不是冗余**：
    panel.js 靠包装层 DOM 做搜索过滤与整组隐藏；`.filtering` 是可观察挂点。样式在
-   `.panel-row` 上，重名只差 4 个字符，极易被当笔误删掉。
+   `.panel-row` 上，重名只差 4 个字符，极易被当笔误删掉。`.panel-group` 既是 JS 的整组
+   显隐单位，也是分组折叠样式的载体(分组头、收起态都挂在它上面)。
 9. **`window.__dbg` 是刻意保留的调试句柄**（main.js 末行）：手工验证与截图复现的唯一入口，
    不要以"生产不该挂全局变量"为由删掉。
 10. **本页被 luzzz.me 当子页面收录**：相对路径（`base: './'`、`../` 回链）+ URL 以 `/` 结尾

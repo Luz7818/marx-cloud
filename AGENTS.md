@@ -92,19 +92,19 @@
 
 | 项 | 值 | 复核命令 |
 |---|---|---|
-| 构建 | 通过,`18 modules transformed`(这个数字跟源码模块数绑定,加一个 `.js` 就会变),约 1 秒 | `npm run build` |
-| 产物 JS | 磁盘文件 1,511,654 字节 / gzip 实测约 466 kB;`npm run build` 打印的 `1,020.46 kB` 是**字符数口径**(UTF-16 单元,中文语录按 1 计),落盘成 UTF-8 后中文按 3 字节展开,所以对账磁盘必须用 `wc -c`,别拿打印值对 | `wc -c dist/assets/*.js`;`gzip -c dist/assets/*.js \| wc -c` |
-| 产物 CSS | 16.39 kB / gzip 3.95 kB | `npm run build` 末三行 |
-| 产物 HTML | 2.17 kB / gzip 1.39 kB | `npm run build` 末三行 |
-| dist 全量 | 约 10.31 MiB = `assets/` 1,528,049(JS 磁盘 1512k + CSS 16k)+ `index.html` 2,660 + 4 张固定肖像掩膜 1,056,817 + `portraits/` 换装掩膜 7,828,671(79 张,按需加载)+ `avatars/` 372,134 + `README.md` 与 `CREDITS.md`(随文档改动而变,不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
-| 语法检查 | 26 个源码文件(`src` 14 + `tools` 11 含测试与 lib 子目录 + `vite.config.js`)全部通过 | `files="$(find src tools -type f \( -name '*.js' -o -name '*.mjs' \) -print) vite.config.js";printf '%s\n' $files \| wc -l;for f in $files;do node --check "$f" \|\| echo "FAIL $f";done` |
+| 构建 | 通过,`20 modules transformed`(这个数字跟源码模块数绑定,加一个 `.js` 就会变),约 1 秒 | `npm run build` |
+| 产物 JS | 磁盘文件 1,516,041 字节 / gzip 实测约 467.9 kB;`npm run build` 打印的 `1,024.60 kB` 是**字符数口径**(UTF-16 单元,中文语录按 1 计),落盘成 UTF-8 后中文按 3 字节展开,所以对账磁盘必须用 `wc -c`,别拿打印值对 | `wc -c dist/assets/*.js`;`gzip -c dist/assets/*.js \| wc -c` |
+| 产物 CSS | 25.25 kB / gzip 5.71 kB | `npm run build` 末三行 |
+| 产物 HTML | 5.31 kB / gzip 2.33 kB(含工具栏内联图标与快捷键帮助层) | `npm run build` 末三行 |
+| dist 全量 | 约 10.32 MiB = `assets/` 1,541,295(JS 磁盘 1516k + CSS 25k)+ `index.html` 6,016 + 4 张固定肖像掩膜 1,056,817 + `portraits/` 换装掩膜 7,828,671(79 张,按需加载)+ `avatars/` 372,134 + `README.md` 与 `CREDITS.md`(随文档改动而变,不写死总数) | `du -sb dist \| cut -f1`;分项 `du -sb dist/*` |
+| 语法检查 | 28 个源码文件(`src` 16 + `tools` 11 含测试与 lib 子目录 + `vite.config.js`)全部通过 | `files="$(find src tools -type f \( -name '*.js' -o -name '*.mjs' \) -print) vite.config.js";printf '%s\n' $files \| wc -l;for f in $files;do node --check "$f" \|\| echo "FAIL $f";done` |
 | 数据契约校验 | `npm run verify`(`tools/verify-data.mjs`,零依赖):语录↔人物 id、每人物至少 1 条、分组 key、DOM id、无全角逗号、无重复(f+t)、肖像清单文件存在 | 退出码 0,结尾打印「数据契约校验通过:91 位人物 / N 条语录 / 4 个分组 / 肖像平面 4 块」 |
 | lint / 类型检查 / 格式化 | 无配置也无依赖 | `git ls-files` 里没有 `eslint*`、`tsconfig*`、`prettier*` |
 | 运行时依赖 | 只有 `three@0.169.0` | `npm ls --depth=0` |
 | 安装期包数 | 61 个(lock 展开,含 devDependencies) | `node -e "console.log(Object.keys(require('./package-lock.json').packages).length-1)"` |
 | 数据规模 | 5897 句语录 / 91 位人物 / 4 个分组 / 3400 个徽章点位 | `node --input-type=module -e "const q=(await import('./src/data/quotes.js')).quotes,{figures:f,groups:g}=(await import('./src/data/figures.js')),e=(await import('./src/data/emblem.js')).emblemPoints;console.log(q.length,f.length,g.length,e.length)"` |
-| 代码规模 | `src/` 下 14 个 `.js` 共 9039 行,另有 `style.css` | `git ls-files 'src/*.js' \| wc -l`;`cat $(git ls-files 'src/*.js') \| wc -l` |
-| 粒子数分档 | 桌面 28000 / 触屏或窄屏 20000 / 软件渲染 14000 / 带 `?lite` 9000 | `grep -n "const COUNT" src/main.js` |
+| 代码规模 | `src/` 下 16 个 `.js` 共 9228 行,另有 `style.css`(835→1000+ 行,含减少动态偏好与移动端适配) | `git ls-files 'src/*.js' \| wc -l`;`cat $(git ls-files 'src/*.js') \| wc -l` |
+| 粒子数分档 | 桌面 34000 / 触屏或窄屏 20000 / 软件渲染 14000 / 带 `?lite` 9000 | `grep -n "const COUNT" src/main.js` |
 | 自动巡游节拍 | 停留 9 秒 + 转场 8 秒,空闲 4 秒后恢复 | `grep -n "DWELL = 9" src/core/scene.js` |
 | CI | 工作流只在 push `main` 或手动触发时跑。**这里不写"最近一次是哪个提交"**——分支每推一次它就变,写进文档同一次提交里就作废了。当前分支 HEAD 的徽章为 `passing`(复核见右)。不装 `gh` 也能读:徽章与 Actions 接口对**公开仓都免认证**,但 URL 里要用**仓库名 `marx-cloud`**,不是目录名 `Marx_Cloud`(用后者返回 404)。要提交号与耗时再用 `/actions/runs`(匿名限 60 次/小时/IP,别拿它轮询) | `python -c "import urllib.request as u;b=u.urlopen(u.Request('https://github.com/Luz7818/marx-cloud/workflows/Deploy%20to%20GitHub%20Pages/badge.svg',headers={'User-Agent':'Mozilla/5.0'}),timeout=30).read().decode();print('passing' in b)"` 应为 `True` |
 | 线上版本 | HTTP 200,资源 hash 与本机 `npm run build` 一致 | `curl -s https://luz7818.github.io/marx-cloud/ \| grep -o 'assets/[a-zA-Z0-9._-]*' \| sort -u` |
@@ -119,8 +119,8 @@
   `step = 1` 的密集拾取,高 DPI 屏会掉帧。
 - 没有 WebGL 就没有降级路径:`new THREE.WebGLRenderer()` 直接抛,`detectSoftwareGL()` 只降
   粒子数不解决"完全没有 GL"。
-- 复制/分享依赖 Clipboard API,只在安全上下文存在;局域网 IP 打开时按钮点了没反应(报错只在
-  控制台)。
+- 复制/分享首选 Clipboard API(仅安全上下文);不可用时降级隐藏 textarea + `execCommand`,
+  两条路都失败会 Toast 明确报错——不会再出现"按钮点了没反应"的静默失败。
 - 嵌入式 webview 冷启动视口可能 0×0,靠逐帧 clientWidth 比对与 300 ms 兜底驱动自愈——
   删掉这两处会让后台标签页/自动化截图里的画面冻住。
 - 帧率自适应只在 `auto` 档生效且**只降不升**(阈值 22 fps,阶梯 `[1, 0.65, 0.45, 0.3, 0.2]`)。

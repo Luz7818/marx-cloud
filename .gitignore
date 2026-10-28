@@ -8,3 +8,4 @@ tools/preview-*.png
 
 .vercel
 .env*
+.workbuddy/

@@ -12,6 +12,8 @@ import { initIntro } from './ui/intro.js';
 import { initFavorites } from './ui/favorites.js';
 import { savePostcard } from './ui/postcard.js';
 import { avaHTML, hydrateAvas } from './ui/avatar.js';
+import { toast } from './ui/toast.js';
+import { copyText } from './ui/clipboard.js';
 
 // ---------- DOM ----------
 const canvas = document.getElementById('scene');
@@ -218,6 +220,7 @@ const boot = async () => {
   const baseUSize = cloud.uniforms.uSize.value;
   let adaptOn = true;
   const qBtn = document.getElementById('btn-quality');
+  const qLabel = qBtn.querySelector('.btn-t');
   const QUALITY = ['auto', 'high', 'low'];
   let qi = FORCE_LITE ? 2 : 0;
   function applyQuality() {
@@ -230,7 +233,7 @@ const boot = async () => {
       cloud.points.geometry.setDrawRange(0, COUNT);
       cloud.uniforms.uSize.value = baseUSize;
     }
-    qBtn.textContent = q === 'auto' ? '画质·自动' : q === 'high' ? '画质·高' : '画质·低';
+    qLabel.textContent = q === 'auto' ? '画质·自动' : q === 'high' ? '画质·高' : '画质·低';
   }
   qBtn.addEventListener('click', () => { qi = (qi + 1) % QUALITY.length; applyQuality(); });
   applyQuality();
@@ -240,39 +243,41 @@ const boot = async () => {
   });
 
   const vBtn = document.getElementById('btn-void');
+  const vLabel = vBtn.querySelector('.btn-t');
   vBtn.addEventListener('click', () => {
     voidFishOn = !voidFishOn;
-    vBtn.textContent = voidFishOn ? '拾句·开' : '拾句·关';
+    vLabel.textContent = voidFishOn ? '拾句·开' : '拾句·关';
   });
 
   const viewBtn = document.getElementById('btn-view');
+  const viewLabel = viewBtn.querySelector('.btn-t');
   let viewTarget = 0;
   viewBtn.addEventListener('click', () => {
     viewMode = viewMode === 'portrait' ? 'group' : 'portrait';
     viewTarget = viewMode === 'group' ? 1 : 0;
-    viewBtn.textContent = viewMode === 'group' ? '视图·徽章' : '视图·肖像';
+    viewLabel.textContent = viewMode === 'group' ? '视图·徽章' : '视图·肖像';
     capShown = -2;
   });
 
   function showQuote(globalIdx, { fished = false } = {}) {
     const q = quotes[globalIdx];
     const f = figureMap[q.f];
+    const list = quotesByFigure[q.f] || [];
     card.show({
       quote: q, figure: f,
       index: globalIdx, total: TOTAL,
       fished,
-      onNext: (quotesByFigure[q.f] || []).length > 1
-        ? () => showQuote(nextSameFigure(q.f, globalIdx))
-        : null,
-      onFigure: (quotesByFigure[q.f] || []).length > 1
+      onNext: list.length > 1 ? () => showQuote(nextSameFigure(q.f, globalIdx)) : null,
+      onPrev: list.length > 1 ? () => showQuote(prevSameFigure(q.f, globalIdx)) : null,
+      onFigure: list.length > 1
         ? () => panel.openFigure(q.f)
         : null,
-      onCopy: () => navigator.clipboard.writeText(
+      onCopy: () => copyText(
         `“${q.t}” —— ${f.name},${q.w}${q.y ? `(${q.y})` : ''}`
-      ).then(() => true, () => false),
+      ),
       onShare: () => {
         history.replaceState(null, '', `#q=${globalIdx}`);
-        return navigator.clipboard.writeText(location.href).then(() => true, () => false);
+        return copyText(location.href, { okMsg: '链接已复制,可直接分享' });
       },
       isFav: favs.has(globalIdx),
       onFav: () => {
@@ -280,13 +285,25 @@ const boot = async () => {
         panel.renderFavs();
         return on;
       },
-      onPostcard: () => savePostcard({ scene, quote: q, figure: f, index: globalIdx, total: TOTAL })
+      onPostcard: () => {
+        try {
+          savePostcard({ scene, quote: q, figure: f, index: globalIdx, total: TOTAL });
+          toast('留影已开始下载');
+        } catch (err) {
+          toast('留影导出失败:' + err.message, { tone: 'err' });
+        }
+      }
     });
   }
   function nextSameFigure(figureId, curIdx) {
     const list = quotesByFigure[figureId];
     const pos = list.indexOf(curIdx);
     return list[(pos + 1) % list.length];
+  }
+  function prevSameFigure(figureId, curIdx) {
+    const list = quotesByFigure[figureId];
+    const pos = list.indexOf(curIdx);
+    return list[(pos - 1 + list.length) % list.length];
   }
   function fishFromVoid() {
     // 点亮了某位思想家时,虚空里也只捞他/她的句子
@@ -304,6 +321,34 @@ const boot = async () => {
     return Math.floor(r / 4294967296 * TOTAL) % TOTAL;
   }
   document.getElementById('btn-daily').addEventListener('click', () => showQuote(dailyIdx()));
+
+  // ---------- 随机漫游:随机一位有肖像的思想家,飞抵并读一句(X 键 / 工具栏) ----------
+  const portraitIds = Object.keys(portraits).filter(id => portraits[id].mask);
+  function randomRoam() {
+    if (viewMode === 'group') {
+      scene.flyTo(((Math.random() * groupKeys.length) | 0) * HALF);
+      return;
+    }
+    const id = portraitIds[(Math.random() * portraitIds.length) | 0];
+    if (!id) return;
+    flyToFigure(id);
+    const pool = quotesByFigure[id] || [];
+    if (pool.length) showQuote(pool[(Math.random() * pool.length) | 0]);
+  }
+  document.getElementById('btn-random').addEventListener('click', randomRoam);
+
+  // ---------- 快捷键帮助(? 键 / 工具栏问号) ----------
+  const kbdHelp = document.getElementById('kbd-help');
+  function toggleHelp(force) {
+    const show = force == null ? !kbdHelp.classList.contains('show') : !!force;
+    kbdHelp.classList.toggle('show', show);
+    requestAnimationFrame(() => kbdHelp.classList.toggle('vis', show));
+  }
+  document.getElementById('btn-help').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleHelp();
+  });
+  kbdHelp.addEventListener('click', () => toggleHelp(false));
 
   // ---------- 点击:星尘 → 该星语录;真空 → 捞起 ----------
   // 点亮的两种形态:uFocusDim=0 只做着色强调(全员星仍在,谁都可选);
@@ -445,16 +490,21 @@ const boot = async () => {
     }
   });
 
-  // Esc 关闭语录卡;H 隐藏全部界面(截图);F 全屏;R 每日一句
+  // Esc 关闭帮助/语录卡;H 隐藏全部界面(截图);F 全屏;R 每日一句;X 随机漫游
   window.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
     const k = e.key.toLowerCase();
-    if (e.key === 'Escape') card.hide();
-    else if (k === 'h') body.classList.toggle('chrome-off');
+    const helpShown = kbdHelp.classList.contains('show');
+    if (e.key === 'Escape') {
+      if (helpShown) toggleHelp(false);
+      else card.hide();
+    } else if (k === 'h') body.classList.toggle('chrome-off');
     else if (k === 'f') {
       if (document.fullscreenElement) document.exitFullscreen();
       else document.documentElement.requestFullscreen?.();
     } else if (k === 'r') showQuote(dailyIdx());
+    else if (k === 'x') randomRoam();
+    else if (e.key === '?') toggleHelp();
   });
 
   // 调试句柄(生产无副作用)

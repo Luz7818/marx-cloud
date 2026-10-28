@@ -25,7 +25,7 @@ export function initIntro(container, { onEnter, immediate = false, stats = '两�
         <p class="intro-line">万点星辰,随视角流转:</p>
         <p class="intro-line">每转过 <em>90°</em>,便汇聚成一位思想家的肖像。</p>
         <p class="intro-line">点击星尘,读到一句经典;点击虚空,<em>捞起一句</em>。</p>
-        <p class="intro-line small">拖拽 / WASD 飞行 · 滚轮缩放 · 左侧点亮或搜索一位思想家 · H 隐藏界面 · F 全屏 · P 暂停巡游</p>
+        <p class="intro-line small">拖拽 / WASD 飞行 · 滚轮缩放 · 左侧点亮或搜索一位思想家 · X 随机漫游 · H 隐藏界面 · F 全屏 · P 暂停巡游 · ? 快捷键</p>
         <p class="intro-line small">卡片上可 <em>收进拾遗</em>、<em>留影</em>、复制与分享这一句</p>
         <button class="intro-enter" type="button">进入星图</button>
       `
@@ -50,6 +50,10 @@ export function initIntro(container, { onEnter, immediate = false, stats = '两�
     const s = slides[i];
     page.className = `intro-page ${s.cls}`;
     page.innerHTML = s.html;
+    // 动画名未变时浏览器不会重播,先摘掉再强制回流以重启进场动画
+    page.style.animation = 'none';
+    void page.offsetHeight;
+    page.style.animation = '';
     pager.textContent = `${i + 1} / 3`;
     pager.style.visibility = i === 0 ? 'hidden' : 'visible';
     const enter = page.querySelector('.intro-enter');
