@@ -8,6 +8,8 @@ export function toast(msg, { tone = 'ok', dur = 2400 } = {}) {
   if (!host) {
     host = document.createElement('div');
     host.id = 'toast';
+    host.setAttribute('role', 'status');
+    host.setAttribute('aria-live', 'polite');
     document.body.appendChild(host);
   }
   const item = document.createElement('div');

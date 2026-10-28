@@ -205,7 +205,8 @@ const boot = async () => {
     if (id == null) scene.armAuto(); else scene.disarmAuto();
   }
 
-  const card = initQuoteCard(document.getElementById('quote-card'));
+  const quoteCardEl = document.getElementById('quote-card');
+  const card = initQuoteCard(quoteCardEl);
   const panel = buildPanel(panelEl, {
     counts,
     quotes,
@@ -259,10 +260,12 @@ const boot = async () => {
     capShown = -2;
   });
 
+  let curQ = -1; // 当前展示的语录下标(←/→ 键导航用)
   function showQuote(globalIdx, { fished = false } = {}) {
     const q = quotes[globalIdx];
     const f = figureMap[q.f];
     const list = quotesByFigure[q.f] || [];
+    curQ = globalIdx;
     card.show({
       quote: q, figure: f,
       index: globalIdx, total: TOTAL,
@@ -338,8 +341,7 @@ const boot = async () => {
   document.getElementById('btn-random').addEventListener('click', randomRoam);
 
   // ---------- 快捷键帮助(? 键 / 工具栏问号) ----------
-  const kbdHelp = document.getElementById('kbd-help');
-  function toggleHelp(force) {
+  const kbdHelp = document.getElementById('kbd-help');  function toggleHelp(force) {
     const show = force == null ? !kbdHelp.classList.contains('show') : !!force;
     kbdHelp.classList.toggle('show', show);
     requestAnimationFrame(() => kbdHelp.classList.toggle('vis', show));
@@ -350,8 +352,7 @@ const boot = async () => {
   });
   kbdHelp.addEventListener('click', () => toggleHelp(false));
 
-  // ---------- 点击:星尘 → 该星语录;真空 → 捞起 ----------
-  // 点亮的两种形态:uFocusDim=0 只做着色强调(全员星仍在,谁都可选);
+  // ---------- 点击:星尘 → 该星语录;真空 → 捞起 ----------  // 点亮的两种形态:uFocusDim=0 只做着色强调(全员星仍在,谁都可选);
   // uFocusDim=1 其余星完全隐去,此时只拾取被点亮者的星
   function pickAllowed(idx) {
     const f = cloud.uniforms.uFocus.value;
@@ -490,7 +491,7 @@ const boot = async () => {
     }
   });
 
-  // Esc 关闭帮助/语录卡;H 隐藏全部界面(截图);F 全屏;R 每日一句;X 随机漫游
+  // Esc 关闭帮助/语录卡;←/→ 同人物上下一条;H 隐藏界面;F 全屏;R 每日一句;X 随机漫游
   window.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
     const k = e.key.toLowerCase();
@@ -505,6 +506,17 @@ const boot = async () => {
     } else if (k === 'r') showQuote(dailyIdx());
     else if (k === 'x') randomRoam();
     else if (e.key === '?') toggleHelp();
+    else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && curQ >= 0
+      && quoteCardEl.classList.contains('show')) {
+      const list = quotesByFigure[quotes[curQ].f] || [];
+      if (list.length > 1) {
+        const pos = list.indexOf(curQ);
+        const next = e.key === 'ArrowRight'
+          ? list[(pos + 1) % list.length]
+          : list[(pos - 1 + list.length) % list.length];
+        showQuote(next);
+      }
+    }
   });
 
   // 调试句柄(生产无副作用)

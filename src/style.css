@@ -135,6 +135,20 @@ html, body {
     0 6px 20px rgba(229, 72, 77, 0.16);
 }
 #toolbar button:active { transform: translateY(0) scale(0.96); }
+/* 键盘可达性:Tab 聚焦时给出清晰焦点环(鼠标点击不触发) */
+#toolbar button:focus-visible,
+.panel-row:focus-visible,
+.panel-group-head:focus-visible,
+.ptab:focus-visible,
+.q-row:focus-visible,
+.hunt-row:focus-visible,
+.fav-row:focus-visible,
+.card-next:focus-visible,
+.card-act:focus-visible,
+.intro-enter:focus-visible {
+  outline: 2px solid rgba(229, 72, 77, 0.65);
+  outline-offset: 2px;
+}
 body.panel-open #btn-panel {
   border-color: rgba(229, 72, 77, 0.5);
   background:
