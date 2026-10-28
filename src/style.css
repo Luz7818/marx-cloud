@@ -1165,11 +1165,10 @@ body.chrome-off #toast {
   #brand { top: 16px; left: 18px; }
   #brand h1 { font-size: 20px; }
   #toolbar { top: 16px; right: 16px; gap: 6px; }
-  /* 窄屏:按钮只留图标,腾出视野 */
+  /* 窄屏:按钮只留图标,腾出视野;速度滑杆换行会压到品牌副标题,直接收起 */
   #toolbar button .btn-t { display: none; }
   #toolbar button { padding: 0 10px; }
-  #speed-wrap .sp-label { display: none; }
-  #speed-wrap input { width: 58px; }
+  #speed-wrap { display: none; }
   #panel {
     top: auto;
     bottom: 0;
