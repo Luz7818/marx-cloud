@@ -2,6 +2,7 @@ import './style.css';
 import { samplePortrait, samplePortraits } from './core/mask.js';
 import { createCloud, createBackdrop } from './core/cloud.js';
 import { createScene } from './core/scene.js';
+import { mulberry32, seedFromString, hash01 } from './core/rand.js';
 import { figures, figureMap, groups } from './data/figures.js';
 import { quotes } from './data/quotes.js';
 import { portraits } from './data/portraits.js';
@@ -97,14 +98,18 @@ const groupIdxByParticle = new Array(COUNT);
 const colors = new Array(COUNT);
 
 const boot = async () => {
+  // 星↔句稳定配对:整条装配链(固定四掩膜采样 → 人物分配 → 配句 → 云层布局)
+  // 共用同一颗种子,reload 后同一颗粒子读到同一句;换装人物各自派生独立种子(见 ensurePortrait)
+  const rng = mulberry32(0x20261029);
   const planes = await samplePortraits(
     PORTRAIT_PLANES.map(p => `${import.meta.env.BASE_URL}${p.id}-mask.png?v=${p.v}`),
-    COUNT
+    COUNT,
+    { rng }
   );
   const planeBrights = planes.map(p => p.bright);
 
   for (let i = 0; i < COUNT; i++) {
-    const r = Math.random() * acc;
+    const r = rng() * acc;
     let lo = 0, hi = figures.length - 1;
     while (lo < hi) {
       const mid = (lo + hi) >> 1;
@@ -114,7 +119,7 @@ const boot = async () => {
     figIndexByParticle[i] = lo;
     groupIdxByParticle[i] = groupKeys.indexOf(f.group);
     const list = quotesByFigure[f.id] || [0];
-    quoteIdxByParticle[i] = list[(Math.random() * list.length) | 0] || 0;
+    quoteIdxByParticle[i] = list[(rng() * list.length) | 0] || 0;
     colors[i] = f.color;
   }
 
@@ -124,7 +129,8 @@ const boot = async () => {
     groupIdx: groupIdxByParticle,
     emblem: emblemPoints,
     colors,
-    height: PORTRAIT_H
+    height: PORTRAIT_H,
+    rng
   });
   if (isMobile || SOFT_GL) cloud.uniforms.uSize.value = 0.26; // 小屏/软渲染下加大光点
   const backdrop = createBackdrop(isMobile ? 900 : 1500);
@@ -148,7 +154,8 @@ const boot = async () => {
     const th = slot * HALF, cos = Math.cos(th), sin = Math.sin(th);
     for (let i = 0; i < COUNT; i++) {
       const lx = smp.pts[i * 2] * W, ly = smp.pts[i * 2 + 1] * H;
-      const lz = (Math.random() + Math.random() + Math.random() - 1.5) * 0.24; // 云层厚度,与 createCloud 同式
+      // 云层厚度用无状态哈希,与 createCloud 同式:同一粒子在同一槽位永远同一深度
+      const lz = (hash01(i, 101 + slot) + hash01(i, 211 + slot) + hash01(i, 307 + slot) - 1.5) * 0.24;
       to[i * 3] = lx * cos + lz * sin;
       to[i * 3 + 1] = ly;
       to[i * 3 + 2] = -lx * sin + lz * cos;
@@ -176,7 +183,8 @@ const boot = async () => {
     let smp = morphCache.get(id);
     if (!smp) {
       const url = `${import.meta.env.BASE_URL}${p.mask}${p.v ? `?v=${p.v}` : ''}`;
-      try { smp = await samplePortrait(url, COUNT); } catch { return false; }
+      // 每位按需人物派生独立种子:无论何时首次点亮,采样结果都一致
+      try { smp = await samplePortrait(url, COUNT, { rng: mulberry32(0x20261029 ^ seedFromString(id)) }); } catch { return false; }
       morphCache.set(id, smp);
     }
     const slot = nearestSlot();

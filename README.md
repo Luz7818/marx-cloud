@@ -105,8 +105,10 @@ npm run dev
    (`tools/verify-data.mjs`)把关,图像算法另有零依赖的 `node tools/test-image-pipeline.mjs` 行为回归,
    其余改动仍靠 `node --check` 与浏览器实测。`package.json` 的 scripts 是
    `dev` / `build` / `preview` / `verify`。
-4. **同一颗星每次刷新对应的句子可能不同**。粒子与语录在加载时随机配对,
-   所以"这颗星永远是这句"不成立;稳定的编号只属于 `#q=N` 与侧栏目录。
+4. **换画质档或设备后,同一颗星对应的句子会变**。星↔句配对已用固定种子整链播种
+   (`src/core/rand.js`):同一设备同一画质档下刷新页面,同一颗粒子永远读到同一句;
+   但粒子总数随画质档变化(34000/20000/14000/9000),换档或换设备是另一段星图,
+   只有前一段数量的星保持原配对。稳定的编号依旧属于 `#q=N` 与侧栏目录。
 5. **分享与复制**：移动端优先调起系统分享面板(`navigator.share`);否则复制走 Clipboard API,
    只在 https 或 localhost 下可用;不可用时自动降级隐藏 textarea + `execCommand`,
    两条路都不通会弹出明确的错误提示(不再静默失败)。

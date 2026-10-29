@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { hash01 } from './rand.js';
 
 const VERT = /* glsl */ `
 attribute vec3 aCloudPos;
@@ -135,6 +136,8 @@ export function createCloud(o) {
 
   // 平面 k 的局部坐标 → 世界坐标:绕 Y 轴旋转 k·90°
   // wx = lx·cosθ + lz·sinθ;wz = -lx·sinθ + lz·cosθ
+  // 云层厚度用无状态哈希:同一下标永远同一深度,换装/重载后"这颗星"位置稳定
+  const rng = o.rng || Math.random;
   const planePositions = o.planes.map((p, k) => {
     const W = H * p.aspect;
     const th = k * HALF_PI;
@@ -143,7 +146,7 @@ export function createCloud(o) {
     for (let i = 0; i < n; i++) {
       const lx = p.pts[i * 2] * W;
       const ly = p.pts[i * 2 + 1] * H;
-      const lz = (Math.random() + Math.random() + Math.random() - 1.5) * 0.24; // 云层厚度
+      const lz = (hash01(i, 101 + k) + hash01(i, 211 + k) + hash01(i, 307 + k) - 1.5) * 0.24;
       arr[i * 3] = lx * cos + lz * sin;
       arr[i * 3 + 1] = ly;
       arr[i * 3 + 2] = -lx * sin + lz * cos;
@@ -169,10 +172,10 @@ export function createCloud(o) {
   const groupCursor = [0, 0, 0, 0];
 
   for (let i = 0; i < n; i++) {
-    // 散开位:随机椭球,近密远疏
-    const r = 2.2 + Math.pow(Math.random(), 1.6) * 8.5;
-    const th = Math.random() * Math.PI * 2;
-    const ph = Math.acos(2 * Math.random() - 1);
+    // 散开位:随机椭球,近密远疏(传入 rng 时可复现)
+    const r = 2.2 + Math.pow(rng(), 1.6) * 8.5;
+    const th = rng() * Math.PI * 2;
+    const ph = Math.acos(2 * rng() - 1);
     aCloudPos[i * 3] = r * Math.sin(ph) * Math.cos(th) * 1.25;
     aCloudPos[i * 3 + 1] = r * Math.cos(ph) * 0.8;
     aCloudPos[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th) * 1.4;
@@ -182,7 +185,7 @@ export function createCloud(o) {
     aColorRest[i * 3] = cRest.r; aColorRest[i * 3 + 1] = cRest.g; aColorRest[i * 3 + 2] = cRest.b;
     aColorFull[i * 3] = cFull.r; aColorFull[i * 3 + 1] = cFull.g; aColorFull[i * 3 + 2] = cFull.b;
 
-    const hero = Math.random() < 0.02;
+    const hero = rng() < 0.02;
     aSize[i] = hero ? 1.6 + Math.random() * 0.9 : 0.65 + Math.random() * 0.85;
     aFig[i] = o.figIndex[i];
     aGroup[i] = o.groupIdx[i];
@@ -192,10 +195,10 @@ export function createCloud(o) {
       aEmblem[i * 2] = p[0];
       aEmblem[i * 2 + 1] = p[1];
     }
-    aSeed[i] = Math.random();
+    aSeed[i] = rng();
     // 亮度取四块掩膜均值(粒子共享同一颗星)
     aBright[i] = hero ? 1.0 :
-      (o.planes[0].bright[i] + o.planes[1].bright[i] + o.planes[2].bright[i] + o.planes[3].bright[i]) / 4 * 0.7 + Math.random() * 0.3;
+      (o.planes[0].bright[i] + o.planes[1].bright[i] + o.planes[2].bright[i] + o.planes[3].bright[i]) / 4 * 0.7 + rng() * 0.3;
   }
 
   const geo = new THREE.BufferGeometry();

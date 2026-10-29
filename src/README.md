@@ -2,7 +2,7 @@
 
 > 用途:说明这块目录里每个文件管哪一段、对外导出什么、改它之前要连带注意什么。
 
-这里放的是构建进产物的所有代码:16 个 `.js` 加 1 个 `style.css`。入口是仓库根的
+这里放的是构建进产物的所有代码:17 个 `.js` 加 1 个 `style.css`。入口是仓库根的
 `index.html`,它只引 `<script type="module" src="/src/main.js">` 这一条,其余都由
 `main.js` 串起来。没有框架、没有路由、没有打包外的运行时。
 
@@ -15,7 +15,8 @@
 |---|---|---|
 | `main.js` | 装配层:建索引、按语录数加权分星、拼粒子属性、接线 UI 与场景、按键、帧率自适应 | 不导出任何东西。`window.__dbg` 是刻意留的调试句柄 |
 | `style.css` | 全部界面样式(1206 行,复核:`wc -l src/style.css`),含一个 `@media (max-width: 720px)` 管移动端与一段 `prefers-reduced-motion` 降级 | 由 `main.js` 第一行 `import './style.css'` 引入 |
-| `core/mask.js` | 把 `public/*-mask.png` 的亮度变成星尘点位 | `samplePortrait(url,count,opts)`、`samplePortraits(urls,count,opts)` |
+| `core/mask.js` | 把 `public/*-mask.png` 的亮度变成星尘点位 | `samplePortrait(url,count,opts)`、`samplePortraits(urls,count,opts)`;`opts.rng` 可注入确定性随机 |
+| `core/rand.js` | 确定性随机工具:mulberry32 序列、FNV-1a 字符串种子、无状态 hash01 | 星↔句稳定配对的种子源,被 `main.js`/`cloud.js` 使用 |
 | `core/cloud.js` | 建粒子几何与 GLSL 材质;另建远景静态星 | `createCloud(o)`、`createBackdrop(count)` |
 | `core/scene.js` | 渲染器、相机、指针与键盘、自动巡游、四平面权重、CPU 拾取 | `createScene(canvas, cloud, backdrop, {planes})` |
 | `ui/panel.js` | 左栏:搜索、点亮、可折叠分组、语录目录、拾遗列表(可导出) | `buildPanel(container, opts)` → `{select, renderFavs, openFigure, setTab}` |
@@ -36,13 +37,13 @@
 
 ## 子目录
 
-上表把 14 个 `.js` 平铺列了一遍,这里改成按三个二级目录说明各管哪一段、哪几个文件是关键的。
+上表把 17 个 `.js` 平铺列了一遍,这里改成按三个二级目录说明各管哪一段、哪几个文件是关键的。
 它只是索引,逐文件的细节见下面三节正文。文件数与行数复核(在仓库根):
 `for d in core ui data; do printf '%s %s files %s lines\n' "$d" "$(ls src/$d | wc -l)" "$(cat src/$d/*.js | wc -l)"; done`。
 
 | 子目录 | 负责 | 关键文件 | 备注(哪些看着能改其实改不得) |
 |---|---|---|---|
-| `core/` | 渲染与拾取这条流水线:`mask.js` 把掩膜亮度变成点位 → `cloud.js` 把点位烘成几何与 GLSL 材质 → `scene.js` 出画面、吃输入、做 CPU 拾取 | 3 个文件:`mask.js`(61 行)、`cloud.js`(302 行)、`scene.js`(399 行) | 只有 `cloud.js` 与 `scene.js` import `three`,`mask.js` 走 canvas。启动时采样 `../public/*-mask.png` 的四张固定掩膜,点亮其他人物时按 `data/portraits.js` 采样 `../public/portraits/*.png` 并替换最近槽;这些图片都不在 `src/`,别拷副本进来。另外位置公式在这里有两份实现(GLSL 与 JS),只改一边点击就静默失灵 |
+| `core/` | 渲染与拾取这条流水线:`mask.js` 把掩膜亮度变成点位 → `cloud.js` 把点位烘成几何与 GLSL 材质 → `scene.js` 出画面、吃输入、做 CPU 拾取;`rand.js` 是星↔句稳定配对的确定性随机源 | 4 个文件:`mask.js`(61 行)、`cloud.js`(305 行)、`scene.js`(399 行)、`rand.js`(34 行) | 只有 `cloud.js` 与 `scene.js` import `three`,`mask.js` 走 canvas,`rand.js` 是纯函数。启动时采样 `../public/*-mask.png` 的四张固定掩膜,点亮其他人物时按 `data/portraits.js` 采样 `../public/portraits/*.png` 并替换最近槽;这些图片都不在 `src/`,别拷副本进来。另外位置公式在这里有两份实现(GLSL 与 JS),只改一边点击就静默失灵 |
 | `data/` | 语料与采样点位。四个文件都是纯 `export const`,不 import 任何东西;唯一的"逻辑"是 `figures.js` 里由 `figures` 派生 `figureMap` 与 `aka` | `quotes.js`(6036 行,5897 句)、`figures.js`(556 行,91 位人物 + 4 个分组 + 末尾 `ALIAS`)、`portraits.js`(505 行,`make-portraits.mjs` 生成)、`emblem.js`(3 行,3400 个点位) | 前两个手工维护,且下标即对外编号(`#q=N`、收藏、留影都用它),只在末尾追加。`portraits.js` 与 `emblem.js` 是生成物(文件头注释写明),手改会在下次重跑时被整体覆盖;`make-emblem.mjs` 用了未播种的 `Math.random()`,没换 `../tools/emblem-ref.png` 就别重跑,只会得到一份字节不同的无意义 diff |
 | `ui/` | 界面这一层:左栏、语录卡、开场引导、收藏、留影、小头像、反馈浮层、剪贴板。八个文件都只碰 DOM | `panel.js`、`quoteCard.js`、`intro.js`、`postcard.js`、`favorites.js`、`avatar.js`(58 行)、`toast.js`(24 行)、`clipboard.js`(31 行) | 没有一个 import `three`(`postcard.js` 要的 `scene` 由参数传入)。`panel.js` 与 `avatar.js` import `../data/`;`panel.js` 造的 `.panel-row-wrap` 在 `style.css` 里查无规则,那是给 JS 定位 DOM 用的钩子,不是冗余样式名(`.panel-group` 有折叠样式,同时兼任 JS 钩子)。`favorites.js` 存的是语录下标,与 `data/quotes.js` 的顺序绑死 |
 
@@ -52,7 +53,16 @@
 
 ## src/core —— 渲染与拾取
 
-三个文件构成一条流水线:`mask.js` 出点位 → `cloud.js` 出几何与材质 → `scene.js` 出画面与交互。
+四个文件构成一条流水线:`rand.js` 出种子 → `mask.js` 出点位 → `cloud.js` 出几何与材质 → `scene.js` 出画面与交互。
+
+### `core/rand.js`
+
+- `mulberry32(seed)` 返回确定性的 [0,1) 伪随机序列;`main.js` 用固定种子 `0x20261029`
+  串起启动时的掩膜采样、人物分配与配句——同一设备同一画质档下,reload 后同一颗粒子
+  永远读到同一句(见 `../AGENTS.md` 已知坑首条)。
+- `seedFromString(id)` 给按需换装人物派生独立种子:无论何时首次点亮,采样结果一致。
+- `hash01(i, salt)` 是无状态哈希,云层厚度用它(不依赖调用顺序,换装重算也不漂移)。
+- 远景星幕 `createBackdrop` 刻意**没有**播种:它不承载语录,每次加载随机无妨。
 
 ### `core/mask.js`
 

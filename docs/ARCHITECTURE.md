@@ -34,6 +34,7 @@ Marx_Cloud/
 | `src/core/mask.js` | 从掩膜 PNG 反比例 CDF 采样星尘点位 | 导出 `samplePortrait` / `samplePortraits` |
 | `src/core/cloud.js` | GLSL 粒子几何与材质：四块平面 + 徽章位 + 星云位 | 导出 `createCloud` / `createBackdrop` |
 | `src/core/scene.js` | 渲染器、相机、指针/键盘、自动巡游、平面权重、CPU 拾取 | 导出 `createScene` |
+| `src/core/rand.js` | 确定性随机工具:mulberry32 / FNV-1a 字符串种子 / 无状态 hash01 | 星↔句稳定配对的种子源;main.js 持有固定种子 `0x20261029` |
 | `src/ui/panel.js` | 左栏：搜索、点亮、可折叠分组、语录目录、拾遗(含导出) | DOM 结构被 CSS 与自身 `querySelectorAll` 双重依赖 |
 | `src/ui/quoteCard.js` / `intro.js` / `favorites.js` / `postcard.js` | 语录卡 / 开场引导 / 拾遗（localStorage）/ 留影导出 | favorites 键 `marxcloud.favs.v1`，存语录下标 |
 | `src/ui/toast.js` / `clipboard.js` | 操作反馈浮层 / 复制文本(Clipboard API → execCommand 降级) | 都不 import `three`；复制结果一律 Toast 明示 |

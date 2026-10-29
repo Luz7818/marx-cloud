@@ -12,7 +12,7 @@ function loadImage(url) {
   });
 }
 
-export async function samplePortrait(url, count, { gamma = 1.35, floor = 0.04 } = {}) {
+export async function samplePortrait(url, count, { gamma = 1.35, floor = 0.04, rng = Math.random } = {}) {
   const img = await loadImage(url);
   const w = img.naturalWidth, h = img.naturalHeight;
   const cv = document.createElement('canvas');
@@ -35,7 +35,7 @@ export async function samplePortrait(url, count, { gamma = 1.35, floor = 0.04 } 
   const bright = new Float32Array(count);
   const aspect = w / h;
   for (let k = 0; k < count; k++) {
-    const r = Math.random() * acc;
+    const r = rng() * acc;
     let lo = 0, hi = n - 1;
     while (lo < hi) {
       const mid = (lo + hi) >> 1;
