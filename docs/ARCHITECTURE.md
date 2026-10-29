@@ -142,8 +142,6 @@ tools/*.mjs（离线）→ 写 src/data/emblem.js、src/data/portraits.js、src/
 ## 子目录说明之外的已知架构问题
 
 - 没有 WebGL 就没有降级路径：`THREE.WebGLRenderer` 直接抛，只有粒子数降档、没有兜底版本。
-- 粒子与语录的配对每次加载用 `Math.random()` 现算，"某颗星固定某句"不成立；要稳定需播种，
-  目前无机制保证。
 - 帧率自适应只在 `auto` 档生效且**只降不升**（阈值 22 fps，阶梯 `[1, 0.65, 0.45, 0.3, 0.2]`）。
 - 单 chunk 打包（three + 数据 628 kB），`chunkSizeWarningLimit: 900` 是刻意抬的——想拆包要
   显式改 `build.rollupOptions`，别顺手"修"掉。
