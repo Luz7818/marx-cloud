@@ -379,11 +379,8 @@ body.panel-open #panel .panel-foot {
 .q-work { flex: none; max-width: 38%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.5; font-size: 10px; }
 
 /* ---------- 拾遗(本机收藏) ---------- */
-.panel-favs {
-  display: none;
-  margin-bottom: 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
+/* 显隐由 panel.js 的内联样式控制(空时 none),这里不再写 display,二者打架会导致永远隐藏 */
+.panel-favs { margin-bottom: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
 .fav-n {
   display: inline-block;
   min-width: 16px;

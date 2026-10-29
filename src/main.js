@@ -202,7 +202,10 @@ const boot = async () => {
       return;
     }
     const ok = await ensurePortrait(id);
-    if (!ok) scene.flyTo(nearestSlot() * HALF);
+    if (!ok) {
+      scene.flyTo(nearestSlot() * HALF);
+      if (portraits[id] && portraits[id].mask) toast('星尘肖像加载失败,已保留单人星群', { tone: 'err' });
+    }
   }
 
   // 点亮语义:有肖像可换装的人物 → 保留全员星尘只强调其色(uFocusDim=0);
@@ -348,7 +351,13 @@ const boot = async () => {
   const portraitIds = Object.keys(portraits).filter(id => portraits[id].mask);
   function randomRoam() {
     if (viewMode === 'group') {
-      scene.flyTo(((Math.random() * groupKeys.length) | 0) * HALF);
+      // 徽章视图:飞往随机分组,并从该组人物里读一句(与按钮文案"飞往并读一句"一致)
+      const k = (Math.random() * groupKeys.length) | 0;
+      const figs = figures.filter(f => f.group === groupKeys[k]);
+      const f = figs[(Math.random() * figs.length) | 0];
+      scene.flyTo(k * HALF);
+      const pool = quotesByFigure[f.id] || [];
+      if (pool.length) showQuote(pool[(Math.random() * pool.length) | 0]);
       return;
     }
     const id = portraitIds[(Math.random() * portraitIds.length) | 0];
