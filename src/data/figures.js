@@ -1,12 +1,12 @@
 /**
  * 人物元数据。weight 由语录数量自动推导,无需手填。
- * color 用于粒子着色与 UI 高亮;group 用于侧栏分组。
+ * color 用于粒子着色与 UI 高亮;group 用于侧栏分组,组色取自各组代表人物的色板。
  */
 export const groups = [
-  { key: 'pioneer', label: '思想先驱' },
-  { key: 'founders', label: '创始人' },
-  { key: 'inheritors', label: '继承与发展' },
-  { key: 'china', label: '在中国' }
+  { key: 'pioneer', label: '思想先驱', color: '#a78bfa' },
+  { key: 'founders', label: '创始人', color: '#ff4d4d' },
+  { key: 'inheritors', label: '继承与发展', color: '#ffb830' },
+  { key: 'china', label: '在中国', color: '#ff6b8a' }
 ];
 
 export const figures = [

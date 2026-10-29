@@ -283,10 +283,9 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
 
   const foot = document.createElement('div');
   foot.className = 'panel-foot';
-  const dotColor = { pioneer: '#a78bfa', founders: '#ff4d4d', inheritors: '#ffb830', china: '#ff6b8a' };
   foot.innerHTML = `
     <span>${figures.length} 位思想家 · ${total} 句</span>
-    <span class="foot-dots">${groups.map(g => `<span class="dot" style="--c:${dotColor[g.key] || '#e5484d'}" title="${esc(g.label)}"></span>`).join('')}</span>
+    <span class="foot-dots">${groups.map(g => `<span class="dot" style="--c:${g.color}" title="${esc(g.label)}"></span>`).join('')}</span>
   `;
   container.appendChild(foot);
 

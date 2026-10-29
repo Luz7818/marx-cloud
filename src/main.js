@@ -280,7 +280,17 @@ const boot = async () => {
       ),
       onShare: () => {
         history.replaceState(null, '', `#q=${globalIdx}`);
-        return copyText(location.href, { okMsg: '链接已复制,可直接分享' });
+        const url = location.href;
+        // 移动端优先调起系统分享面板;取消(AbortError)不打扰,其余失败回退复制链接
+        if (navigator.share && window.isSecureContext) {
+          return navigator.share({ title: '思想云 · Marx Cloud', text: `“${q.t}” —— ${f.name}`, url })
+            .then(() => true)
+            .catch((err) => {
+              if (err && err.name === 'AbortError') return false;
+              return copyText(url, { okMsg: '链接已复制,可直接分享' });
+            });
+        }
+        return copyText(url, { okMsg: '链接已复制,可直接分享' });
       },
       isFav: favs.has(globalIdx),
       onFav: () => {
@@ -419,7 +429,7 @@ const boot = async () => {
         captionEl.querySelector('.cap-name').textContent = g.label;
         captionEl.querySelector('.cap-sub').textContent =
           `${groupStats[show].figs} 位思想家 · ${groupStats[show].quotes} 句经典`;
-        captionEl.style.setProperty('--c', '#e5484d');
+        captionEl.style.setProperty('--c', g.color);
       } else {
         const f = planeFigs[show];
         capAvaSlot.innerHTML = avaHTML(f.id, f.name, f.color, 'ava-cap');

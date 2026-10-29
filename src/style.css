@@ -571,6 +571,7 @@ body.chrome-off #toast {
   color: var(--text);
   font-size: 12px;
   letter-spacing: 0.15em;
+  white-space: nowrap;
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s, transform 0.15s;
 }

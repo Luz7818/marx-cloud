@@ -107,8 +107,9 @@ npm run dev
    `dev` / `build` / `preview` / `verify`。
 4. **同一颗星每次刷新对应的句子可能不同**。粒子与语录在加载时随机配对,
    所以"这颗星永远是这句"不成立;稳定的编号只属于 `#q=N` 与侧栏目录。
-5. **分享与复制优先 Clipboard API**,只在 https 或 localhost 下可用;不可用时自动降级
-   隐藏 textarea + `execCommand`,两条路都不通会弹出明确的错误提示(不再静默失败)。
+5. **分享与复制**：移动端优先调起系统分享面板(`navigator.share`);否则复制走 Clipboard API,
+   只在 https 或 localhost 下可用;不可用时自动降级隐藏 textarea + `execCommand`,
+   两条路都不通会弹出明确的错误提示(不再静默失败)。
 6. **收藏存在本机 localStorage**(键 `marxcloud.favs.v1`),不跨设备;
    语录数组中间插入或删条目会让已分享的 `#q=N` 与收藏整体错位,所以只在末尾追加。
 7. **肖像平面固定四块**。四向 90° 写死在着色器与相机权重里;可换装人物会替换最近槽,
