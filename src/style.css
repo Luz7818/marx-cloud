@@ -429,6 +429,7 @@ body.chrome-off #hint,
 body.chrome-off #figure-caption,
 body.chrome-off #quote-card,
 body.chrome-off #tooltip,
+body.chrome-off #kbd-help,
 body.chrome-off #toast {
   opacity: 0 !important;
   pointer-events: none;
