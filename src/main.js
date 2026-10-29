@@ -29,7 +29,11 @@ const body = document.body;
 let intro = null;
 let voidFishOn = true;
 const favs = initFavorites();
-document.getElementById('btn-panel').addEventListener('click', () => body.classList.toggle('panel-open'));
+const btnPanel = document.getElementById('btn-panel');
+btnPanel.addEventListener('click', () => {
+  body.classList.toggle('panel-open');
+  btnPanel.setAttribute('aria-expanded', body.classList.contains('panel-open'));
+});
 document.getElementById('btn-about').addEventListener('click', () => intro && intro.reopen());
 
 // 回链只在作为子页面挂到别处时有意义:开发服务器或静态托管跑在站点根时, ../ 就是本页自己
@@ -256,10 +260,12 @@ const boot = async () => {
 
   const vBtn = document.getElementById('btn-void');
   const vLabel = vBtn.querySelector('.btn-t');
+  vBtn.setAttribute('aria-pressed', 'true'); // 拾句默认开启,按压态=功能开启
   vBtn.addEventListener('click', () => {
     voidFishOn = !voidFishOn;
     vLabel.textContent = voidFishOn ? '拾句·开' : '拾句·关';
     vBtn.classList.toggle('off', !voidFishOn);
+    vBtn.setAttribute('aria-pressed', String(voidFishOn));
   });
 
   const viewBtn = document.getElementById('btn-view');

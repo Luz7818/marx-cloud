@@ -1183,9 +1183,17 @@ body.chrome-off #toast {
 
 /* ---------- 移动端 ---------- */
 @media (max-width: 720px) {
-  #brand { top: 16px; left: 18px; }
+  /* 刘海屏安全区:viewport-fit=cover 下不避让会被系统 UI 压住 */
+  #brand {
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    left: calc(18px + env(safe-area-inset-left, 0px));
+  }
   #brand h1 { font-size: 20px; }
-  #toolbar { top: 16px; right: 16px; gap: 6px; }
+  #toolbar {
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    gap: 6px;
+  }
   #toolbar button { padding: 0 10px; }
   #panel {
     top: auto;
@@ -1201,7 +1209,12 @@ body.chrome-off #toast {
     transform: translateY(110%);
   }
   body.panel-open #panel { transform: translateY(0); }
-  #quote-card { right: 12px; left: 12px; bottom: 14px; width: auto; }
+  #quote-card {
+    right: calc(12px + env(safe-area-inset-right, 0px));
+    left: calc(12px + env(safe-area-inset-left, 0px));
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+  }
   .card-quote { font-size: 16px; }
   #hint { display: none; }
   /* 抽屉升起时字幕压在半透明面板后面,与语录卡同规则一并隐藏 */

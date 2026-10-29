@@ -101,7 +101,7 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
       </div>
       ${ids.map(i => {
         const q = quotes[i]; const f = figureMap[q.f];
-        return `<button class="fav-row" type="button" data-q="${i}">
+        return `<button class="fav-row" type="button" data-q="${i}" title="${esc(q.t)}">
           <span class="dot" style="--c:${f.color}"></span>
           <span class="fav-text">${esc(cut(q.t, 22))}</span>
           <span class="fav-who">${esc(f.name.split('·').pop())}</span>
@@ -129,7 +129,7 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
   // ---------- 语录目录行(人物与著作共用) ----------
   function quotesListHTML(idxs) {
     return idxs.map(i => `
-      <button class="q-row" type="button" data-q="${i}">
+      <button class="q-row" type="button" data-q="${i}" title="${esc(quotes[i].t)}${quotes[i].w ? ` —— ${esc(quotes[i].w)}` : ''}">
         <span class="q-num">${String(i + 1).padStart(3, '0')}</span>
         <span class="q-text">${esc(cut(quotes[i].t, 20))}</span>
         <span class="q-work">${esc(quotes[i].w)}</span>
@@ -443,7 +443,7 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
     huntList.innerHTML = hits.length
       ? `<div class="hunt-count">命中 ${hits.length}${hits.length >= 100 ? '(截断)' : ''} 句</div>` + hits.map(i => {
         const f = figureMap[quotes[i].f];
-        return `<button class="hunt-row" type="button" data-q="${i}">
+        return `<button class="hunt-row" type="button" data-q="${i}" title="${esc(quotes[i].t)}">
             <span class="dot" style="--c:${f.color}"></span>
             <span class="q-text">${esc(cut(quotes[i].t, 32))}</span>
             <span class="fav-who">${esc(f.name.split('·').pop())}</span>
