@@ -256,6 +256,7 @@ const boot = async () => {
   vBtn.addEventListener('click', () => {
     voidFishOn = !voidFishOn;
     vLabel.textContent = voidFishOn ? '拾句·开' : '拾句·关';
+    vBtn.classList.toggle('off', !voidFishOn);
   });
 
   const viewBtn = document.getElementById('btn-view');
@@ -524,6 +525,16 @@ const boot = async () => {
     } else if (k === 'r') showQuote(dailyIdx());
     else if (k === 'x') randomRoam();
     else if (e.key === '?') toggleHelp();
+    else if (e.key === '/') {
+      // 快捷聚焦侧栏搜索:窄屏先升起抽屉
+      e.preventDefault();
+      body.classList.add('panel-open');
+      const searchEl = panelEl.querySelector('.panel-search');
+      if (searchEl && searchEl.style.display !== 'none') {
+        searchEl.focus();
+        searchEl.select();
+      }
+    }
     else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && curQ >= 0
       && quoteCardEl.classList.contains('show')) {
       const list = quotesByFigure[quotes[curQ].f] || [];

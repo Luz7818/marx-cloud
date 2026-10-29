@@ -16,6 +16,8 @@ const N = [0, 1, 2, 3].map(k => {
 export function createScene(canvas, cloud, backdrop, { planes }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
   renderer.setClearColor(new THREE.Color('#07080f'), 1);
+  // 减少动态偏好:不自动巡游、不做空闲摇摆;用户拖拽/飞抵等主动操作不受影响
+  const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
@@ -202,7 +204,7 @@ export function createScene(canvas, cloud, backdrop, { planes }) {
 
     // 自动巡游:开场进入后武装;空闲 4 秒起,像位停留 DWELL 后用 TRAVEL 转到下一位
     const idle = now - state.lastInteract > 4000;
-    if (state.autoArmed && idle && !state.fly && !state.paused) {
+    if (state.autoArmed && idle && !state.fly && !state.paused && !REDUCED_MOTION) {
       state.autoT += dt * state.speed;
       if (!state.traveling && state.autoT > DWELL) {
         state.traveling = true;
@@ -226,8 +228,8 @@ export function createScene(canvas, cloud, backdrop, { planes }) {
       state.traveling = false;
     }
 
-    // 空闲后轻微摇摄,让肖像保持呼吸感
-    const swayAmp = lerp(state.swayAmp || 0, idle ? 1 : 0, Math.min(1, dt * 1.5));
+    // 空闲后轻微摇摄,让肖像保持呼吸感(减少动态偏好下不动)
+    const swayAmp = lerp(state.swayAmp || 0, idle && !REDUCED_MOTION ? 1 : 0, Math.min(1, dt * 1.5));
     state.swayAmp = swayAmp;
     const swayTheta = Math.sin(t * 0.14) * 0.10 * swayAmp;
     const swayPhi = Math.sin(t * 0.1 + 1.3) * 0.05 * swayAmp;
