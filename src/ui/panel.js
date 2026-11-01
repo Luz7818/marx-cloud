@@ -160,25 +160,33 @@ export function buildPanel(container, { counts, quotes, favs, onFilter, onSelect
   const groupSections = [];
   const wrapHome = new Map();
   for (const g of groups) {
-    const figs = figures.filter(f => f.group === g.key);
+    // 组内按生卒年升序:让每个分组读起来是一条时间线(只改显示顺序,不动 figures 数组)
+    const figs = figures.filter(f => f.group === g.key).sort((a, b) => birthYear(a) - birthYear(b));
     if (!figs.length) continue;
     const sec = document.createElement('div');
     sec.className = 'panel-group';
+    sec.style.setProperty('--c', g.color);
     const gQuotes = figs.reduce((a, f) => a + (counts[f.id] || 0), 0);
     sec.innerHTML = `
-      <button class="panel-group-head" type="button" title="展开 / 收起「${esc(g.label)}」">
+      <button class="panel-group-head" type="button" title="${esc(g.label)} · ${esc(g.era)} — ${esc(g.desc)}(展开 / 收起)">
+        <span class="gh-chip" style="--c:${g.color}"></span>
         <span class="gh-caret">▸</span>
         <span class="gh-label">${esc(g.label)}</span>
+        <span class="gh-era">${esc(g.era)}</span>
         <span class="gh-count">${figs.length} 位 · ${gQuotes} 句</span>
       </button>
+      <div class="gh-desc">${esc(g.desc)}</div>
       <div class="panel-group-body"></div>
     `;
     const body = sec.querySelector('.panel-group-body');
     sec.querySelector('.panel-group-head').addEventListener('click', () => sec.classList.toggle('open'));
+    let rowIdx = 0;
     const buildRow = (f, parent, minor) => {
       const row = document.createElement('div');
       row.className = 'panel-row-wrap' + (minor ? ' minor-row' : '');
       row.dataset.fig = f.id;
+      // 展开分组时逐行错峰上浮(延迟随序号递增,封顶 0.3s)
+      row.style.setProperty('--d', Math.min(rowIdx++ * 0.02, 0.3).toFixed(3) + 's');
       const list = byFigure[f.id] || [];
       row.innerHTML = `
         <button class="panel-row" type="button" title="${esc(f.name)}(${esc(f.en)}) · ${esc(f.blurb)}">

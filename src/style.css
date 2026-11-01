@@ -285,20 +285,37 @@ body.panel-open #panel .panel-foot {
   color: var(--text);
   text-align: left;
   cursor: pointer;
-  transition: background 0.18s;
+  transition: background 0.18s, box-shadow 0.18s;
 }
-.panel-group-head:hover { background: rgba(255, 255, 255, 0.04); }
+.panel-group-head:hover {
+  background: color-mix(in srgb, var(--c, #fff) 7%, transparent);
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--c, #fff) 60%, transparent);
+}
+.gh-chip {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 8px var(--c);
+}
 .gh-caret {
   flex: none;
   font-size: 10px;
   color: var(--muted);
   transition: transform 0.28s var(--ease-out), color 0.2s;
 }
-.panel-group.open .gh-caret { transform: rotate(90deg); color: var(--accent); }
+.panel-group.open .gh-caret { transform: rotate(90deg); color: var(--c, var(--accent)); }
 .gh-label {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.22em;
+}
+.gh-era {
+  font-size: 10px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
 }
 .gh-count {
   margin-left: auto;
@@ -307,8 +324,21 @@ body.panel-open #panel .panel-foot {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.05em;
 }
+.gh-desc {
+  padding: 0 16px 4px 32px;
+  font-size: 10px;
+  line-height: 1.55;
+  color: rgba(152, 160, 179, 0.62);
+  letter-spacing: 0.04em;
+}
 .panel-group-body { display: none; }
 .panel-group.open .panel-group-body { display: block; animation: paneIn 0.32s var(--ease-out); }
+/* 展开分组时组内主行逐行错峰上浮(延迟由 JS 写入行内 --d) */
+.panel-group.open > .panel-group-body > .panel-row-wrap {
+  animation: rowIn 0.3s var(--ease-out) both;
+  animation-delay: var(--d, 0s);
+}
+@keyframes rowIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 /* 按年代模式:行全部平铺进 .panel-flat,分组折叠区整体隐藏 */
 .yearmode .panel-group { display: none; }
 

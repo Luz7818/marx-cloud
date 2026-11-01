@@ -1,12 +1,13 @@
 /**
  * 人物元数据。weight 由语录数量自动推导,无需手填。
  * color 用于粒子着色与 UI 高亮;group 用于侧栏分组,组色取自各组代表人物的色板。
+ * groups 的 era(成员生卒年区间)与 desc(一句话定位)只用于侧栏展示,不参与渲染。
  */
 export const groups = [
-  { key: 'pioneer', label: '思想先驱', color: '#a78bfa' },
-  { key: 'founders', label: '创始人', color: '#ff4d4d' },
-  { key: 'inheritors', label: '继承与发展', color: '#ffb830' },
-  { key: 'china', label: '在中国', color: '#ff6b8a' }
+  { key: 'pioneer', label: '思想先驱', color: '#a78bfa', era: '1478–1828', desc: '空想社会主义与早期工人运动先驱' },
+  { key: 'founders', label: '创始人', color: '#ff4d4d', era: '1818–1820', desc: '马克思主义的创立者' },
+  { key: 'inheritors', label: '继承与发展', color: '#ffb830', era: '1816–1928', desc: '国际共产主义运动的传播与发展' },
+  { key: 'china', label: '在中国', color: '#ff6b8a', era: '1879–1940', desc: '马克思主义中国化与新中国建设者' }
 ];
 
 export const figures = [
