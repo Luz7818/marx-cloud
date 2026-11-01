@@ -103,7 +103,7 @@
 | 运行时依赖 | 只有 `three@0.169.0` | `npm ls --depth=0` |
 | 安装期包数 | 61 个(lock 展开,含 devDependencies) | `node -e "console.log(Object.keys(require('./package-lock.json').packages).length-1)"` |
 | 数据规模 | 5897 句语录 / 91 位人物 / 4 个分组 / 3400 个徽章点位 |
-| 分组展示 | 4 组,组内按生卒年升序;组头 = 组色徽点 + 组名 + 年代区间 + 人数·句数,下带一句话定位;展开时组内行错峰上浮(rowIn,延迟封顶 0.3s) | `grep -n "era:" src/data/figures.js` | `node --input-type=module -e "const q=(await import('./src/data/quotes.js')).quotes,{figures:f,groups:g}=(await import('./src/data/figures.js')),e=(await import('./src/data/emblem.js')).emblemPoints;console.log(q.length,f.length,g.length,e.length)"` |
+| 分组展示 | 4 组,组内按生卒年升序;组头 = 组色徽点 + 组名 + 年代区间 + 人数·句数,下带一句话定位;展开时组内行错峰上浮(rowIn,延迟封顶 0.3s) | `grep -n "era:" src/data/figures.js`\|`node --input-type=module -e "const q=(await import('./src/data/quotes.js')).quotes,{figures:f,groups:g}=(await import('./src/data/figures.js')),e=(await import('./src/data/emblem.js')).emblemPoints;console.log(q.length,f.length,g.length,e.length)"` |
 | 代码规模 | `src/` 下 17 个 `.js` 共 9363 行,另有 `style.css` 1280 行(含减少动态偏好与移动端适配) | `git ls-files 'src/*.js' \| wc -l`;`cat $(git ls-files 'src/*.js') \| wc -l` |
 | 粒子数分档 | 桌面 34000 / 触屏或窄屏 20000 / 软件渲染 14000 / 带 `?lite` 9000 | `grep -n "const COUNT" src/main.js` |
 | 自动巡游节拍 | 停留 9 秒 + 转场 8 秒,空闲 4 秒后恢复 | `grep -n "DWELL = 9" src/core/scene.js` |
