@@ -13,14 +13,14 @@
 
 | 文件 | 干什么 | 备注 |
 |---|---|---|
-| `portrait-src/<id>.jpg` / `.png` | 83 张人物原图(Wikidata P18 → Commons 缩略图,宽 640) | `fetch-portraits.mjs` 产物,按 `figures[].id` 命名;幂等,已存在的 id 跳过(`--force` 重抓) |
+| `portrait-src/<id>.jpg` / `.png` | 88 张人物原图(多数 Wikidata P18 → Commons 缩略图,宽 640;5 张 Commons 检索直取) | `fetch-portraits.mjs` 产物,按 `figures[].id` 命名;幂等,已存在的 id 跳过(`--force` 重抓) |
 | `portrait-src/credits.json` | 每张原图的来源页面与许可记录 | `fetch-portraits.mjs` 产物;对外署名页在 `public/portraits/CREDITS.md` |
 
 ## 子目录
 
 | 子目录 | 负责 |
 |---|---|
-| `portrait-src/` | 人物原图素材缓存:83 张按人物 id 命名的原图 + credits.json 署名记录 |
+| `portrait-src/` | 人物原图素材缓存:88 张按人物 id 命名的原图 + credits.json 署名记录 |
 
 ## 和谁打交道
 

@@ -34,8 +34,8 @@ npm run build
 ## 肖像管线的确定性与视觉验收
 
 改动 `tools/lib/image-pipeline.mjs`、`prepare-mask.mjs` 或 `make-portraits.mjs` 后,先跑图像管线回归,
-再完整运行两套生成器。`make-portraits.mjs` 必须不带 `--only`,确保 83 项运行时清单完整。保存首轮
-4 张固定掩膜、79 张按需掩膜和 `src/data/portraits.js` 的 SHA-256,立即以同样命令完整生成第二轮
+再完整运行两套生成器。`make-portraits.mjs` 必须不带 `--only`,确保 88 项运行时清单完整。保存首轮
+4 张固定掩膜、84 张按需掩膜和 `src/data/portraits.js` 的 SHA-256,立即以同样命令完整生成第二轮
 并再次计算；两轮摘要必须逐项相同。算法有意变化时生成物相对 Git 出现差异是预期结果,确定性判据
 是第二轮与第一轮相同,不是要求生成物恢复为 Git-clean。
 

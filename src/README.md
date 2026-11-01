@@ -127,7 +127,7 @@
 |---|---|---|
 | `quotes.js` | `{f, w, y, t}` 数组,一行一条 | `main.js` 建索引、`panel.js` 出目录、卡片与留影取文本 |
 | `figures.js` | `groups` 4 项、`figures` 91 项、`figureMap` 由 `figures` 派生 | `main.js` 配色与加权、`panel.js` 分组渲染与搜索 |
-| `portraits.js` | 83 项头像/大型掩膜路径与缓存版本清单 | `main.js` 按需换装、`ui/avatar.js` 显示头像 |
+| `portraits.js` | 88 项头像/大型掩膜路径与缓存版本清单 | `main.js` 按需换装、`ui/avatar.js` 显示头像 |
 | `emblem.js` | `[x, y]` 数组,归一化到 `[-1,1]` | 只有 `cloud.js` 把它写进 `aEmblem` |
 
 - **`f` 必须是 `figures` 里某个 `id`**,没有任何代码校验这件事;写错的表现见
@@ -142,7 +142,7 @@
 
 ## 和谁打交道
 
-- **上游**:`../public/*-mask.png`(四张启动固定掩膜)与 `../public/portraits/*.png`(79 张按需掩膜),
+- **上游**:`../public/*-mask.png`(四张启动固定掩膜)与 `../public/portraits/*.png`(84 张按需掩膜),
   后者按 `data/portraits.js` 的 `mask` 与 `v` 拉取;`../tools/` 还生成 `data/emblem.js`。
 - **下游**:`npm run build` → `../dist/`(合并成一个 JS 加一个 CSS,`public/` 原样拷过去);
   GitHub Pages 工作流发布 `dist/`。

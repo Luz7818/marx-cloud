@@ -17,7 +17,7 @@ Marx_Cloud/
 ├── assets/                   入库素材:fetch-portraits.mjs 抓取的人物原图(portrait-src/)
 ├── data/                     入库语料:语录扩充流水线的批次 ndjson(quotes-src/)
 ├── docs/                     文档目录（手册与专项规范 + README 横幅 banner.svg）
-├── public/                   入库：4 张肖像掩膜 + 83 张侧栏头像 + 79 张换装掩膜（含署名）
+├── public/                   入库：4 张肖像掩膜 + 88 张侧栏头像 + 84 张换装掩膜（含署名）
 ├── src/                      全部前端代码：core/ 渲染与拾取、ui/ 界面、data/ 语料与点位
 ├── tools/                    离线脚本 + lib/ 共用图像管线 + 照片素材
 ├── dist/                     Vite 构建产物（gitignore，不入库）
@@ -44,9 +44,9 @@ Marx_Cloud/
 | `src/data/portraits.js` | 运行时肖像清单（人物 id → 头像/掩膜路径与缓存版本） | `make-portraits.mjs` 生成；无条目的人物回退姓氏徽记 |
 | `src/style.css` | 全部界面样式，单个 media query 管移动端 | 见关键约定 8 的未定义类 |
 | `public/*-mask.png` | 4 张启动时加载的固定肖像掩膜,按 `./<id>-mask.png?v=<n>` 拉取 | `prepare-mask.mjs` 生成；Vite 原样拷进 `dist/` |
-| `public/avatars/`、`public/portraits/` | 83 张小头像 + 79 张换装掩膜（按需加载） | `make-portraits.mjs` 生成；`public/portraits/CREDITS.md` 记录来源与授权 |
+| `public/avatars/`、`public/portraits/` | 88 张小头像 + 84 张换装掩膜（按需加载） | `make-portraits.mjs` 生成；`public/portraits/CREDITS.md` 记录来源与授权 |
 | `tools/*.mjs` | 离线脚本：verify-data / prepare-mask / make-emblem / make-banner / fetch-portraits / make-portraits / selfcheck / merge / coverage / test-image-pipeline | make-emblem 写徽章点位；make-portraits 写头像、换装掩膜、署名与肖像清单；merge 追加语录 |
-| `assets/portrait-src/` | 人物原图素材：83 张 Wikimedia 抓取的原图 + credits.json | `fetch-portraits.mjs` 产物、`make-portraits.mjs` 输入；不进构建 |
+| `assets/portrait-src/` | 人物原图素材：88 张 Wikimedia 抓取的原图 + credits.json | `fetch-portraits.mjs` 产物、`make-portraits.mjs` 输入；不进构建 |
 | `data/quotes-src/` | 语录批次 ndjson（75 个 `quotes-<组名>-<人物id>-<序号>.ndjson`） | `selfcheck.mjs` 校验、`merge.mjs` 合并；合并后仍留仓供追溯 |
 | `tools/*-photo.jpg`、`emblem-ref.png` | 生成脚本的输入素材（3.20 MiB） | 不进构建、不被 `src/` 引用 |
 | `docs/banner.svg` | README 横幅 | `tools/make-banner.mjs` 生成 |
@@ -116,9 +116,9 @@ tools/*.mjs（离线）→ 写 src/data/emblem.js、src/data/portraits.js、src/
 2. **语录下标即对外编号**——见「数据组织方式」，只在末尾追加。
 3. **运行时固定四块肖像平面,掩膜来源分两级**：启动时先把马克思、恩格斯、列宁、卢森堡的
    `public/<id>-mask.png?v=<n>` 载入四个固定槽；点亮其他人物时,运行时经生成的
-   `src/data/portraits.js` 清单按需加载 79 张 `public/portraits/*.png?v=<n>`,并替换离当前视角
-   最近的槽。91 位人物中另有 8 位没有清单条目,继续使用姓氏徽记回退。固定掩膜由
-   `prepare-mask.mjs` 写入,按需掩膜、83 张小头像、署名与清单由完整运行的
+   `src/data/portraits.js` 清单按需加载 84 张 `public/portraits/*.png?v=<n>`,并替换离当前视角
+   最近的槽。91 位人物中另有 3 位没有清单条目,继续使用姓氏徽记回退。固定掩膜由
+   `prepare-mask.mjs` 写入,按需掩膜、88 张小头像、署名与清单由完整运行的
    `make-portraits.mjs` 写入；重画任一掩膜而不递增清单或固定平面的 `v` 会让 CDN/浏览器继续发旧图。
 4. **四向是写死的，不是配置**：`uW0..uW3`、`N=[0,1,2,3]`、着色器 `k*1.5707963`、
    `groupPos(0..3)`。加第五块肖像要同时动 `cloud.js` 与 `scene.js`；徽章视图要求分组恰好 4 个。

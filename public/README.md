@@ -8,8 +8,8 @@
 `tools/README.md`(本目录会被原样拷进 `dist/`,所以这里一律写成路径而不是链接:
 链接在 `dist/` 与作为子页面的副本里都会断)。
 
-另外两个子目录:`avatars/`(83 张侧栏小头像,`tools/make-portraits.mjs` 生成,清单在
-`src/data/portraits.js`,缺失的人物侧栏回退姓氏徽记)与 `portraits/`(79 张人物星尘掩膜,
+另外两个子目录:`avatars/`(88 张侧栏小头像,`tools/make-portraits.mjs` 生成,清单在
+`src/data/portraits.js`,缺失的人物侧栏回退姓氏徽记)与 `portraits/`(84 张人物星尘掩膜,
 4:5 归一化,点亮某位人物时运行时按清单里的 `portraits/<id>.png` 按需加载换装;同目录
 `CREDITS.md` 记录来源与许可)。
 
@@ -18,9 +18,9 @@ URL 就是文件名本身,唯一的缓存控制手段是查询串里的 `?v=`。
 
 ## 子目录
 
-- `avatars/` —— 83 张侧栏小头像(JPG,`tools/make-portraits.mjs` 生成);清单在
+- `avatars/` —— 88 张侧栏小头像(JPG,`tools/make-portraits.mjs` 生成);清单在
   `../src/data/portraits.js`,按 `figures[].id` 查找,缺失的人物在侧栏回退姓氏徽记。
-- `portraits/` —— 79 张人物星尘掩膜(PNG,4:5 归一化)+ `CREDITS.md` 来源署名。
+- `portraits/` —— 84 张人物星尘掩膜(PNG,4:5 归一化)+ `CREDITS.md` 来源署名。
   点亮某位人物时,运行时按清单里的 `portraits/<id>.png` 按需加载并换装;
   固定四位(马恩列卢)不用它,他们走根下的 `*-mask.png`。
 
@@ -44,7 +44,7 @@ URL 就是文件名本身,唯一的缓存控制手段是查询串里的 `?v=`。
   累加成 CDF,再随机反查像素取 `count` 个点。取的是红色通道 / 255 当密度(图是灰度,三通道相同)。
 - `src/main.js`(说明见仓库根 `src/README.md`):四张固定平面拼
   `${import.meta.env.BASE_URL}${p.id}-mask.png?v=${p.v}`,构建期 `BASE_URL` 是 `./`,
-  所以线上实际请求示例是 `./marx-mask.png?v=8`。79 张按需肖像则读取
+  所以线上实际请求示例是 `./marx-mask.png?v=8`。84 张按需肖像则读取
   `src/data/portraits.js` 的 `mask` 与 `v`,同样用清单缓存版本拼接查询串。
 - 四张启动固定掩膜中任一加载失败都会让 `boot()` 拒绝,整个页面停在
   "加载失败:掩膜图加载失败: …";按需掩膜失败由 `ensurePortrait()` 捕获并返回 `false`,页面继续运行。
@@ -52,12 +52,12 @@ URL 就是文件名本身,唯一的缓存控制手段是查询串里的 `?v=`。
 ## 三条必须一起动的规矩
 
 1. **路径必须与对应清单一致**。四张启动固定掩膜用 `<id>-mask.png`,且 `id` 出现在
-   `src/main.js` 的 `PORTRAIT_PLANES` 中;79 张按需掩膜用 `portraits/<id>.png`,路径登记在
+   `src/main.js` 的 `PORTRAIT_PLANES` 中;84 张按需掩膜用 `portraits/<id>.png`,路径登记在
    `src/data/portraits.js`。文件、人物 id 与清单任一不一致都会请求 404。
 2. **重画或替换掩膜后必须把对应的 `v` 加 1**。`?v=` 没有任何语义,只是缓存串:
    不加它,Pages 的 CDN 与浏览器会继续发旧图,现象是"改了掩膜但肖像没变"。
    当前四个固定平面 `v` 依次是 8 / 4 / 4 / 4(在仓库根复核:`grep -n "v: [0-9]" src/main.js`);
-   79 张按需掩膜的 `v` 当前统一为 4,以 `src/data/portraits.js` 为准。
+   84 张按需掩膜的 `v` 当前统一为 4,以 `src/data/portraits.js` 为准。
 3. **不要手改像素**。它们是脚本产物:换 `tools/<id>-photo.jpg` 或调 `CONFIGS` 参数再重跑。
    手工在图像编辑器里涂抹能应急,但下一次重跑就被覆盖。
 

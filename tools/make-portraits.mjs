@@ -1,6 +1,6 @@
 /**
  * 把人像原料加工成运行时资产:
- *   1. 头像 public/avatars/<id>.jpg(128×128,主体居中方形裁剪);
+ *   1. 头像 public/avatars/<id>.jpg(128×128,主体居中方形裁剪 + 自动色阶,暗底老照片也清晰);
  *   2. 星尘掩膜 public/portraits/<id>.png(亮度掩膜,归一化 4:5,运行时按需采样换装);
  *   3. 运行时清单 src/data/portraits.js(ava/mask/credit,徽记回退依据);
  *   4. 署名页 public/portraits/CREDITS.md。
@@ -273,6 +273,33 @@ function normalize45(m) {
   return out;
 }
 
+/**
+ * 头像自动色阶:按亮度 p10..p90 百分位做线性拉伸,把偏暗/偏亮的历史照片统一到
+ * 可辨识的影调——深色底的老照片(欧文、赫尔岑、莫尔等)不再糊成一团,亮底照片也不泛白。
+ * 对 R/G/B 施加同一仿射变换,色相与饱和度比例保持不变。
+ * 与 mask 管线无关:只作用于方形头像,星尘掩膜仍走 buildAutoMask 的原逻辑。
+ */
+function normalizeExposure(rgba, w, h, pLo = 0.10, pHi = 0.90, tLo = 0.14, tHi = 0.90) {
+  const n = w * h;
+  const lum = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const o = i * 4;
+    lum[i] = (0.299 * rgba[o] + 0.587 * rgba[o + 1] + 0.114 * rgba[o + 2]) / 255;
+  }
+  const sorted = Float32Array.from(lum).sort();
+  const lo = sorted[Math.floor(n * pLo)];
+  const hi = sorted[Math.floor(n * pHi)];
+  const span = Math.max(1e-3, hi - lo);
+  const a = (tHi - tLo) / span;
+  const b = tLo - a * lo;
+  for (let i = 0; i < n; i++) {
+    const o = i * 4;
+    rgba[o] = clamp(a * rgba[o] + b * 255, 0, 255);
+    rgba[o + 1] = clamp(a * rgba[o + 1] + b * 255, 0, 255);
+    rgba[o + 2] = clamp(a * rgba[o + 2] + b * 255, 0, 255);
+  }
+}
+
 /** 头像:主体外接框定位(裁剪空间),回退到通用中心 */
 function buildAvatar(img, cfg, subj, subjW, subjH, ok) {
   const lum0 = toGray(img.w, img.h, img.data);
@@ -319,7 +346,8 @@ function buildAvatar(img, cfg, subj, subjW, subjH, ok) {
       rgba[o] = r / n; rgba[o + 1] = g / n; rgba[o + 2] = b / n; rgba[o + 3] = 255;
     }
   }
-  return Buffer.from(encodeJpeg({ data: rgba, width: AVA, height: AVA }, 82).data);
+  normalizeExposure(rgba, AVA, AVA);
+  return Buffer.from(encodeJpeg({ data: rgba, width: AVA, height: AVA }, 88).data);
 }
 
 // ---------- 主流程 ----------

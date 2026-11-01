@@ -105,13 +105,13 @@ node tools/coverage.mjs             # 每人物条数分布(现有库 + 批次)
 ### `make-portraits.mjs` —— 重算头像、按需掩膜与清单
 
 ```bash
-node tools/make-portraits.mjs                # 生产完整的 83 项清单
+node tools/make-portraits.mjs                # 生产完整的 88 项清单
 node tools/make-portraits.mjs --only=mao     # 仅调试单人,会写出不完整清单,不可作为最终生成结果
 ```
 
 `--only` 会让最终 `src/data/portraits.js` 只含所选人物,所以正式生成必须不带该参数完整跑完。
 改动共享管线后,先完整运行 `prepare-mask.mjs` 和 `make-portraits.mjs`,记录 4 张固定掩膜、
-79 张按需掩膜与清单的 SHA-256;再以相同命令完整生成第二轮并比较摘要。算法有意变化时相对 Git
+84 张按需掩膜与清单的 SHA-256;再以相同命令完整生成第二轮并比较摘要。算法有意变化时相对 Git
 出现资产 diff 是正常的,验收要求是第二轮与第一轮逐字节一致,不是要求 Git-clean。
 
 ### `make-emblem.mjs` —— 重算徽章点位

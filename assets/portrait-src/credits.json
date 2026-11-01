@@ -579,5 +579,40 @@
   "license": "Public domain",
   "artist": "Unknown authorUnknown author",
   "url": "https://commons.wikimedia.org/wiki/File%3ATao%20Xing-zhi.jpg"
+ },
+ "chernyshevsky": {
+  "figure": "chernyshevsky",
+  "file": "Nikolay Chernyshevsky2.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3ANikolay%20Chernyshevsky2.jpg"
+ },
+ "blanqui": {
+  "figure": "blanqui",
+  "file": "Louis Auguste Blanqui.JPG",
+  "license": "Public domain",
+  "artist": "Eugène Appert",
+  "url": "https://commons.wikimedia.org/wiki/File%3ALouis%20Auguste%20Blanqui.JPG"
+ },
+ "kawakami": {
+  "figure": "kawakami",
+  "file": "Hajime Kawakami.jpg",
+  "license": "Public domain",
+  "artist": "Unknown authorUnknown author",
+  "url": "https://commons.wikimedia.org/wiki/File%3AHajime%20Kawakami.jpg"
+ },
+ "chenyi": {
+  "figure": "chenyi",
+  "file": "Chen Yi(communist).jpg",
+  "license": "Public domain",
+  "artist": "​《新华社》记者 齐观山",
+  "url": "https://commons.wikimedia.org/wiki/File%3AChen%20Yi(communist).jpg"
+ },
+ "wenyiduo": {
+  "figure": "wenyiduo",
+  "file": "闻一多01.jpg",
+  "license": "Public domain",
+  "artist": "",
+  "url": "https://commons.wikimedia.org/wiki/File%3A%E9%97%BB%E4%B8%80%E5%A4%9A01.jpg"
  }
 }

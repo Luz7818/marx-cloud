@@ -142,6 +142,12 @@ export const portraits = {
     "credit": "Commons:WilhelmWeitling.jpg(Public domain)",
     "v": 4
   },
+  "chernyshevsky": {
+    "ava": "avatars/chernyshevsky.jpg",
+    "mask": "portraits/chernyshevsky.png",
+    "credit": "Commons:Nikolay Chernyshevsky2.jpg(Public domain)",
+    "v": 4
+  },
   "bebel": {
     "ava": "avatars/bebel.jpg",
     "mask": "portraits/bebel.png",
@@ -218,6 +224,12 @@ export const portraits = {
     "ava": "avatars/cabet.jpg",
     "mask": "portraits/cabet.png",
     "credit": "Commons:Etienne Cabet (1788-1856) même portrait, l'habit simplement esquissé, D.1740.jpg(CC0)",
+    "v": 4
+  },
+  "blanqui": {
+    "ava": "avatars/blanqui.jpg",
+    "mask": "portraits/blanqui.png",
+    "credit": "Commons:Louis Auguste Blanqui.JPG(Public domain)",
     "v": 4
   },
   "bakunin": {
@@ -364,6 +376,12 @@ export const portraits = {
     "credit": "Commons:KotokuShusui.jpg(Public domain)",
     "v": 4
   },
+  "kawakami": {
+    "ava": "avatars/kawakami.jpg",
+    "mask": "portraits/kawakami.png",
+    "credit": "Commons:Hajime Kawakami.jpg(Public domain)",
+    "v": 4
+  },
   "katayama": {
     "ava": "avatars/katayama.jpg",
     "mask": "portraits/katayama.png",
@@ -442,6 +460,12 @@ export const portraits = {
     "credit": "Commons:General Peng Dehuai.jpg(Public domain)",
     "v": 4
   },
+  "chenyi": {
+    "ava": "avatars/chenyi.jpg",
+    "mask": "portraits/chenyi.png",
+    "credit": "Commons:Chen Yi(communist).jpg(Public domain)",
+    "v": 4
+  },
   "songqingling": {
     "ava": "avatars/songqingling.jpg",
     "mask": "portraits/songqingling.png",
@@ -500,6 +524,12 @@ export const portraits = {
     "ava": "avatars/taoxingzhi.jpg",
     "mask": "portraits/taoxingzhi.png",
     "credit": "Commons:Tao Xing-zhi.jpg(Public domain)",
+    "v": 4
+  },
+  "wenyiduo": {
+    "ava": "avatars/wenyiduo.jpg",
+    "mask": "portraits/wenyiduo.png",
+    "credit": "Commons:闻一多01.jpg(Public domain)",
     "v": 4
   }
 };
