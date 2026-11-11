@@ -28,4 +28,6 @@
 ## commit message
 
 - 风格沿用既有历史：`<type>(<scope>): 中文一句话` 或 `<type>: 中文一句话`，
-  type 取 `feat / fix / docs / chore / refactor`（复核：`git log --oneline -10`）。
+  type 取 `feat / fix / docs / chore / refactor / polish`——`polish` 是白名单外已实际在用的
+  既有例外（`8074d35`、`8527d27` 均用 `polish(ui)`），本轮正式收编；另有规范落位前的
+  个别无 type 前缀提交（如 `9e41535`），属历史存量不再追溯（复核：`git log --oneline -10`）。

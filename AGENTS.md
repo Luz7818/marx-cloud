@@ -67,6 +67,7 @@
 | 命令/入口/交互变化 | `README.md` / `docs/GET-START.md` / 对应子目录 README |
 | 增删一级或二级目录 | 仓根 `目录说明.md` + 本文件 |
 | 规模数字(句数/人物数/体积)变化 | 本文件「当前状态」 |
+| DOM 契约 / 源码模块数 / 粒子档位数字变动 | 下游所有复述处同批同改:`docs/ARCHITECTURE.md`、`docs/GET-START.md`、`docs/TESTING.md`、`docs/CODE-STYLE.md`、`src/README.md`;或按本文件开头第 5 行的规则把下游改成「只链接不复述」。此坑已两次复发(2026-10-06 与 2026-11-11,见 `HISTORY.md`),改这些数字时逐份过一遍 |
 | 新对话/新任务开始 | 按下方阅读清单阅读 |
 
 ## 开发前阅读清单

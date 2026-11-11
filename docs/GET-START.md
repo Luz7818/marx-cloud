@@ -83,13 +83,13 @@ npm run build
 
 vite v5.4.21 building for production...
 transforming...
-✓ 18 modules transformed.
+✓ 22 modules transformed.
 rendering chunks...
 computing gzip size...
-dist/index.html                   2.17 kB │ gzip:   1.39 kB
-dist/assets/index-*.css        16.39 kB │ gzip:   3.95 kB
-dist/assets/index-*.js     1020.46 kB │ gzip: 467.71 kB
-✓ built in 1.23s
+dist/index.html                    5.46 kB │ gzip:   2.42 kB
+dist/assets/index-*.css        28.52 kB │ gzip:   6.18 kB
+dist/assets/index-*.js     1,027.37 kB │ gzip: 470.41 kB
+✓ built in 1.40s
 ```
 
 体积行是构建器的字符数口径（中文语录落盘成 UTF-8 后字节更多，磁盘见 `wc -c dist/assets/*`）。
@@ -158,6 +158,7 @@ npm run preview
 | 点虚空 | 同上,拾取失败分支 | 随机捞一句,顶栏「拾句·开/关」可关 |
 | 左栏点人名 | `panel.js` | 点亮该人物;肖像视图下 88 位有大型掩膜的人物会按清单加载并替换最近槽后飞抵,其余 3 位保持单人星群并飞向最近槽;徽章视图按所属分组飞过去 |
 | 左栏分组头 | `panel.js` | 四个分组默认收起(组头显示「人数 · 句数」),点击展开;搜索命中或选中人物时自动展开,清空搜索复位 |
+| 左栏「著作」页签 | `panel.js` | 全部出处按收录量降序,点一行展开该著作下的语录;**未筛选时只显示收录量前 120 部**(全库 1313 部,数字随语录增删而变,复核:`node --input-type=module -e "const{quotes}=await import('./src/data/quotes.js');console.log(new Set(quotes.map(q=>q.w)).size)"`),且没有寻句页签那种「命中 100(截断) 句」的明示——要看 120 名以外的著作,在著作筛选框输关键词 |
 | 左栏 `▸` | 同上 | 展开该人全部语录,点一句即定位(点亮 + 展开卡片) |
 | 搜索框输完按 `Enter` | 同上 | 等同于点当前筛选结果里的第一个人 |
 | 顶栏「视图·肖像/徽章」 | `main.js` | 在四向肖像与党徽两种星图之间切换 |
@@ -178,7 +179,7 @@ npm run preview
 
 - **每 90° 换人**:四块肖像平面互成直角。相机正对某块平面时权重才不为 0:视线与平面法线
   夹角小于 15.2° 时完全成形,超过 45.6° 就一点不剩,中间那段漫天星雾是有意的过渡
-  (阈值 0.965 与 0.7 写在 `src/core/scene.js:246`,复核:`grep -n "smoothstep(0.7" src/core/scene.js`)。
+  (阈值 0.965 与 0.7 写在 `src/core/scene.js:249`,复核:`grep -n "smoothstep(0.7" src/core/scene.js`)。
 - **自动巡游**:进入星图后开始。每个像位停留 9 秒,再用 8 秒 easeInOutCubic 转到下一位,
   一整圈约 68 秒(速度 1 倍)。任何拖拽或按键立即接管,停手 4 秒后恢复。
 - **底部字幕**:只有正对某位思想家时才出现,给出姓名、生卒与身份;徽章视图下给出组名与
@@ -229,6 +230,10 @@ node --input-type=module -e "const{quotes}=await import('./src/data/quotes.js');
 - `group` 只能取 `pioneer` / `founders` / `inheritors` / `china` 四个 key 之一,写错会让页面直接崩
   (原因见 `AGENTS.md` 约定 6)。
 - 想让人名以外也能搜到,在文件末尾的 `ALIAS` 表里按 id 加别名数组(字号、原名、另一通译)。
+- **要头像或换装掩膜,还须在文件末尾的 `WIKI` 表里按 id 登记 enwiki 标题**,然后重跑
+  `node tools/fetch-portraits.mjs` + `node tools/make-portraits.mjs` 生成并入库新资产;
+  只加 `figures` 项不登记 `WIKI` 也能正常运行,但会静默落入「徽记回退 + 单人星群」
+  (`f.wiki = WIKI[f.id] || null`,无 wiki 就不生成头像——见 `figures.js` 末尾)。
 - 至少要给他/她配一条语录,否则星点会指向数组第 0 句(见 `AGENTS.md` 约定 1)。
 - **不要给 `figures` 重排序**:粒子上存的是人物下标。
 
@@ -273,7 +278,7 @@ node tools/make-emblem.mjs --n=5000   # 改点数
 它会写两个文件:`tools/preview-emblem.png`(gitignore 内的核对图)与
 **`src/data/emblem.js`(入库文件,直接覆盖)**。底图是 `tools/emblem-ref.png`(1280×1280,CC0)。
 脚本用了未播种的随机数,所以每次跑出来的点位都不一样 —— 没有换底图就别重跑,
-否则 `git diff` 会出现一堆无意义的改动。粒子总数(28000)与这里无关,不用同步改。
+否则 `git diff` 会出现一堆无意义的改动。粒子总数(34000,分档见 `AGENTS.md`「当前状态」)与这里无关,不用同步改。
 
 ### 5.5 重画 README 横幅
 
@@ -334,7 +339,7 @@ node tools/make-banner.mjs     # 读 public/marx-mask.png,覆盖 docs/banner.svg
 | WebGL | 浏览器里直接驱动 GPU 画图形的接口。本项目所有画面都由它绘制,拿不到上下文就没有画面 |
 | 软件渲染 | 没有 GPU 时用 CPU 假装 WebGL(如 SwiftShader、llvmpipe)。本项目检测到就少画一半粒子 |
 | three.js / `THREE` | 封装 WebGL 的绘图库,本项目的运行时依赖只有它 |
-| 点云 / 粒子 | 一堆各自有坐标和颜色的点,不加连线。这里每颗星就是一个粒子,数量 9000–28000 |
+| 点云 / 粒子 | 一堆各自有坐标和颜色的点,不加连线。这里每颗星就是一个粒子,数量 9000–34000(分档 9000/14000/20000/34000,见 `src/main.js` 的 `const COUNT`) |
 | 掩膜(mask) | 一张灰度图,亮度决定该处聚多少星。肖像不是模型,是从照片生成的掩膜采样出来的密度图 |
 | 亮度 / 灰度 | 取掩膜的红色通道除以 255 当密度用(掩膜是灰度图,三个通道相同) |
 | CDF 逆变换采样 | 先按亮度累加成"越亮占的区间越长"的表,再随机取一个落点。作用是亮处星密、暗处星疏 |
@@ -362,6 +367,6 @@ npm run build
 ```
 
 通过标准:`verify` 与图像管线回归退出码 0,`node --check` 一条 `FAIL` 都不打,`build` 退出码 0
-且输出 `18 modules transformed`。然后 `npm run preview`,把改过的东西在浏览器里实际操作一遍;
+且输出 `22 modules transformed`(该数字跟源码模块数绑定,加一个 `.js` 就会变,以实跑输出为准)。然后 `npm run preview`,把改过的东西在浏览器里实际操作一遍;
 图像管线有自动行为回归,但浏览器视觉与交互仍需人工验收。每条命令各自拦什么、哪些文件是生成物,
 写在仓库根的 [`AGENTS.md`](../AGENTS.md)。

@@ -66,6 +66,6 @@ grep -rn "easeInOutCubic" src/       # 仅剩 src/core/easing.js 单源定义与
 | 图像管线或大型肖像掩膜 | 图像回归 → 两次完整生成并比 SHA-256 → build → preview | 回归通过；两轮逐字节一致；固定与按需肖像通过视觉验收 |
 | `tools/emblem-ref.png` 或 make-emblem | `node tools/make-emblem.mjs` | 点位仍 3400，徽章能认出镰刀锤头 |
 | `cloud.js` / `scene.js` 位置公式 | `npm run dev` 逐姿态点星 | 成形/散开/徽章都能点中，气泡与卡片同人同句 |
-| `index.html` 的 DOM | `npm run dev` 开控制台 | 无 `null` 报错；16 个被引用 id 都在 |
+| `index.html` 的 DOM | `npm run dev` 开控制台 | 无 `null` 报错；19 个被引用 id 都在（枚举复核：`grep -o "getElementById('[^']*')" src/main.js \| sort -u \| wc -l`） |
 | `src/style.css` 或 `src/core/easing.js` 的动效 | 「动效令牌哨兵」三条 grep（见上节） | `var(--dur` 引用 >0；裸秒行均带豁免注释；`easeInOutCubic` 仅 easing.js 单源+引用 |
 | 提交前 | `(cd .. && python 文档标准/check_docs.py Marx_Cloud)` | 退出码 0,无阻断项 |

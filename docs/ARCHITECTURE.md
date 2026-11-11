@@ -143,5 +143,6 @@ tools/*.mjs（离线）→ 写 src/data/emblem.js、src/data/portraits.js、src/
 
 - 没有 WebGL 就没有降级路径：`THREE.WebGLRenderer` 直接抛，只有粒子数降档、没有兜底版本。
 - 帧率自适应只在 `auto` 档生效且**只降不升**（阈值 22 fps，阶梯 `[1, 0.65, 0.45, 0.3, 0.2]`）。
-- 单 chunk 打包（three + 数据 628 kB），`chunkSizeWarningLimit: 900` 是刻意抬的——想拆包要
-  显式改 `build.rollupOptions`，别顺手"修"掉。
+- 单 chunk 打包（three + 数据，`npm run build` 打印 1,027.37 kB，磁盘 `wc -c dist/assets/*.js`
+  = 1,518,998 字节；两个口径的差与对账方式见 `AGENTS.md`「当前状态」），`chunkSizeWarningLimit: 900`
+  是刻意抬的——想拆包要显式改 `build.rollupOptions`，别顺手"修"掉。
