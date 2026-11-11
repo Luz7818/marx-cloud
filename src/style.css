@@ -10,8 +10,16 @@
   --accent-soft: rgba(229, 72, 77, 0.14);
   --serif: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', '宋体', serif;
   --sans: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', system-ui, sans-serif;
+  /* 动效令牌(批2 归仓,照家族 zhishuxing/TH/rr-studio/flowdeck 同源体系):
+     三缓动——强 ease-out 为 UI 默认;spring 用于「一次到达可轻微过冲」的回弹;
+     in-out 用于屏上移动/变形(JS 侧逐帧曲线统一走 src/core/easing.js 单源,与此处同值同语义);
+     四档时长阶梯——按压 --dur-1 < 悬停/焦点 --dur-2 < 入场/弹层 --dur-3 < 抽屉/大面板 --dur-4,
+     高频交互一律从阶梯取值(散值贴梯取整,漂移 ≤40ms 归档,照 Harness e5b4b5f 口径),
+     错峰延迟与 >300ms 营销/长循环档不入阶梯(散值处均带豁免注释) */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.35, 0.4, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-1: .12s; --dur-2: .18s; --dur-3: .24s; --dur-4: .3s;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -65,11 +73,13 @@ html, body {
   color: var(--muted);
   text-decoration: none;
   border-bottom: 1px solid var(--glass-brd);
-  transition: color 0.2s, border-color 0.2s;
+  transition: color var(--dur-2), border-color var(--dur-2);
 }
-#brand .back:hover {
-  color: var(--text);
-  border-bottom-color: var(--text);
+@media (hover: hover) and (pointer: fine) {
+  #brand .back:hover {
+      color: var(--text);
+      border-bottom-color: var(--text);
+    }
 }
 #brand h1 {
   font-family: var(--serif);
@@ -118,21 +128,23 @@ html, body {
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 2px 10px rgba(0, 0, 0, 0.28);
   transition:
-    border-color 0.22s, color 0.22s, background 0.22s,
-    transform 0.22s var(--ease-out), box-shadow 0.22s;
+    border-color var(--dur-2), color var(--dur-2), background var(--dur-2),
+    transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
 }
 #toolbar button svg { flex: none; opacity: 0.85; }
-#toolbar button:hover {
-  border-color: rgba(229, 72, 77, 0.5);
-  color: #fff;
-  transform: translateY(-1px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 6px 20px rgba(229, 72, 77, 0.16);
+@media (hover: hover) and (pointer: fine) {
+  #toolbar button:hover {
+      border-color: rgba(229, 72, 77, 0.5);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 6px 20px rgba(229, 72, 77, 0.16);
+    }
 }
 #toolbar button:active { transform: translateY(0) scale(0.96); }
 /* 键盘可达性:Tab 聚焦时给出清晰焦点环(鼠标点击不触发) */
@@ -193,6 +205,7 @@ body.panel-open #btn-panel {
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     12px 0 40px rgba(0, 0, 0, 0.35);
   transform: translateX(calc(-100% - 20px));
+  /* 豁免(营销档):284px 抽屉全幅推进的 0.45s,收进 --dur-4 会明显变急(>300ms 不入阶梯,家族口径) */
   transition: transform 0.45s var(--ease-out);
 }
 body.panel-open #panel { transform: translateX(0); }
@@ -201,7 +214,9 @@ body.panel-open #panel { transform: translateX(0); }
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.12);
 }
-#panel::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+@media (hover: hover) and (pointer: fine) {
+  #panel::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+}
 #panel::-webkit-scrollbar-track { background: transparent; }
 
 /* 面板开合时内容轻微上浮进场 */
@@ -210,8 +225,10 @@ body.panel-open #panel { transform: translateX(0); }
 #panel .panel-foot {
   opacity: 0;
   transform: translateY(10px);
+  /* 豁免(编排档):0.35s 三段进场与下方 0.05/0.12/0.19s 错峰延迟咬合成组,贴梯(50ms>40ms)会拆散节拍 */
   transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
 }
+/* 错峰延迟(30ms 系)不入阶梯,保留编排原值(家族口径) */
 #panel .panel-head { transition-delay: 0.05s; }
 #panel .tab-pane { transition-delay: 0.12s; }
 #panel .panel-foot { transition-delay: 0.19s; }
@@ -242,7 +259,7 @@ body.panel-open #panel .panel-foot {
   font-size: 12px;
   letter-spacing: 0.06em;
   outline: none;
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  transition: border-color var(--dur-2), background var(--dur-2), box-shadow var(--dur-2);
 }
 .panel-search:focus {
   border-color: rgba(229, 72, 77, 0.55);
@@ -262,9 +279,11 @@ body.panel-open #panel .panel-foot {
   font-size: 11px;
   letter-spacing: 0.1em;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--dur-2);
 }
-.panel-all:hover { color: var(--accent); }
+@media (hover: hover) and (pointer: fine) {
+  .panel-all:hover { color: var(--accent); }
+}
 
 .panel-group-label {
   padding: 10px 16px 4px;
@@ -285,11 +304,13 @@ body.panel-open #panel .panel-foot {
   color: var(--text);
   text-align: left;
   cursor: pointer;
-  transition: background 0.18s, box-shadow 0.18s;
+  transition: background var(--dur-2), box-shadow var(--dur-2);
 }
-.panel-group-head:hover {
-  background: color-mix(in srgb, var(--c, #fff) 7%, transparent);
-  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--c, #fff) 60%, transparent);
+@media (hover: hover) and (pointer: fine) {
+  .panel-group-head:hover {
+      background: color-mix(in srgb, var(--c, #fff) 7%, transparent);
+      box-shadow: inset 2px 0 0 color-mix(in srgb, var(--c, #fff) 60%, transparent);
+    }
 }
 .gh-chip {
   width: 8px;
@@ -303,7 +324,7 @@ body.panel-open #panel .panel-foot {
   flex: none;
   font-size: 10px;
   color: var(--muted);
-  transition: transform 0.28s var(--ease-out), color 0.2s;
+  transition: transform var(--dur-4) var(--ease-out), color var(--dur-2);
 }
 .panel-group.open .gh-caret { transform: rotate(90deg); color: var(--c, var(--accent)); }
 .gh-label {
@@ -332,10 +353,10 @@ body.panel-open #panel .panel-foot {
   letter-spacing: 0.04em;
 }
 .panel-group-body { display: none; }
-.panel-group.open .panel-group-body { display: block; animation: paneIn 0.32s var(--ease-out); }
+.panel-group.open .panel-group-body { display: block; animation: paneIn var(--dur-4) var(--ease-out); }
 /* 展开分组时组内主行逐行错峰上浮(延迟由 JS 写入行内 --d) */
 .panel-group.open > .panel-group-body > .panel-row-wrap {
-  animation: rowIn 0.3s var(--ease-out) both;
+  animation: rowIn var(--dur-4) var(--ease-out) both;
   animation-delay: var(--d, 0s);
 }
 @keyframes rowIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
@@ -353,9 +374,11 @@ body.panel-open #panel .panel-foot {
   color: var(--text);
   text-align: left;
   cursor: pointer;
-  transition: background 0.18s;
+  transition: background var(--dur-2);
 }
-.panel-row:hover { background: rgba(255, 255, 255, 0.05); }
+@media (hover: hover) and (pointer: fine) {
+  .panel-row:hover { background: rgba(255, 255, 255, 0.05); }
+}
 .panel-row.active {
   background: linear-gradient(90deg, rgba(229, 72, 77, 0.16), rgba(229, 72, 77, 0.04));
   box-shadow: inset 2px 0 0 var(--accent);
@@ -372,10 +395,12 @@ body.panel-open #panel .panel-foot {
 .row-name { font-size: 13px; letter-spacing: 0.06em; }
 .row-years { font-size: 10px; color: var(--muted); }
 .row-count { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.row-caret { width: 14px; flex: none; text-align: center; font-size: 10px; color: var(--muted); cursor: pointer; transition: color 0.2s, transform 0.25s var(--ease-out); }
-.row-caret:hover { color: var(--accent); }
+.row-caret { width: 14px; flex: none; text-align: center; font-size: 10px; color: var(--muted); cursor: pointer; transition: color var(--dur-2), transform var(--dur-3) var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .row-caret:hover { color: var(--accent); }
+}
 .row-quotes { display: none; padding: 0 10px 6px 30px; }
-.row-quotes.open { display: block; animation: paneIn 0.28s var(--ease-out); }
+.row-quotes.open { display: block; animation: paneIn var(--dur-4) var(--ease-out); }
 /* 展开态的行箭头转向(:has 不可用时只是少了动画,不影响功能) */
 .work-row-wrap:has(.row-quotes.open) .row-caret,
 .panel-row-wrap:has(.row-quotes.open) > .panel-row .row-caret { transform: rotate(90deg); }
@@ -384,7 +409,9 @@ body.panel-open #panel .panel-foot {
 .minor-box { display: none; }
 .panel-minor-wrap .minor-toggle { opacity: 0.85; }
 .panel-minor-wrap .minor-toggle .row-name { font-size: 12px; color: var(--muted); letter-spacing: 0.12em; }
-.panel-minor-wrap .minor-toggle:hover .row-name { color: var(--text); }
+@media (hover: hover) and (pointer: fine) {
+  .panel-minor-wrap .minor-toggle:hover .row-name { color: var(--text); }
+}
 .panel-minor-wrap.open .minor-toggle .row-caret { display: inline-block; transform: rotate(90deg); }
 .minor-box .panel-row { padding-left: 28px; }
 .minor-box .row-quotes { padding-left: 44px; }
@@ -401,9 +428,11 @@ body.panel-open #panel .panel-foot {
   text-align: left;
   cursor: pointer;
   border-radius: 6px;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--dur-1), color var(--dur-1);
 }
-.q-row:hover { background: rgba(255, 255, 255, 0.05); color: var(--text); }
+@media (hover: hover) and (pointer: fine) {
+  .q-row:hover { background: rgba(255, 255, 255, 0.05); color: var(--text); }
+}
 .q-num { flex: none; opacity: 0.55; font-variant-numeric: tabular-nums; }
 .q-text { flex: 1; min-width: 0; }
 .q-work { flex: none; max-width: 38%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.5; font-size: 10px; }
@@ -430,9 +459,11 @@ body.panel-open #panel .panel-foot {
   font-size: 10px;
   letter-spacing: 0.1em;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--dur-2);
 }
-.fav-clear:hover, .fav-export:hover { color: var(--accent); }
+@media (hover: hover) and (pointer: fine) {
+  .fav-clear:hover, .fav-export:hover { color: var(--accent); }
+}
 .fav-row {
   width: 100%;
   display: flex;
@@ -445,9 +476,11 @@ body.panel-open #panel .panel-foot {
   font-size: 11px;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--dur-1);
 }
-.fav-row:hover { background: rgba(255, 255, 255, 0.05); }
+@media (hover: hover) and (pointer: fine) {
+  .fav-row:hover { background: rgba(255, 255, 255, 0.05); }
+}
 .fav-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fav-who { flex: none; font-size: 10px; color: var(--muted); }
 
@@ -499,7 +532,7 @@ body.chrome-off #toast {
   pointer-events: none;
   opacity: 0;
   transform: translateY(3px);
-  transition: opacity 0.16s, transform 0.16s var(--ease-out);
+  transition: opacity var(--dur-2), transform var(--dur-2) var(--ease-out);
 }
 #tooltip.show { opacity: 1; transform: none; }
 #tooltip b { font-weight: 600; letter-spacing: 0.05em; white-space: nowrap; }
@@ -527,7 +560,13 @@ body.chrome-off #toast {
   opacity: 0;
   transform: translateY(18px) scale(0.96);
   pointer-events: none;
-  transition: opacity 0.28s, transform 0.42s var(--ease-spring);
+  /* 豁免(营销档):0.42s spring 为语录卡进场主弹簧,不入阶梯 */
+  transition: opacity var(--dur-4), transform 0.42s var(--ease-spring);
+}
+/* 退场快于进场(深评 §5.3):非 .show 态是退场目的地,两通道收紧到交互档并换 ease-out */
+#quote-card:not(.show) {
+  transition-duration: var(--dur-2);
+  transition-timing-function: var(--ease-out);
 }
 #quote-card.show {
   opacity: 1;
@@ -539,6 +578,7 @@ body.chrome-off #toast {
   letter-spacing: 0.3em;
   color: rgba(229, 72, 77, 0.9);
   margin-bottom: 10px;
+  /* 豁免(营销档):0.4s 为卡内「已捞到」小标签从属入场,贴近 0.42s 主卡弹簧节奏,不入阶梯 */
   animation: paneIn 0.4s var(--ease-out);
 }
 .card-head {
@@ -559,9 +599,11 @@ body.chrome-off #toast {
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 8px;
-  transition: color 0.2s, background 0.2s, transform 0.2s;
+  transition: color var(--dur-2), background var(--dur-2), transform var(--dur-2);
 }
-.card-close:hover { color: #fff; background: rgba(255, 255, 255, 0.06); transform: rotate(90deg); }
+@media (hover: hover) and (pointer: fine) {
+  .card-close:hover { color: #fff; background: rgba(255, 255, 255, 0.06); transform: rotate(90deg); }
+}
 .card-quote {
   font-family: var(--serif);
   font-size: 18px;
@@ -603,11 +645,13 @@ body.chrome-off #toast {
   letter-spacing: 0.15em;
   white-space: nowrap;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  transition: border-color var(--dur-2), background var(--dur-2), transform var(--dur-1);
 }
-.card-next:hover {
-  border-color: rgba(229, 72, 77, 0.55);
-  background: linear-gradient(180deg, rgba(229, 72, 77, 0.12), rgba(229, 72, 77, 0.04));
+@media (hover: hover) and (pointer: fine) {
+  .card-next:hover {
+      border-color: rgba(229, 72, 77, 0.55);
+      background: linear-gradient(180deg, rgba(229, 72, 77, 0.12), rgba(229, 72, 77, 0.04));
+    }
 }
 .card-next:active { transform: scale(0.97); }
 .card-actions {
@@ -628,9 +672,11 @@ body.chrome-off #toast {
   font-size: 12px;
   letter-spacing: 0.15em;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.15s;
+  transition: border-color var(--dur-2), color var(--dur-2), background var(--dur-2), transform var(--dur-1);
 }
-.card-act:hover { border-color: rgba(229, 72, 77, 0.55); color: #fff; }
+@media (hover: hover) and (pointer: fine) {
+  .card-act:hover { border-color: rgba(229, 72, 77, 0.55); color: #fff; }
+}
 .card-act:active { transform: scale(0.96); }
 .card-act:disabled { opacity: 0.7; cursor: default; }
 .card-act.primary {
@@ -651,6 +697,7 @@ body.chrome-off #toast {
   color: rgba(152, 160, 179, 0.85);
   user-select: none;
   pointer-events: none;
+  /* 豁免(营销档):1.2s 底部提示慢淡出,不入阶梯 */
   transition: opacity 1.2s;
   white-space: normal;
   max-width: min(92vw, 880px);
@@ -696,6 +743,7 @@ body.chrome-off #toast {
   opacity: 0;
   pointer-events: none;
   user-select: none;
+  /* 豁免(营销档):0.7s 字幕呼吸浮现,与 .cap-name 0.9s 字距展开咬合,不入阶梯 */
   transition: opacity 0.7s, transform 0.7s var(--ease-out);
 }
 #figure-caption.show {
@@ -721,6 +769,7 @@ body.chrome-off #toast {
   font-weight: 600;
   letter-spacing: 0.3em;
   white-space: nowrap;
+  /* 豁免(营销档):0.9s 字距展开为开场编排,不入阶梯 */
   transition: letter-spacing 0.9s var(--ease-out);
 }
 #figure-caption.show .cap-name { letter-spacing: 0.18em; }
@@ -743,6 +792,7 @@ body.chrome-off #toast {
   cursor: pointer;
 }
 #intro.show { display: block; }
+/* 豁免(营销档):开场退场 0.85s 长淡出,不入阶梯 */
 #intro.leave { opacity: 0; transition: opacity 0.85s; }
 .intro-stage {
   position: absolute;
@@ -755,6 +805,7 @@ body.chrome-off #toast {
   text-align: center;
   max-width: 640px;
   padding: 0 32px;
+  /* 豁免(营销档):开场页 0.9s/页内行 0.7s 为开场编排节奏,不入阶梯 */
   animation: introIn 0.9s var(--ease-out) both;
 }
 @keyframes introIn {
@@ -764,8 +815,10 @@ body.chrome-off #toast {
 /* 页内逐行进场 */
 .intro-page .intro-kicker, .intro-page .intro-title, .intro-page .intro-sub,
 .intro-page .intro-credit, .intro-page .intro-line, .intro-page .intro-enter {
+  /* 豁免(营销档):同上,页内逐行 0.7s 开场编排 */
   animation: introIn 0.7s var(--ease-out) both;
 }
+/* 错峰延迟(30ms 系)不入阶梯,保留编排原值(家族口径) */
 .intro-page > *:nth-child(1) { animation-delay: 0.02s; }
 .intro-page > *:nth-child(2) { animation-delay: 0.1s; }
 .intro-page > *:nth-child(3) { animation-delay: 0.18s; }
@@ -824,13 +877,16 @@ body.chrome-off #toast {
   letter-spacing: 0.35em;
   text-indent: 0.17em;
   cursor: pointer;
-  transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+  transition: background var(--dur-3), transform var(--dur-3), box-shadow var(--dur-3);
+  /* 豁免(营销/长循环档):0.7s 开场编排 + breathe 2.6s 永动呼吸(已被 prefers-reduced-motion 覆盖) */
   animation: introIn 0.7s var(--ease-out) both, breathe 2.6s ease-in-out 0.8s infinite;
 }
-.intro-enter:hover {
-  background: rgba(229, 72, 77, 0.28);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 30px rgba(229, 72, 77, 0.3);
+@media (hover: hover) and (pointer: fine) {
+  .intro-enter:hover {
+      background: rgba(229, 72, 77, 0.28);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 30px rgba(229, 72, 77, 0.3);
+    }
 }
 @keyframes breathe {
   0%, 100% { box-shadow: 0 0 0 0 rgba(229, 72, 77, 0.0); }
@@ -856,9 +912,11 @@ body.chrome-off #toast {
   border: 1px solid var(--glass-brd);
   border-radius: 14px;
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  transition: color var(--dur-2), border-color var(--dur-2), background var(--dur-2);
 }
-.intro-skip:hover { color: #fff; border-color: rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.04); }
+@media (hover: hover) and (pointer: fine) {
+  .intro-skip:hover { color: #fff; border-color: rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.04); }
+}
 
 /* ---------- 加载 ---------- */
 #loading {
@@ -871,6 +929,7 @@ body.chrome-off #toast {
   justify-content: center;
   gap: 22px;
   background: var(--bg);
+  /* 豁免(营销档):加载层退场 0.9s 长淡出,不入阶梯 */
   transition: opacity 0.9s;
 }
 #loading.done { opacity: 0; pointer-events: none; }
@@ -881,6 +940,7 @@ body.chrome-off #toast {
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.08);
   border-top-color: var(--accent);
+  /* 豁免(长循环):加载双环 1.1s/1.6s 永动旋转,曲线 linear,不入阶梯 */
   animation: spin 1.1s linear infinite;
 }
 .load-ring::after {
@@ -890,6 +950,7 @@ body.chrome-off #toast {
   border-radius: 50%;
   border: 2px solid transparent;
   border-bottom-color: rgba(229, 72, 77, 0.45);
+  /* 豁免(长循环):同上,内环 1.6s 反向 */
   animation: spin 1.6s linear infinite reverse;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -898,6 +959,7 @@ body.chrome-off #toast {
   letter-spacing: 0.35em;
   text-indent: 0.17em;
   color: var(--muted);
+  /* 豁免(长循环):加载文案 2.4s 永动脉动,不入阶梯 */
   animation: loadPulse 2.4s ease-in-out infinite;
 }
 @keyframes loadPulse {
@@ -924,16 +986,19 @@ body.chrome-off #toast {
     0 2px 6px rgba(0, 0, 0, 0.4);
   opacity: 0.95;
   background: #0b0d16;
-  transition: filter 0.3s, transform 0.3s var(--ease-out), box-shadow 0.3s;
+  transition: filter var(--dur-4), transform var(--dur-4) var(--ease-out), box-shadow var(--dur-4);
 }
 .ava-sm { --sz: 24px; }
 .ava-lg { --sz: 48px; }
 .ava-cap { --sz: 28px; }
-/* 列表悬停:头像恢复本来色彩并轻微放大——"点亮"的预感 */
-.panel-row:hover .ava,
-.panel-focus:hover .ava-lg {
-  filter: grayscale(0) sepia(0) saturate(1.05) hue-rotate(0deg) brightness(1) contrast(1);
-  transform: scale(1.07);
+/* 触屏收敛:hover 态只在真悬停设备生效,避免 tap 后悬停底色/头像复色残留(深评 §5.5) */
+@media (hover: hover) and (pointer: fine) {
+  /* 列表悬停:头像恢复本来色彩并轻微放大——"点亮"的预感 */
+  .panel-row:hover .ava,
+  .panel-focus:hover .ava-lg {
+      filter: grayscale(0) sepia(0) saturate(1.05) hue-rotate(0deg) brightness(1) contrast(1);
+      transform: scale(1.07);
+    }
 }
 .ava-mono {
   display: inline-flex;
@@ -968,12 +1033,14 @@ body.chrome-off #toast {
   cursor: pointer;
   border-bottom: 1px solid transparent;
   margin-bottom: -1px;
-  transition: color 0.2s, border-color 0.2s;
+  transition: color var(--dur-2), border-color var(--dur-2);
 }
-.ptab:hover { color: var(--text); }
+@media (hover: hover) and (pointer: fine) {
+  .ptab:hover { color: var(--text); }
+}
 .ptab.active { color: #fff; border-bottom-color: var(--accent); }
 .tab-pane { display: none; }
-.tab-pane.active { display: block; animation: paneIn 0.3s var(--ease-out); }
+.tab-pane.active { display: block; animation: paneIn var(--dur-4) var(--ease-out); }
 @keyframes paneIn {
   from { opacity: 0; transform: translateY(7px); }
   to { opacity: 1; transform: none; }
@@ -991,9 +1058,11 @@ body.chrome-off #toast {
   font-size: 11px;
   letter-spacing: 0.1em;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--dur-2);
 }
-.panel-order:hover { color: var(--accent); }
+@media (hover: hover) and (pointer: fine) {
+  .panel-order:hover { color: var(--accent); }
+}
 
 /* ---------- 点亮卡 ---------- */
 .panel-focus {
@@ -1008,7 +1077,7 @@ body.chrome-off #toast {
     rgba(229, 72, 77, 0.04);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
-.panel-focus.show { display: flex; animation: paneIn 0.3s var(--ease-out); }
+.panel-focus.show { display: flex; animation: paneIn var(--dur-4) var(--ease-out); }
 .pf-main { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .pf-main b { font-size: 14px; letter-spacing: 0.06em; }
 .pf-sub { font-size: 10px; color: var(--muted); }
@@ -1031,9 +1100,11 @@ body.chrome-off #toast {
   font-size: 10px;
   letter-spacing: 0.14em;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  transition: background var(--dur-2), border-color var(--dur-2), transform var(--dur-1);
 }
-.pf-random:hover { background: rgba(229, 72, 77, 0.22); border-color: rgba(229, 72, 77, 0.6); }
+@media (hover: hover) and (pointer: fine) {
+  .pf-random:hover { background: rgba(229, 72, 77, 0.22); border-color: rgba(229, 72, 77, 0.6); }
+}
 .pf-random:active { transform: scale(0.95); }
 
 /* ---------- 著作 ---------- */
@@ -1052,7 +1123,7 @@ body.chrome-off #toast {
   font-size: 12px;
   letter-spacing: 0.06em;
   outline: none;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color var(--dur-2), background var(--dur-2);
 }
 .panel-wsearch:focus,
 .panel-hsearch:focus {
@@ -1071,9 +1142,11 @@ body.chrome-off #toast {
   color: var(--text);
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background var(--dur-1);
 }
-.work-row:hover { background: rgba(255, 255, 255, 0.05); }
+@media (hover: hover) and (pointer: fine) {
+  .work-row:hover { background: rgba(255, 255, 255, 0.05); }
+}
 .work-rank { flex: none; font-size: 10px; color: var(--muted); opacity: 0.7; font-variant-numeric: tabular-nums; }
 .work-name { flex: 1; min-width: 0; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .work-meta { flex: none; font-size: 10px; color: var(--muted); }
@@ -1094,9 +1167,11 @@ body.chrome-off #toast {
   text-align: left;
   cursor: pointer;
   border-radius: 6px;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--dur-1), color var(--dur-1);
 }
-.hunt-row:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+@media (hover: hover) and (pointer: fine) {
+  .hunt-row:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+}
 .hunt-row .q-text { flex: 1; min-width: 0; }
 
 /* ---------- 字幕头像 ---------- */
@@ -1122,7 +1197,7 @@ body.chrome-off #toast {
   backdrop-filter: blur(6px);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.25s;
+  transition: opacity var(--dur-3);
 }
 #kbd-help.show { display: flex; }
 #kbd-help.vis { opacity: 1; }
@@ -1200,7 +1275,7 @@ body.chrome-off #toast {
   color: var(--text);
   opacity: 0;
   transform: translateY(8px);
-  transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+  transition: opacity var(--dur-4) var(--ease-out), transform var(--dur-4) var(--ease-out);
 }
 .toast-item.show { opacity: 1; transform: none; }
 .toast-item.err { border-color: rgba(229, 72, 77, 0.5); color: #f2b8ba; }
@@ -1260,6 +1335,7 @@ body.chrome-off #toast {
 }
 
 /* ---------- 减少动态偏好:退化为直切 ---------- */
+/* 豁免(直切档):0.01ms 强制瞬时完成,不属阶梯语义 */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -1277,4 +1353,6 @@ body:has(#quote-card.show) #figure-caption { opacity: 0; }
 .panel-row.active .row-name { color: #fff; }
 /* 顶栏开关类按钮的"关"态:降透明度,一眼可辨 */
 #toolbar button.off { opacity: 0.55; }
-#toolbar button.off:hover { opacity: 1; }
+@media (hover: hover) and (pointer: fine) {
+  #toolbar button.off:hover { opacity: 1; }
+}

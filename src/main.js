@@ -2,6 +2,7 @@ import './style.css';
 import { samplePortrait, samplePortraits } from './core/mask.js';
 import { createCloud, createBackdrop } from './core/cloud.js';
 import { createScene } from './core/scene.js';
+import { easeInOutCubic } from './core/easing.js';
 import { mulberry32, seedFromString, hash01 } from './core/rand.js';
 import { figures, figureMap, groups } from './data/figures.js';
 import { quotes } from './data/quotes.js';
@@ -375,10 +376,20 @@ const boot = async () => {
   document.getElementById('btn-random').addEventListener('click', randomRoam);
 
   // ---------- 快捷键帮助(? 键 / 工具栏问号) ----------
-  const kbdHelp = document.getElementById('kbd-help');  function toggleHelp(force) {
+  const kbdHelp = document.getElementById('kbd-help');
+  let helpHideTimer = 0;
+  function toggleHelp(force) {
     const show = force == null ? !kbdHelp.classList.contains('show') : !!force;
-    kbdHelp.classList.toggle('show', show);
-    requestAnimationFrame(() => kbdHelp.classList.toggle('vis', show));
+    clearTimeout(helpHideTimer);
+    if (show) {
+      kbdHelp.classList.add('show');
+      requestAnimationFrame(() => kbdHelp.classList.add('vis'));
+    } else {
+      // 退场:先摘 .vis 让淡出(style.css #kbd-help --dur-3)播完,再摘 .show;
+      // 瞬摘 display:none 会硬切(深评 §5.4)。240ms 与 --dur-3(.24s)同值
+      kbdHelp.classList.remove('vis');
+      helpHideTimer = setTimeout(() => kbdHelp.classList.remove('show'), 240);
+    }
   }
   document.getElementById('btn-help').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -499,7 +510,7 @@ const boot = async () => {
     if (morphAnim) {
       const a = morphAnim;
       const mu = Math.min(1, (now - a.t0) / a.dur);
-      const me = mu < 0.5 ? 4 * mu * mu * mu : 1 - Math.pow(-2 * mu + 2, 3) / 2;
+      const me = easeInOutCubic(mu);
       const arr = a.attr.array;
       for (let i = 0; i < arr.length; i++) arr[i] = a.from[i] + (a.to[i] - a.from[i]) * me;
       a.attr.needsUpdate = true;

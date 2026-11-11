@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { easeInOutCubic } from './easing.js';
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -197,7 +198,7 @@ export function createScene(canvas, cloud, backdrop, { planes }) {
     if (state.fly) {
       state.fly.t += dt;
       const u = Math.min(1, state.fly.t / state.fly.dur);
-      const e = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+      const e = easeInOutCubic(u);
       state.theta = state.fly.from + (state.fly.to - state.fly.from) * e;
       if (u >= 1) state.fly = null;
     }
@@ -215,7 +216,7 @@ export function createScene(canvas, cloud, backdrop, { planes }) {
       }
       if (state.traveling) {
         const u = Math.min(1, state.autoT / TRAVEL);
-        const e = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; // easeInOutCubic
+        const e = easeInOutCubic(u); // 曲线单源:src/core/easing.js
         state.theta = state.fromTheta + (state.toTheta - state.fromTheta) * e;
         if (u >= 1) {
           state.traveling = false;

@@ -210,3 +210,32 @@
   dist 全量 10.97 MiB、src 17 个 `.js` 共 9324 → 9363 行、`style.css` 1280 行。
 - 门禁:`npm run verify`(91 人物 / 5897 句 / 4 组 / 4 平面)、`node tools/test-image-pipeline.mjs`、
   29 个源码文件 `node --check`、`npm run build` 全部通过。
+
+## 2026-11-12 · 动效令牌归仓批2(四档 --dur + 三缓动 + JS 曲线单源 + 退场/触屏修复)
+
+- **令牌落位**:`:root` 补四档时长阶梯 `--dur-1..4 = .12/.18/.24/.3s`(家族 zhishuxing/TH/rr-studio/
+  flowdeck 同源)与第三条缓动 `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)`(同 TH tokens.css:31 /
+  zhishuxing style.css:29)。本仓此前从未有过 --dur 令牌(`git log --all -S "--dur" -- src/style.css`
+  为空,深评-Marx §0 实测)。
+- **贴梯归仓**:transition/animation 散值时长按家族口径贴梯取整(漂移 ≤40ms 归档,照 Harness e5b4b5f:
+  .15→--dur-1、.16/.18/.2/.22→--dur-2、.25→--dur-3、.28/.3/.32→--dur-4)。基线实测 81 个时长槽位、
+  梯上仅 11 槽(0.18×3+0.3×8,深评按其口径计 9/56≈16%);归仓后梯上 64 槽(--dur-1×9 / --dur-2×38 /
+  --dur-3×5 / --dur-4×12,34 行),裸秒仅剩 18 槽营销/编排/长循环档(抽屉 0.45s、语录卡弹簧 0.42s、
+  面板三段 0.35s、开场 0.7-0.9s、提示 1.2s、加载 1.1-2.4s、breathe 2.6s)+ 2 槽 reduced-motion
+  0.01ms 直切,全部带「豁免(档位):理由」注释;错峰延迟(0.05/0.12/0.19s 与开场逐行)不入阶梯保留原值。
+- **JS 曲线单源**:新增 `src/core/easing.js` 导出 easeInOutCubic(与 --ease-in-out 同值同语义),
+  main.js 换装 morphAnim、scene.js flyTo / autoT 三处手写内联三次曲线(深评-Marx §5.2)收敛为引用,
+  `grep -rn "easeInOutCubic" src/` 仅剩单源定义与其 import/调用。
+- **退场与触屏修复**:语录卡退场快于进场——`#quote-card:not(.show)` 覆盖 transition-duration 到
+  --dur-2 并换 --ease-out,进场保持 0.42s spring(深评 §5.3);kbd-help 退场不再瞬切——toggleHelp
+  先摘 .vis 让 --dur-3 淡出播完再摘 .show,setTimeout 240ms 与 --dur-3 同值(深评 §5.4);24 处 :hover
+  全部包进 `@media (hover: hover) and (pointer: fine)`,触屏 tap 不再残留悬停底色/头像复色(深评 §5.5)。
+- **门禁矩阵**:动效令牌哨兵三条 grep(var(--dur 引用>0 / 裸秒仅剩豁免行 / easeInOutCubic 仅单源)
+  写进 docs/TESTING.md 新节,照路线图 §8.3「仅剩定义行+豁免行」口径防回潮。
+- **同条目捆带未动**:accent 32 处 rgba→color-mix 与字距三档(路线图 §3.4-4 后半)属色彩/排版令牌、
+  非动效主体,本批未触碰,留给色彩/排版令牌批。
+- **文档数字**:产物 JS 磁盘 1,518,943 → 1,518,998(gzip 实测 469.0 kB 持平)、CSS 26.79 → 28.52 kB
+  (gzip 6.18 kB)、dist 全量约 10.97 MiB 持平、构建 21 → 22 modules transformed、
+  src 17 → 18 个 `.js` 共 9363 → 9381 行、`style.css` 1280 → 1358 行。
+- 门禁:`npm run verify`(91 人物 / 5897 句 / 4 组 / 4 平面)、30 个源码文件 `node --check`、
+  `npm run build`(22 modules,退出码 0)全部通过;`check_docs` 阻断 0 提醒 0。
